@@ -915,7 +915,8 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 ### assistant-turn — `keyFor`, `fixedText`, `turnAnswerSchema`, `buildTurnBody`, `runTurn`, `applyGuardrails`, `askTurnModel` (plan 679)
 
 - Status: stable — server only
-- Use: the guest-facing assistant. The model key is resolved only by `keyFor` (`server/services/ai-key.js`). A fixed Hebrew sentence leaves the server through `fixedText` / `reasonText` (`server/utils/fixed-text.js`), never written in code. The model's answer shape is `turnAnswerSchema` (`shared/schemas/front-desk/turn-answer.schema.ts`); its request is `buildTurnBody` (`server/services/frontdesk-prompt.js`). The turn is `runTurn` (`server/services/frontdesk-turn.js`); every block lives in `applyGuardrails` (`server/services/frontdesk-guardrails.js`); the one model call is `askTurnModel` in `server/routes/ai/frontdesk.js`. plan 751: between the model's answer and the rules, `runTurn` calls `fillWhen` (`server/services/frontdesk-when.js`, with `currentGuestText`; family date-words). plan 753: `unansweredTail`, the UNANSWERED block.
+- Use: the guest-facing assistant. The model key is resolved only by `keyFor` (`server/services/ai-key.js`). A fixed Hebrew sentence leaves the server through `fixedText` / `reasonText` (`server/utils/fixed-text.js`), never written in code. The model's answer shape is `turnAnswerSchema` (`shared/schemas/front-desk/turn-answer.schema.ts`); its request is `buildTurnBody` (`server/services/frontdesk-prompt.js`). The turn is `runTurn` (`server/services/frontdesk-turn.js`); every block lives in `applyGuardrails` (`server/services/frontdesk-guardrails.js`); the one model call is `askTurnModel` in `server/routes/ai/frontdesk.js`. plan 751: between the model's answer and the rules, `runTurn` calls `fillWhen` (`server/services/frontdesk-when.js`, with `currentGuestText`; family date-words). plan 753: `unansweredTail`, the UNANSWERED block. plan 755: the facts are picked by `pickFacts`.
+- Plan 755: publicFacts in server/services/knowledge.js takes the guest's current question and returns what was sent and what was left out (family fact-pick).
 - Plan 753: unansweredTail and the UNANSWERED data block in server/services/frontdesk-prompt.js name the guest messages one reply must answer.
 - Pieces: keyFor, fixedText, reasonText, turnAnswerSchema, TURN_SYSTEM_PROMPT, buildTurnBody, unansweredTail, runTurn, decide, applyGuardrails, askTurnModel.
 - When: any assistant reply, draft or block; a second model call for the assistant or a second place for a block is never added.
@@ -942,6 +943,7 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 - Status: stable — server only
 - Use: every rule that stops a guest conversation or a reply lives in `server/services/frontdesk-guardrails.js`: `preCheck` runs before the model call (removal request, keywords, active hours, turn count), `applyGuardrails` judges the reply. The word lists are data in `server/constants/frontdesk-guard-words.js` (`GUARD_WORDS`). The time check of applyGuardrails — plan 751: a time in a reply is checked against every fact line (R-25).
 - Pieces: preCheck, applyGuardrails, GUARD_WORDS.
+- Plan 755: norm moved unchanged to server/utils/text-norm.js; the guardrails import it and keep no copy.
 - Plan 753: The follow_up_limit stop in preCheck ends a chain of follow-up runs after FOLLOW_UP_MAX.
 - When: any new block, handoff trigger or word list for the assistant; a second place for a block is never added.
 - Known copies: none.
@@ -951,6 +953,7 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 - Status: stable — server only
 - Use: `dateFromWords` turns a person's date words (Hebrew, English, day/month) into one `YYYY-MM-DD` in Asia/Jerusalem, or `null`; `clockTimeOf` gives a clock time as `HH:mm`, or `null`; `fillWhen` fills the date the model left out of a turn answer, reading `currentGuestText` (R-24).
 - Pieces: dateFromWords, clockTimeOf, fillWhen, currentGuestText.
+- Plan 755: currentGuestText takes an optional windowMs, so the fact picker reads the same guest messages whatever their age.
 - When: any code that needs a date or a clock time out of a person's words — call it, never a second word table.
 - Known copies: none.
 
@@ -1037,7 +1040,8 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 ### assistant-runs — the step-by-step record of an assistant run and its page (plan 752)
 
 - Status: stable — plan 752
-- Use: the recorder `server/services/frontdesk-runs.js` (`startRun` → `time`, `timeSync`, `step`, `set`, `end`, `discard`, `finish`; `NO_RUN`; the reads `listRuns`, `loadRun`, `markAdminView`), written by `runTurn` (`server/services/frontdesk-turn.js`); the route `server/routes/assistant-runs.js` at `/api/v1/assistant-runs`; the shape `assistantRunSchema` (`shared/schemas/entities/assistant-run.schema.ts`). Browser: `AssistantRunDataService`, `AssistantPage` (`src/app/pages/frontdesk/assistant/`), `app-run-detail` (`run-detail.component.ts`), `assistant-run-view.util.ts` (`verdictOf`, `stepRows`, `STEP_FIELDS`, `outcomeTone`). plan 753: outcomes `dropped` and `superseded`, the follow-up link. plan 754: the field kind `tries`, `tryResultKey`.
+- Use: the recorder `server/services/frontdesk-runs.js` (`startRun` → `time`, `timeSync`, `step`, `set`, `end`, `discard`, `finish`; `NO_RUN`; the reads `listRuns`, `loadRun`, `markAdminView`), written by `runTurn` (`server/services/frontdesk-turn.js`); the route `server/routes/assistant-runs.js` at `/api/v1/assistant-runs`; the shape `assistantRunSchema` (`shared/schemas/entities/assistant-run.schema.ts`). Browser: `AssistantRunDataService`, `AssistantPage` (`src/app/pages/frontdesk/assistant/`), `app-run-detail` (`run-detail.component.ts`), `assistant-run-view.util.ts` (`verdictOf`, `stepRows`, `STEP_FIELDS`, `outcomeTone`). plan 753: outcomes `dropped` and `superseded`, the follow-up link. plan 754: the field kind `tries`, `tryResultKey`. plan 755: the facts step records what was left out.
+- Plan 755: three rows of STEP_FIELDS in assistant-run-view.util.ts show how many facts were left out, their titles and how they were picked.
 - Pieces: startRun, NO_RUN, listRuns, loadRun, markAdminView, assistantRunSchema, AssistantRunDataService, AssistantPage, RunDetailComponent, verdictOf, stepRows, STEP_FIELDS, outcomeTone, tryResultKey.
 - Plan 754: tryResultKey and the field kind tries in assistant-run-view.util.ts show each AI try with its time.
 - Classes: page-local `.asr-*` only. The step row that opens and closes is a `button.asr-step` with `aria-expanded` and `aria-controls` over `.asr-step-panel`.
@@ -1053,3 +1057,12 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 - Plan 754: QUIET_MS, MAX_WAIT_MS, burstAtOf, burstStart and the changed rule of nextStep in server/services/inbound.js time the quiet wait before a run (R-29).
 - When: anything that must not run twice for one conversation, or must stop when a person steps in, goes through these; the timing of a guest message is changed in `nextStep` only; a second lock, an in-memory map of running turns or a second wait is never added.
 - Known copies: none.
+
+### fact-pick — pickFacts, scoreItem, factTokens, factQueryOf in server/services/fact-pick.js, norm in server/utils/text-norm.js, publicFacts in server/services/knowledge.js (plan 755)
+
+- Status: stable — server only
+- Origin: New registry family fact-pick in docs/brain/component-families.md (plan 755).
+- Use: `server/utils/text-norm.js` · `norm` lower-cases a text and removes the Hebrew vowel points. `server/services/fact-pick.js` · `factTokens` gives the words of a text that can tell items apart; `formsOf` a word with and without its Hebrew prefix letters; `tokenMatch` how alike two words are; `scoreItem` how well a knowledge item fits the asked words; `pickFacts` builds the facts block inside the budget and says what was left out; `factQueryOf` reads what the guest is asking now from the history. `server/services/knowledge.js` · `publicFacts` loads the business's facts and picks them (R-32).
+- Pieces: norm, factTokens, formsOf, tokenMatch, scoreItem, pickFacts, factQueryOf, publicFacts.
+- When: any text that goes to the assistant as a fact comes from `publicFacts`; any ranking of Hebrew text by shared words on the server starts from `factTokens` — a second stop-word list or a second cut of the facts is never added.
+- Known copies: `tokenize` in `server/services/ai-recipe-helpers.js` (plan 370, recipe examples); the vowel-point strip inside `shared/schemas/front-desk/date-words.ts` (plan 751 — shared code cannot import a server util); `normalizeHebrew` in `src/app/core/utils/recipe-match.util.ts` (browser).

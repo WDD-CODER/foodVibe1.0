@@ -264,6 +264,51 @@ describe('plan 751: a time from the facts', () => {
   });
 });
 
+describe('plan 755: the rules judge the facts that were sent', () => {
+  const reply = 'יש חניון ציבורי, פתוח עד 23:30';
+  const ANSWER = { reply, intent: 'question', usedFacts: ['k39'] };
+  const blocked = () => logs.byEvent('frontdesk.turn.blocked');
+  const nn = i => String(i).padStart(2, '0');
+  const item = (i, topic, question, answer) => ({
+    _id: `k${nn(i)}`, businessId: 'b1', createdAt: i, topic, question, answer, status: 'approved', visibility: 'public',
+  });
+  const BIG = [
+    ...Array.from({ length: 38 }, (_, i) => item(i + 1, 'faq', `שאלה כללית ${nn(i + 1)}`, 'א'.repeat(300))),
+    item(39, 'other', 'יש חניה ליד המסעדה?', 'יש חניון ציבורי במרחק 100 מטר, פתוח עד 23:30. ' + 'ג'.repeat(300)),
+    item(40, 'other', 'אפשר להביא כלב?', 'ב'.repeat(300)),
+  ];
+
+  const askedAbout = async text => {
+    const { conversation } = await setup();
+    await col('knowledgeItems').insertMany(BIG);
+    await say(conversation, ANSWER, { text });
+    return conversation;
+  };
+
+  it('a time from the picked item is sent to the guest', async () => {
+    const conversation = await askedAbout('יש לכם חניה?');
+    const sent = await outs();
+    expect(sent).toHaveLength(1);
+    expect(sent[0]).toMatchObject({ text: reply, author: 'ai' });
+    expect((await conv(conversation._id)).status).toBe('bot');
+    expect(blocked()).toHaveLength(0);
+  });
+
+  it('the same answer about an item that was left out is blocked', async () => {
+    const conversation = await askedAbout('שלום');
+    expect((await lastOut()).text).toBe(fixedText('fd_ai_handoff_default'));
+    expect((await conv(conversation._id)).status).toBe('human');
+    expect(blocked()).toHaveLength(1);
+    expect(blocked()[0]).toMatchObject({
+      reason: 'unsupported_time', stage: 'post', times: 1, unmatched: 1, usedFacts: 0, unknownFacts: 1,
+    });
+    const [run] = await col('assistantRuns').find({}).toArray();
+    const stepOf = key => run.steps.find(s => s.key === key);
+    expect(stepOf('facts').out.leftOutIds).toContain('k39');
+    expect(stepOf('guardrails').status).toBe('stopped');
+  });
+});
+
 describe('book, manual and over the limit', () => {
   it('manual: a qualified request, no booking, no hold', async () => {
     const { conversation } = await setup({ mode: 'manual' });

@@ -108,6 +108,9 @@ export const STEP_FIELDS: Record<RunStepKey, { in: FieldDef[]; out: FieldDef[] }
     in: [],
     out: [
       field('factIds', 'count', 'asr_f_facts'),
+      field('leftOut', 'number', 'asr_f_facts_left_out'),
+      field('leftOutTitles', 'list', 'asr_f_left_out_titles'),
+      field('pick', 'enum', 'asr_f_fact_pick', 'asr_factpick_'),
       field('factsChars', 'number', 'asr_f_facts_chars'),
       field('tablesOn', 'bool', 'asr_f_tables_on')
     ]

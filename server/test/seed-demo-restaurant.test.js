@@ -10,6 +10,7 @@ const { parseArgs } = require('../scripts/seed-demo-business')
 const { parseV2 } = require('../utils/schema-check')
 const { jerusalemDate } = require('../middleware/usage')
 const { modulesOf } = require('../generated/schemas/modules')
+const { publicFacts } = require('../services/knowledge')
 
 let app
 
@@ -82,6 +83,28 @@ describe('buildDemoRestaurant', () => {
     for (const iso of CLOCKS) {
       const now = Date.parse(iso)
       expect(buildDemoRestaurant({ now })).toEqual(buildDemoRestaurant({ now }))
+    }
+  })
+})
+
+describe('plan 755: the facts of the demo restaurant', () => {
+  it("the demo's facts are all sent", async () => {
+    const profile = buildDemoRestaurant({ now: Date.now() }).frontDeskProfiles[0]
+    const profiles = testDb().collection('frontDeskProfiles')
+    await profiles.insertOne({ ...profile })
+    try {
+      const facts = await publicFacts(testDb(), profile.businessId)
+      expect(facts.text).toBe([
+        '[profile.displayName] name: מסעדת הדגמה',
+        '[profile.phone] phone: 03-5550100',
+        '[profile.address] address: רחוב הרצל 10, תל אביב',
+        '[profile.hours] opening hours: כל יום 12:00–23:00',
+      ].join('\n'))
+      expect(facts.text).toHaveLength(172)
+      expect(facts.leftOutIds).toEqual([])
+      expect(facts.stats.pick).toBe('all')
+    } finally {
+      await profiles.deleteOne({ _id: profile._id })
     }
   })
 })

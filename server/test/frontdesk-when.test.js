@@ -84,6 +84,12 @@ describe('which messages are read', () => {
     expect(currentGuestText([guest('א'), out()], NOW)).toBe('');
     expect(currentGuestText([], NOW)).toBe('');
   });
+
+  it('plan 755: the window can be widened', () => {
+    const history = [guest('מחר', NOW - 31 * MIN), guest('שולחן')];
+    expect(currentGuestText(history, NOW)).toBe('שולחן');
+    expect(currentGuestText(history, NOW, { windowMs: Infinity })).toBe('מחר\nשולחן');
+  });
 });
 
 describe('the other intents', () => {

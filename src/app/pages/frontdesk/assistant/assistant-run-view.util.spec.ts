@@ -74,6 +74,34 @@ describe('assistant-run-view.util (plan 752)', () => {
     expect(String(list.value).split(', ').length).toBe(12)
   })
 
+  it('plan 755: the facts step shows how many were left out, their titles and how they were picked', () => {
+    const out = {
+      factIds: Array.from({ length: 19 }, (_, i) => `f${i}`),
+      factsChars: 5812,
+      tablesOn: false,
+      pick: 'matched',
+      leftOut: 23,
+      leftOutIds: ['k17'],
+      leftOutTitles: ['שאלה כללית 17', 'שאלה כללית 18']
+    }
+    const rows = stepRows({ key: 'facts', out }, 'out')
+    expect(rows).toContain({ labelKey: 'asr_f_facts_left_out', kind: 'number', value: '23' })
+    expect(rows).toContain({ labelKey: 'asr_f_left_out_titles', kind: 'list', value: 'שאלה כללית 17, שאלה כללית 18' })
+    expect(rows).toContain({
+      labelKey: 'asr_f_fact_pick',
+      kind: 'enum',
+      value: 'matched',
+      valueKey: 'asr_factpick_matched'
+    })
+    expect(rows.some((row) => row.value === 'k17')).toBeFalse()
+    expect(rows.length).toBe(6)
+  })
+
+  it('plan 755: a facts step without those fields gives the rows it gave before', () => {
+    const rows = stepRows({ key: 'facts', out: { factIds: ['a'], factsChars: 12, tablesOn: true } }, 'out')
+    expect(rows.map((row) => row.labelKey)).toEqual(['asr_f_facts', 'asr_f_facts_chars', 'asr_f_tables_on'])
+  })
+
   it('plan 754: tryResultKey() names how a call ended', () => {
     expect(tryResultKey({ ok: true })).toBe('asr_try_ok')
     expect(tryResultKey({ ok: false, reason: 'slow' })).toBe('asr_try_slow')

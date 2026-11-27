@@ -2,27 +2,32 @@
 /**
  * Plan 554 (C-KB): `publicFacts` is the one source of business facts the assistant may be given. Server-only; it
  * returns only the profile's own facts and the business's live, approved, public knowledge items, in a fixed order.
+ * Plan 755 (R-32): when the lines do not all fit in 6,000 characters the profile's lines are always sent and the items
+ * are picked by `pickFacts` for the guest's current message; `factIds` are exactly the lines that were sent.
  */
 const { KNOWLEDGE_TOPICS } = require('../generated/schemas/entities')
+const { pickFacts, TITLE_MAX } = require('./fact-pick')
 
 const MAX_CHARS = 6000
 
 /** A value on one line: any run of line breaks becomes a single space. */
 const oneLine = value => String(value).replace(/[\r\n]+/g, ' ').trim()
 
+/** The profile's own facts, `{ id, line }` each: the basics, always sent. */
 function profileLines(profile) {
   if (!profile) return []
   const lines = []
-  if (profile.displayName) lines.push({ line: `[profile.displayName] name: ${oneLine(profile.displayName)}` })
-  if (profile.phone) lines.push({ line: `[profile.phone] phone: ${oneLine(profile.phone)}` })
-  if (profile.address) lines.push({ line: `[profile.address] address: ${oneLine(profile.address)}` })
-  if (profile.serviceArea) lines.push({ line: `[profile.serviceArea] service area: ${oneLine(profile.serviceArea)}` })
+  const add = (id, text) => lines.push({ id, line: `[${id}] ${text}` })
+  if (profile.displayName) add('profile.displayName', `name: ${oneLine(profile.displayName)}`)
+  if (profile.phone) add('profile.phone', `phone: ${oneLine(profile.phone)}`)
+  if (profile.address) add('profile.address', `address: ${oneLine(profile.address)}`)
+  if (profile.serviceArea) add('profile.serviceArea', `service area: ${oneLine(profile.serviceArea)}`)
   if (Array.isArray(profile.hours) && profile.hours.length) {
     const rows = profile.hours.map(row => oneLine(`${row.days} ${row.time}`)).join('; ')
-    lines.push({ line: `[profile.hours] opening hours: ${rows}` })
+    add('profile.hours', `opening hours: ${rows}`)
   }
   if (Array.isArray(profile.closedDates) && profile.closedDates.length) {
-    lines.push({ line: `[profile.closedDates] closed on: ${profile.closedDates.map(oneLine).join(', ')}` })
+    add('profile.closedDates', `closed on: ${profile.closedDates.map(oneLine).join(', ')}`)
   }
   return lines
 }
@@ -32,18 +37,27 @@ const topicIndex = topic => {
   return i === -1 ? KNOWLEDGE_TOPICS.length : i
 }
 
+/** One knowledge item as its fact line, with what the picker scores it by. */
 function itemLine(item) {
   const base = `[${item._id}] ${item.topic}: Q: ${oneLine(item.question)} | A: ${oneLine(item.answer)}`
   const variations = Array.isArray(item.variations) ? item.variations.map(oneLine).filter(Boolean) : []
-  return { id: String(item._id), line: variations.length ? `${base} | also asked: ${variations.join('; ')}` : base }
+  return {
+    id: String(item._id),
+    line: variations.length ? `${base} | also asked: ${variations.join('; ')}` : base,
+    title: oneLine(item.question).slice(0, TITLE_MAX),
+    question: item.question,
+    answer: item.answer,
+    variations: item.variations ?? [],
+  }
 }
 
 /**
  * @param {import('mongodb').Db} db
  * @param {string} businessId
- * @returns {Promise<{ text: string, factIds: string[] }>}
+ * @param {{ query?: string, context?: string, budget?: number }} [ask] what the guest is asking now (`factQueryOf`)
+ * @returns {Promise<{ text: string, factIds: string[], leftOutIds: string[], leftOutTitles: string[], stats: object }>}
  */
-async function publicFacts(db, businessId) {
+async function publicFacts(db, businessId, { query = '', context = '', budget = MAX_CHARS } = {}) {
   const profile = await db.collection('frontDeskProfiles').findOne({ businessId })
   const items = await db.collection('knowledgeItems')
     .find({ businessId, status: 'approved', visibility: 'public', deletedAt: { $exists: false } })
@@ -53,19 +67,7 @@ async function publicFacts(db, businessId) {
     (a.createdAt ?? 0) - (b.createdAt ?? 0) ||
     (String(a._id) < String(b._id) ? -1 : String(a._id) > String(b._id) ? 1 : 0))
 
-  const lines = [...profileLines(profile), ...items.map(itemLine)]
-  const kept = []
-  let length = 0
-  for (const entry of lines) {
-    const next = length + (kept.length ? 1 : 0) + entry.line.length
-    if (next > MAX_CHARS) break
-    kept.push(entry)
-    length = next
-  }
-  return {
-    text: kept.map(entry => entry.line).join('\n'),
-    factIds: kept.map(entry => entry.id ?? entry.line.slice(1, entry.line.indexOf(']'))),
-  }
+  return pickFacts({ core: profileLines(profile), items: items.map(itemLine), query, context, budget })
 }
 
 module.exports = { publicFacts, MAX_FACTS_CHARS: MAX_CHARS }

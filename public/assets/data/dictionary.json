@@ -3261,6 +3261,12 @@
     "asr_try_timeout": "לא ענה בזמן",
     "asr_try_busy": "עמוס",
     "asr_try_quota": "המכסה היומית נגמרה",
-    "asr_try_other": "תקלה"
+    "asr_try_other": "תקלה",
+    "asr_f_facts_left_out": "פריטי מידע שנשארו בחוץ",
+    "asr_f_left_out_titles": "מה נשאר בחוץ",
+    "asr_f_fact_pick": "איך נבחר המידע",
+    "asr_factpick_all": "כל המידע נשלח",
+    "asr_factpick_matched": "נבחר לפי שאלת האורח",
+    "asr_factpick_general": "לא נמצאה התאמה לשאלה, נשלח המידע הכללי"
   }
 }

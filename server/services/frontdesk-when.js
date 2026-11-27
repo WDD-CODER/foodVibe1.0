@@ -17,16 +17,17 @@ function validDate(value) {
 
 /**
  * The guest messages this turn answers (R-03): those after the last outbound one, typed (not a button tap) and at most
- * 30 minutes old. `history` is oldest first. A message of the same millisecond as that outbound one counts as answered:
- * the order of the two in `history` is arbitrary.
+ * `windowMs` old (30 minutes by default; plan 755: the fact picker reads them whatever their age). `history` is oldest
+ * first. A message of the same millisecond as that outbound one counts as answered: the order of the two in `history`
+ * is arbitrary.
  */
-function currentGuestText(history, now) {
+function currentGuestText(history, now, { windowMs = CURRENT_WINDOW_MS } = {}) {
   const list = history ?? [];
   const lastOut = list.reduce((found, m, i) => (m && m.direction === 'out' ? i : found), -1);
   const answeredAt = lastOut < 0 ? -Infinity : list[lastOut].at;
   return list.slice(lastOut + 1)
     .filter(m => m && m.direction === 'in' && m.author === 'guest' && m.kind !== 'button' && m.text
-      && m.at > answeredAt && now - m.at <= CURRENT_WINDOW_MS)
+      && m.at > answeredAt && now - m.at <= windowMs)
     .map(m => m.text)
     .join('\n');
 }

@@ -97,7 +97,41 @@ describe('publicFacts', () => {
   })
 
   it('returns empty text for a business with nothing', async () => {
-    expect(await publicFacts(testDb(), 'nobody')).toEqual({ text: '', factIds: [] })
+    expect(await publicFacts(testDb(), 'nobody')).toEqual({
+      text: '', factIds: [], leftOutIds: [], leftOutTitles: [],
+      stats: {
+        pick: 'all', core: 0, sent: 0, leftOut: 0, chars: 0, coreChars: 0, budget: 6000, queryTokens: 0, matched: 0,
+        matchedLeftOut: 0, coreOver: false,
+      },
+    })
+  })
+
+  it('picks the item the guest asks about', async () => {
+    const nn = i => String(i).padStart(2, '0')
+    const big = (i, topic, question, answer) => item({ _id: `k${nn(i)}`, createdAt: i, topic, question, answer })
+    await testDb().collection('frontDeskProfiles').insertOne({ _id: 'p1', businessId: 'kb1', displayName: 'מסעדה' })
+    await col().insertMany([
+      ...Array.from({ length: 38 }, (_, i) => big(i + 1, 'faq', `שאלה כללית ${nn(i + 1)}`, 'א'.repeat(300))),
+      big(39, 'other', 'יש חניה ליד המסעדה?', 'יש חניון ציבורי במרחק 100 מטר, פתוח עד 23:30. ' + 'ג'.repeat(300)),
+      big(40, 'other', 'אפשר להביא כלב?', 'ב'.repeat(300)),
+      item({ status: 'draft' }),
+      item({ visibility: 'internal' }),
+      item({ deletedAt: 5 }),
+    ])
+
+    const asked = await publicFacts(testDb(), 'kb1', { query: 'יש לכם חניה?' })
+    expect(asked.factIds[0]).toBe('profile.displayName')
+    expect(asked.factIds).toContain('k39')
+    expect(asked.factIds).not.toContain('k40')
+    expect(asked.text.length).toBeLessThanOrEqual(6000)
+    expect(asked.factIds.length - 1 + asked.leftOutIds.length).toBe(40)
+    expect(asked.leftOutTitles).toHaveLength(asked.leftOutIds.length)
+    // Only the 40 live, approved, public items are sent or named as left out.
+    for (const id of [...asked.factIds.slice(1), ...asked.leftOutIds]) expect(id).toMatch(/^k(0[1-9]|[1-3]\d|40)$/)
+
+    const unasked = await publicFacts(testDb(), 'kb1')
+    expect(unasked.stats.pick).toBe('general')
+    expect(unasked.factIds).not.toContain('k39')
   })
 })
 
