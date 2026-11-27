@@ -13,7 +13,7 @@ const { TERM_REFERENCES } = require('../generated/schemas/entities');
 const { CLIENT_SERVER_FIELDS } = require('../generated/schemas/entities/client.schema');
 const { PROFILE_SERVER_FIELDS } = require('../generated/schemas/entities/front-desk-profile.schema');
 const { normalizePhone, phoneKey } = require('../generated/schemas/phone');
-const { SOFT_DELETE_TYPES, ROUTER_WRITE_TYPES } = require('../constants/collections');
+const { CLONEABLE_TYPES, SOFT_DELETE_TYPES, ROUTER_WRITE_TYPES } = require('../constants/collections');
 const { expireDue } = require('../utils/request-expiry');
 const { buildNewEventDoc, withoutServerEventFields, withSavedSnapshot } = require('../utils/event-create');
 const { purgeRetained } = require('../jobs/retention');
@@ -99,8 +99,7 @@ function requireSoftDelete(req, res, next) {
 // Read live as master ∪ own: master terms are shared, a user's own docs hold only
 // the terms they added. Only an admin edits shared terms (Human, 2026-10-05): POST
 // with `shared: true` creates one, PUT/DELETE by id reach master terms for admins.
-// Terms carry no clone-lineage fields (_masterId/_userModified) — the strict schema
-// rejects them.
+// Terms are not cloneable, so they carry no clone-lineage fields (see LINEAGE below).
 // ---------------------------------------------------------------------------
 const TAXONOMY = 'taxonomyTerms';
 const MASTER = '__master__';
@@ -120,8 +119,11 @@ const PROFILES = 'frontDeskProfiles';
 const PROFILE_EXISTS = { error: 'PROFILE_EXISTS' };
 const SLUG_TAKEN = { error: 'SLUG_TAKEN', messageKey: 'fd_slug_taken' };
 
-/** Plan 512: types whose docs carry no clone lineage (`_masterId`, `_userModified`): the strict schema rejects them. */
-const NO_LINEAGE = new Set([TAXONOMY, CLIENTS, PROFILES, 'knowledgeItems', 'menuDesigns']);
+/**
+ * Plan 771: the types whose docs carry clone lineage (`_masterId`, `_userModified`) — the `cloneable` ones of
+ * constants/collections.js. A non-cloneable type's strict schema rejects both fields.
+ */
+const LINEAGE = new Set(CLONEABLE_TYPES);
 
 /** Plan 512: the Mongo projection that trims a staff member's read of `type`; `undefined` for everyone else. */
 const readProjection = (req, type) => {
@@ -603,7 +605,7 @@ router.post('/:type', verifyToken, async (req, res) => {
         ...safeEntity,
         _id,
         userId: shared ? MASTER : req.user.userId,
-        ...(!NO_LINEAGE.has(entityType) && { _masterId: _id, _userModified: false }),
+        ...(LINEAGE.has(entityType) && { _masterId: _id, _userModified: false }),
         ...(hasV2Schema(entityType) && {
           schemaVersion: 2,
           // A restored/re-appended doc keeps its original createdAt; a brand-new one gets now.
@@ -737,7 +739,7 @@ router.put('/:type/:id', verifyToken, async (req, res) => {
     const filter = await withEventVisibility(req, req.params.type, { _id: req.params.id, ...(isTerm ? termWriteOwner(req) : scopeFilter(req)), ...LIVE });
     const stamps = {
       ...(hasV2Schema(req.params.type) && { schemaVersion: 2, updatedAt: Date.now() }),
-      ...(!NO_LINEAGE.has(req.params.type) && { _userModified: true }),
+      ...(LINEAGE.has(req.params.type) && { _userModified: true }),
     };
     // createdAt is server-owned: a client PUT never rewrites it.
     const { createdAt: _ca, ...clientUpdatable } = safeBody;
