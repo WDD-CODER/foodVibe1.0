@@ -83,6 +83,7 @@ append the path to the scope block above and retry.
 ## Architecture Impact
 - INV-none: preserves — presentation only; no route, permission, data or AI change.
 - INV-6: preserves — the scope glob `src/app/**/breadcrumbs.md` matches `*ai*` paths only by name; no AI call is touched.
+- INV-3: preserves — the user list's admin chip swaps the browser `title` for the shared tooltip (ask 763-1); no rename, cascade or client write.
 
 ## Reuse Check
 - none — the narrow step is one more token in the app's one breakpoint set; the leaf box keeps the shared
@@ -134,7 +135,7 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
 
 - [x] G1: Add the narrow-phone breakpoint and move the stock count's two-line rule to it — src/app/pages/inventory/components/stock-count/stock-count.component.scss
 - [x] G2: The leaf's box opens in the same place every time, like the triangle's — src/app/shared/nutrition-badge/nutrition-badge.component.ts
-- [ ] G3: Run every automatic check and paste the outputs under Execution Notes — plans/763-stock-count-narrow-breakpoint-and-leaf-box-placement.plan.md
+- [x] G3: Run every automatic check and paste the outputs under Execution Notes — plans/763-stock-count-narrow-breakpoint-and-leaf-box-placement.plan.md
 
 ## What happens when
 - A window between 420px and 767px: the stock count rows are one line, as on a tablet.
@@ -174,17 +175,27 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
   move the `name-nutrition-slot` span (it reuses `.name-status-slot`) before `.name-text` and widen the header's start
   padding.
 
+### Ask 763-1 (answered: approved)
+- `scripts/test/breakpoints-no-literals.test.mjs` knows the fifth name, `break-phone-narrow-max` = 419, in the two
+  style files, in `breakpoints.ts` and in the allowed `@media` names.
+- The user list's platform-admin chip uses `[appTooltip]` in place of the browser `title`, with `role="img"` and an
+  `aria-label` so it keeps its name; one spec case; the tooltip family's user list names it. This brings
+  `reuse-copy.tooltip` back from 241 to the baseline 240.
+- `## Architecture Impact` gained the INV-3 line: the approved paths made the scope overlap its `Touches`.
+
 ### G3 — checks
 - `pnpm run build` -> exit 0
 - `pnpm run lint` -> exit 0 (0 errors, 71 warnings)
-- `pnpm run test:ci` -> exit 0, `TOTAL: 3137 SUCCESS` (one earlier run: the 800px layout test timed out waiting for a
-  stylesheet to load; the test now copies the loaded rules and waits for nothing)
+- `pnpm run test:ci` -> exit 0, `TOTAL: 3138 SUCCESS` (one run in this resume: 1 failed, the new chip case opened the
+  tooltip by focus, which a non-focusable chip never gets; it now opens it by hover)
+- `pnpm run test:scripts` -> exit 0, 156 pass, 0 fail, 1 skipped
 - `kit-manifest-check.mjs --root .` -> `KIT_MANIFEST: ok`
+- `scope-check.mjs --diff=origin/orch/biz-final` (the worktree's copy) -> `SCOPE: ok`
+- `kit-checks.mjs` -> `KIT_CHECKS: ok (6 checks)`
 - `override-check`, `lint:icons`, `lint:no-native-select`, `plan-ledger-check`, `breadcrumbs-check`,
   `inventory.mjs --check` -> exit 0
-- `scope-check.mjs --arch` -> `ARCH: ok INV-none, INV-6`
+- `ci-scope-check.mjs --checkout-branch` -> exit 0 (skipped: it reads no branch name outside CI)
+- `scope-check.mjs --arch` -> `ARCH: ok INV-none, INV-6, INV-3`
 - `log-query.mjs --since=plan-start --level=error` -> `SKIP: no database configured`
-- **FAIL** `pnpm run test:scripts` (a CI step) -> 156 of 157: `scripts/test/breakpoints-no-literals.test.mjs`
-  "no @media under src types a width" allows only the four old names, so it rejects
-  `@media (max-width: $break-phone-narrow-max)`. The file is outside the scope; asked to add it.
-  Change needed there: add `phone-narrow-max` to the allowed-name pattern (line 59), and to `NAMES` / `EXPECTED`.
+- seen: the platform-admin chip cannot take keyboard focus, so its hint never shows from the keyboard (the old
+  `title` did not either) — `src/app/pages/metadata-manager/components/user-management/user-management.component.html:28`
