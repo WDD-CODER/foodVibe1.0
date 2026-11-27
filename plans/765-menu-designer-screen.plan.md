@@ -378,6 +378,10 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
   `pnpm run lint` -> 0 errors (69 older warnings); `lint:icons` -> 0 violations; `lint:no-native-select` -> exit 0;
   `reuse-lint --diff=origin/orch/md-1` -> `REUSE: ok`; `scope-check --arch` -> `ARCH: ok INV-1, INV-3, INV-4, INV-6`;
   `scope-check --reuse` -> `REUSE: ok`.
+- `kit-checks --base origin/orch/md-1` first -> 47 findings (undeclared classes, 4 registry lines, copied style blocks);
+  after the Reuse Check rows, the registry lines and the style changes -> `KIT_CHECKS: ok (6 checks)`; build, lint, the
+  whole test suite and the node checks were run again on the last commit. The kit copy of `scope-check.mjs` reads the
+  folder it lives in, so the scope check ran with this worktree's identical copy -> `SCOPE: ok`.
 - A5: the header button sits in the page header's leading slot. `page-header.component.scss:190` puts every
   `[header-actions]` button in one grid cell, so a button there lies under «תפריט חדש» (a spec showed the overlap).
 - A6: no change to `server/app.js`. The real app's policy (`frame-src 'none'`) was read from `/api/v1/health` of the app
