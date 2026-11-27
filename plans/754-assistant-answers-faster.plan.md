@@ -777,6 +777,9 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
 - `pnpm run test:ci` → exit 0, `TOTAL: 3284 SUCCESS`.
 - `pnpm run test:server` → exit 0, `Test Files 184 passed (184)`, `Tests 2749 passed (2749)`.
 - `node scripts/inventory.mjs --check` → `INVENTORY: ok` · `node scripts/reuse-lint.mjs --check-registry` → `REUSE: registry ok`.
+- `kit-checks.mjs --base origin/orch/rs-console` → first `KIT_CHECKS: fail (4 findings)` (each rung-3 family needed a line naming its Reuse Check piece), after those four lines `KIT_CHECKS: ok (6 checks)` · scope check (the main folder's `scopeCheck` on this folder) → `SCOPE: ok — 24 changed file(s) inside the scope`.
+- The suites above ran on the content of de9ca150; the later commits change only this plan, `docs/brain/component-families.md` and nothing under `src/`, `server/` or `public/`.
+- `node scripts/log-query.mjs --since=plan-start --level=error` → exit 0, `SKIP: no database configured` (a builder folder has no database).
 - behaviour: the new row "כל ניסיון והזמן שלקח" uses the key `asr_f_try_list`, not `asr_f_tries`: plan 752 already uses `asr_f_tries` for the shape step ("ניסיונות קריאה"). Reverse: rename the key and give the shape step another one.
 - behaviour: a refused send gets no `answerMs` (nothing left the server). Reverse: drop the `out.refused` test in `timeAnswer` (`server/services/frontdesk-runs.js`).
 - A10 stays open: the checks ran; the slot's servers and the two [human] simulator cards belong to the run and Dandan.
