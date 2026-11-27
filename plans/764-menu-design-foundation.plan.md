@@ -1,4 +1,4 @@
-# Plan 763 — Menu design foundation: module, design records, menu fields and the one shared template
+# Plan 764 — Menu design foundation: module, design records, menu fields and the one shared template
 
 Status: draft
 Depends-on: none
@@ -11,8 +11,8 @@ Program map: `docs/menu-design/menu-design-map.md` (decisions M1–M9, contracts
 
 A food business wants to send a customer a designed menu in seconds. Nothing in FoodVibe stores a menu "look"
 today: the menu editor has one fixed paper skin, there is no design record, no font list, no subtitle or bottom note on a
-menu, and no server-side drawing of a menu. Every later plan of the program (designer 764, AI 765, PDF 766/767, editor
-768, menu from text 769) needs the same stored shapes and the same template, so they are built once, here, with no
+menu, and no server-side drawing of a menu. Every later plan of the program (designer 765, AI 766, PDF 767/768, editor
+769, menu from text 770) needs the same stored shapes and the same template, so they are built once, here, with no
 screen yet.
 
 ## Goals & Success Criteria
@@ -57,6 +57,7 @@ Always allowed regardless of the list below: this plan file itself, its own
 hotspots (`src/styles.scss, src/app/app.routes.ts` — add to them, never rewrite or remove an existing entry without escalating).
 
 ```scope
+server/routes/generic.js
 server/test/admin-business-delete.test.js
 server/test/admin-platform.test.js
 server/test/ai-usage.test.js
@@ -134,16 +135,16 @@ append the path to the scope block above and retry.
 - `shared/schemas/menu-design/` (fonts, textures, base templates, menu doc, `renderMenuDocument`, `designCssVars`) — family: none — rung: 4 — why: no piece in FoodVibe draws a menu as a standalone HTML document for both the browser and the server; the PDF, the designer preview and the editor's CSS variables all need one pure source (map guideline 1). Registered as a new `menu-template` family in `docs/brain/component-families.md`.
 
 ## Adopt Check
-- menu HTML template — verdict: skip — why: domain logic (FoodVibe's design schema → one HTML string); a pure function of a few hundred lines with no dependency, and the PDF engine is chosen separately in plan 766.
+- menu HTML template — verdict: skip — why: domain logic (FoodVibe's design schema → one HTML string); a pure function of a few hundred lines with no dependency, and the PDF engine is chosen separately in plan 767.
 
 ## Defaults
 
-- loading-and-error-states — exception — why: no screen in this plan; the designer (764) and editor (768) apply it.
-- app-list-container — exception — why: no list screen in this plan; the design list is plan 764.
+- loading-and-error-states — exception — why: no screen in this plan; the designer (765) and editor (769) apply it.
+- app-list-container — exception — why: no list screen in this plan; the design list is plan 765.
 - one-breakpoint-set — exception — why: no app style in this plan; the template is a print document sized by `@page`.
-- row-action-icons — exception — why: no rows in this plan; the design list rows are plan 764.
-- unsaved-changes-on-leave — exception — why: no form in this plan; the designer form is plan 764.
-- empty-state-on-list — exception — why: no list screen in this plan; the design list is plan 764.
+- row-action-icons — exception — why: no rows in this plan; the design list rows are plan 765.
+- unsaved-changes-on-leave — exception — why: no form in this plan; the designer form is plan 765.
+- empty-state-on-list — exception — why: no list screen in this plan; the design list is plan 765.
 - unit-dropdown-add — exception — why: no unit field or dropdown in this plan; "custom" refers to design values only.
 
 ## Step 0 — Reality Check
@@ -238,7 +239,7 @@ menuDesignDraftSchema = menuDesignSchema without baseDocShape and name   // what
   `.paper` sheet (M2), so the editor wears the same fonts, colors, background, frame and logo.
 
 ### C-AI — feature keys (this plan's part)
-- New keys in `server/constants/ai-features.js` (added in 763): `menu_design_variants`, `menu_design_refine`, `menu_from_text`.
+- New keys in `server/constants/ai-features.js` (added in 764): `menu_design_variants`, `menu_design_refine`, `menu_from_text`.
 
 ## User Stories
 - As a chef, I want my menus to carry my own look so that the offer I send a customer looks like my business.
@@ -300,18 +301,18 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
   accepts `hidePoweredBy`. `menuDesigns` uses the generic `/api/v1/data/menuDesigns` CRUD, gated by `requireModuleForType`.
 - Auth and validation: owner route by `assertCan('editSettings')`; admin route by `requirePlatformAdmin`; the design id is
   checked against `menuDesigns` with `businessId` = the caller's and no `deletedAt`.
-- Security surface: `renderMenuDocument` is the input to a headless browser later (766/767) — so every text is escaped,
+- Security surface: `renderMenuDocument` is the input to a headless browser later (767/768) — so every text is escaped,
   no `<script>`, image URLs only from `https://res.cloudinary.com/`, font CSS only from `fonts.googleapis.com`. Tests pin it.
 - Data / migration: none — all new fields are optional; a menu without `designId` wears the business default.
 - Project checks: log-query `[auto]` item (above); `[ui]` — none (no screen); Reuse Check filled; Page recipe: none;
   hotspot `dictionary.json` append-only; breadcrumbs for `server/`, `core/models`, `core/services` in scope;
   entity shape in `shared/schemas/`; new collection via the generic entity contract.
-- Plan 769 note: C-MATCH's `shared/menu-match/` has the same compile issue — it belongs at `shared/schemas/menu-match/`.
+- Plan 770 note: C-MATCH's `shared/menu-match/` has the same compile issue — it belongs at `shared/schemas/menu-match/`.
 
 ## Out of Scope
-- Any screen: the designer (764), the editor wearing the design (768).
-- AI calls (765, 769), the PDF render and export (766, 767).
-- The platform admin's checkbox for `hidePoweredBy` in the business dialog — plan 767, where the line is first printed
+- Any screen: the designer (765), the editor wearing the design (769).
+- AI calls (766, 770), the PDF render and export (767, 768).
+- The platform admin's checkbox for `hidePoweredBy` in the business dialog — plan 768, where the line is first printed
   (the server field exists from this plan).
 - WhatsApp and outside access (last stage).
 
