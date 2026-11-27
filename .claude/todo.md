@@ -798,3 +798,9 @@ Every batch's plans depend only on plans in earlier batches, so the batches are 
 - [ ] A9: Add the Hebrew texts and the icon — dictionary keys from UI/UX Notes, file-text icon — public/assets/data/dictionary.json, src/app/app.config.ts
 - [ ] A10: Prove the window and the section confirm in specs and one browser check — modal spec, page spec, e2e with the AI route stubbed — src/app/shared/ai-menu-modal/ai-menu-modal.component.spec.ts, src/app/pages/menu-intelligence/menu-intelligence.page.spec.ts, e2e/ui/770-1.spec.ts
 - [ ] A11: Update the folder maps for the moved matcher, the engine files, the route and the quick mode — server/breadcrumbs.md, src/app/core/services/breadcrumbs.md, src/app/shared/breadcrumbs.md
+
+### Plan 771 — Generic writes add clone lineage only to cloneable collections
+- [ ] L1: Write a failing test: a non-cloneable collection added only to COLLECTIONS is refused today by its own lineage fields — server/test/generic-lineage.test.js
+- [ ] L2: Make the generic routes read clone lineage from the cloneable flag instead of a hand list — server/routes/generic.js
+- [ ] L3: Correct the New Collection Checklist so planners stop asking for the generic route — docs/agent/standards-backend.md
+- [ ] L4: Run every automatic check and paste the outputs under Execution Notes — plans/771-generic-writes-read-lineage-from-cloneable.plan.md
