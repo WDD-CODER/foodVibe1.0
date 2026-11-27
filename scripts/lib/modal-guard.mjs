@@ -116,6 +116,18 @@ function cardClassesOf(html) {
   return found
 }
 
+/**
+ * Plan 757: the text of src/styles.scss without the bottom-sheet rules the Human approved removing on 2026-11-26
+ * (the append-only tests compare with a base that may still hold them)
+ */
+export function withoutRetiredSheetRules(text) {
+  return text
+    .replace(/\r?\n\r?\n  \/\* Tablet \+ mobile: the same panel[\s\S]*?\r?\n  &\.as-modal \{[\s\S]*?\r?\n  \}(?=\r?\n\})/, '')
+    .replace(/  \/\* Centred dialogs become bottom sheets\. \*\/\r?\n  \.m-sheet \{[^}]*\}\r?\n\r?\n  \.m-sheet-card \{[^}]*\}\r?\n\r?\n/, '')
+    .replace(/ The tablet\/phone modal variant \(\.inline-edit-panel\.as-modal,\r?\n\s*position: fixed, z-index 1001\) is excluded: it already sits above its backdrop and must stay fixed\. \*\//, ' */')
+    .replace('.inline-edit-panel:not(.as-modal):has(.c-dropdown)', '.inline-edit-panel:has(.c-dropdown)')
+}
+
 export function modalFindings(files, { root = process.cwd(), allow = [], cardClasses = [] } = {}) {
   for (const a of allow) {
     if (!a || typeof a.why !== 'string' || a.why.trim() === '') throw new Error('modalFindings: an allow entry needs a why')

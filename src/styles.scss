@@ -1403,48 +1403,6 @@ textarea.c-input {
   animation: inline-edit-expand 0.2s ease-out;
   overflow: visible;
   z-index: 1;
-
-  /* Tablet + mobile: the same panel, same form, rendered as a modal instead of
-   * in-flow under the row (plan 305 decision 2 — desktop keeps the inline panel
-   * unchanged, only this width range gets a wrapper change). Paired with a sibling
-   * `.c-modal-overlay` backdrop in the template — this class only handles the
-   * panel's own position, since the overlay's flex-centering can't reach a sibling.
-   * Surface tokens (background/border/shadow/blur) come from the base rule above,
-   * shared with the desktop-inline variant since design-port screen 04 (Suppliers)
-   * — both match the design's one shared glass-modal surface (Equipment.dc.html:377
-   * confirms the same tokens at this breakpoint), nothing to override here. */
-  &.as-modal {
-    position: fixed;
-    inset-inline: var(--space-4);
-    inset-block-start: 50%;
-    z-index: 1001;
-
-    max-width: 32rem;
-    max-height: calc(100dvh - var(--space-8));
-    margin: 0 auto;
-
-    overflow-y: auto;
-    transform: translateY(-50%);
-
-    @media (max-width: $break-phone-max) {
-      inset-inline: 0;
-      // Plan 347: sit above the on-screen keyboard (iOS overlays it; --kb-inset is 0 elsewhere).
-      inset-block: auto var(--kb-inset, 0px);
-      z-index: 1001;
-
-      max-width: none;
-      max-height: calc(86dvh - var(--kb-inset, 0px));
-      margin-inline: 0;
-
-      border-end-end-radius: 0;
-      border-end-start-radius: 0;
-      border-start-start-radius: var(--radius-xl);
-      border-start-end-radius: var(--radius-xl);
-      padding-block-end: calc(var(--space-4) + env(safe-area-inset-bottom, 0px));
-
-      transform: none;
-    }
-  }
 }
 
 .inline-edit-title {
@@ -1849,23 +1807,6 @@ textarea.c-input {
   .m-fab-lift {
     /* tab bar + 128px thumb clearance, per the design */
     inset-block-end: calc(var(--tabbar-h) + 8rem + env(safe-area-inset-bottom, 0px)) !important;
-  }
-
-  /* Centred dialogs become bottom sheets. */
-  .m-sheet {
-    align-items: flex-end !important;
-  }
-
-  .m-sheet-card {
-    width: 100% !important;
-    max-width: none !important;
-    max-height: 86dvh !important;
-
-    padding-block-end: calc(var(--space-4) + env(safe-area-inset-bottom, 0px)) !important;
-    border-start-start-radius: var(--radius-xl);
-    border-start-end-radius: var(--radius-xl);
-    border-end-end-radius: 0;
-    border-end-start-radius: 0;
   }
 
   /* Toasts clear the tab bar, and a page save bar when one is present. */
@@ -2651,12 +2592,11 @@ span:is(.c-chip--teal, .c-chip--amber, .c-chip--red, .c-chip--green, .c-chip--al
    backdrop-filter makes every .c-glass-panel / .c-modal-card its own stacking context, so a list opened inside
    one (z-index 9999 there) is still painted as part of that panel and a later sibling panel covers it.
    .c-dropdown exists in the DOM only while a list is open; lifting that panel above its siblings fixes it.
-   20 stays below the app header (z-index 100). The tablet/phone modal variant (.inline-edit-panel.as-modal,
-   position: fixed, z-index 1001) is excluded: it already sits above its backdrop and must stay fixed. */
+   20 stays below the app header (z-index 100). */
 .c-glass-panel:has(.c-dropdown),
 .c-modal-card:has(.c-dropdown),
 .c-modal-body:has(.c-dropdown),
-.inline-edit-panel:not(.as-modal):has(.c-dropdown) {
+.inline-edit-panel:has(.c-dropdown) {
   position: relative;
   z-index: 20;
 }
