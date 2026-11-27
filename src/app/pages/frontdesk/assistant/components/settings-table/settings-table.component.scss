@@ -72,14 +72,9 @@
   margin: 0;
 }
 
-.asr-set__box {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-}
-
 .asr-set__input {
   inline-size: 7rem;
+  margin-inline-end: var(--space-2);
 }
 
 .asr-set__range {

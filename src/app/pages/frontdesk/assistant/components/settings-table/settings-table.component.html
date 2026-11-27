@@ -91,10 +91,8 @@
                   [attr.data-testid]="'set-editor-' + item.row.id"
                   (submit)="save($event, edit)"
                 >
-                  <span appNumberBox class="asr-set__box">
-                    <input
-                      class="c-input asr-set__input"
-                      type="number"
+                  <!-- prettier-ignore -->
+                  <span appNumberBox><input type="number" class="c-input asr-set__input"
                       [min]="edit.range.unit === 'ms' ? edit.range.min / 1000 : edit.range.min"
                       [max]="edit.range.unit === 'ms' ? edit.range.max / 1000 : edit.range.max"
                       [step]="edit.range.unit === 'ms' ? 0.1 : 1"

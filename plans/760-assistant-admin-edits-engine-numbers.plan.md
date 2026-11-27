@@ -135,6 +135,8 @@ append the path to the scope block above and retry.
 
 ## Reuse Check
 - assistant-engine-settings service (defaults with ranges, cached read, admin save with history) — family: none — rung: 4 — why: no platform-wide runtime settings store exists; the engine numbers are code constants today
+- assistant-engine.service.ts and assistant-engine.util.ts (the admin's save of one number and how a number is shown) — family: assistant-engine-settings — rung: 3 — why: the browser half of the same store; the core run data service is outside this plan's scope
+- `.asr-set__editor`, `.asr-set__input`, `.asr-set__range`, `.asr-set__save` (the open number box in a settings row) — family: assistant-engine-settings — rung: 3 — why: the settings table's own page-local layout; no shared inline-edit row exists for a list row
 
 ## Defaults
 

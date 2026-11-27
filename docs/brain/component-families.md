@@ -1058,6 +1058,7 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 - Origin: New registry family assistant-engine-settings in docs/brain/component-families.md (plan 760).
 - Use: `server/services/assistant-engine-settings.js` · `ENGINE_RULES` is the one table of the assistant's engine numbers with each default, min, max and unit; `engineSettings(db)` gives the numbers in force (saved values over the defaults, cached for a few seconds, dropped on save); `engineRanges` the allowed ranges; `saveEngineSetting` the admin's save with one history entry. The save route is `PUT /api/v1/assistant-runs/engine-settings`, platform admin only; the body is `engineSettingSaveSchema` (`shared/schemas/front-desk/engine-settings.schema.ts`). Browser (`src/app/pages/frontdesk/assistant/`): `AssistantEngineService.save`, `assistant-engine.util.ts` (`toShown`, `fromShown`, `shownRange`, `engineUnitKey`).
 - Pieces: ENGINE_RULES, ENGINE_DEFAULTS, engineSettings, engineRanges, saveEngineSetting, engineSettingSaveSchema, ENGINE_FIELDS, AssistantEngineService, toShown, fromShown, shownRange, engineUnitKey.
+- Classes: page-local, the open number box of the settings table: `.asr-set__editor`, `.asr-set__input`, `.asr-set__range`, `.asr-set__save`.
 - When: a new number of the assistant's engine is a row of `ENGINE_RULES`, a field of `ENGINE_FIELDS` and a row of `SETTING_ROWS`; code that works with it reads it from `engineSettings(db)` — never a new constant, a second settings document or an environment variable for it.
 - Known copies: none.
 
