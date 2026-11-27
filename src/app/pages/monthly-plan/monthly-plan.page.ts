@@ -151,9 +151,13 @@ export class MonthlyPlanPage {
     const month = this.liveMonth_()
     if (!month) return { estimate: false, fixedPartial: false }
     const { labour, fixed } = monthInputOf(month)
+    // Plan 759: «חלקי» gives way to the faded mark once the forecast covers every line that has no actual.
+    const covered =
+      !!this.figures_()?.actual.fromForecast.includes('fixed') &&
+      !(fixed.parts ?? [fixed]).some((p) => p.actual === null && p.plan === null)
     return {
       estimate: labour.estimate && (labour.plan !== null || labour.actual !== null),
-      fixedPartial: fixed.entered < fixed.lines
+      fixedPartial: fixed.entered < fixed.lines && !covered
     }
   })
   /** The fixed lines still without an actual, for the «חלקי» hints. */

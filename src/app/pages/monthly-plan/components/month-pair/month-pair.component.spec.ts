@@ -69,6 +69,64 @@ describe('MonthPairComponent (plan 749)', () => {
     expect(box('plan')).toBeNull()
   })
 
+  it('plan 759: blur closes the box back to «word · amount», for the forecast and the actual side', async () => {
+    setup()
+    for (const side of ['plan', 'actual'] as const) {
+      const word = side === 'plan' ? 'mp_chip_plan' : 'mp_actual'
+      expect(chip(side).textContent!.trim()).toBe(word)
+      press(side)
+      await settle()
+      box(side)!.value = '158000'
+      box(side)!.dispatchEvent(new Event('input'))
+      // The page owns the value and hands it back.
+      fixture.componentRef.setInput(side, 158000)
+      box(side)!.blur()
+      fixture.detectChanges()
+      expect(box(side)).toBeNull()
+      expect(chip(side).getAttribute('aria-expanded')).toBe('false')
+      expect(chip(side).textContent!.trim()).toBe(`${word} · ₪158,000.00`)
+      expect(chip(side).classList).toContain('teal')
+    }
+    expect(plans).toEqual([158000])
+    expect(actuals).toEqual([158000])
+    expect(left).toEqual(['plan', 'actual'])
+  })
+
+  it('plan 759: Enter closes the box back to the chip, for the forecast and the actual side', () => {
+    setup()
+    for (const side of ['plan', 'actual'] as const) {
+      press(side)
+      const enter = new KeyboardEvent('keydown', { key: 'Enter', cancelable: true })
+      box(side)!.dispatchEvent(enter)
+      fixture.detectChanges()
+      expect(enter.defaultPrevented).toBeTrue()
+      expect(box(side)).toBeNull()
+      expect(document.activeElement).toBe(chip(side))
+    }
+    expect(left).toEqual(['plan', 'actual'])
+  })
+
+  it('plan 759: opening the other side closes the first, and a chip press keeps the focus until the click', () => {
+    setup()
+    press('plan')
+    const down = new MouseEvent('mousedown', { bubbles: true, cancelable: true })
+    chip('actual').dispatchEvent(down)
+    expect(down.defaultPrevented).toBeTrue()
+    expect(document.activeElement).toBe(box('plan'))
+    press('actual')
+    expect(box('plan')).toBeNull()
+    expect(document.activeElement).toBe(box('actual'))
+    expect(left).toEqual(['plan'])
+  })
+
+  it('plan 759: closing a box does not move what is below the pair', () => {
+    setup()
+    const height = () => el().offsetHeight
+    const closed = height()
+    press('actual')
+    expect(height()).toBe(closed)
+  })
+
   it('a press on the small chip closes the box and keeps the value', async () => {
     setup({ plan: 12000 })
     press('plan')
@@ -147,6 +205,9 @@ describe('MonthPairComponent (plan 749)', () => {
     input.dispatchEvent(new Event('blur'))
     expect(actuals).toEqual([])
     expect(chip('actual').classList).not.toContain('teal')
+    fixture.detectChanges()
+    expect(box('actual')).toBeNull()
+    expect(chip('actual').textContent!.trim()).toBe('mp_actual')
   })
 
   it('a forecast of 0 is shown faded as 0; no forecast leaves «לא הוזן» and no hint', () => {

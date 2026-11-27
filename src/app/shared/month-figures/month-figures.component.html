@@ -30,7 +30,14 @@
         @for (side of ['plan', 'actual']; track side) {
           @let c = side === 'plan' ? row.plan : row.actual;
           <span class="mf__cell" role="cell" [attr.data-testid]="'mf-' + side + '-' + row.key">
-            <span class="mf__money" [class.mf__money--neg]="c.negative">{{ c.text }}</span>
+            <span
+              class="mf__money"
+              [class.mf__money--neg]="c.negative"
+              [class.mf__money--forecast]="c.fromForecast"
+              [appTooltip]="c.fromForecast ? ('mp_actual_from_forecast' | translatePipe) : null"
+              [attr.tabindex]="c.fromForecast ? 0 : null"
+              >{{ c.text }}</span
+            >
             @if (c.pctText) {
               <span class="mf__pct">{{ c.pctText }}</span>
             }

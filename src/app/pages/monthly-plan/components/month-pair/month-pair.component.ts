@@ -32,9 +32,9 @@ interface SideView {
 const SIDE_KEY: Record<PairSide, string> = { plan: 'mp_chip_plan', actual: 'mp_actual' }
 
 /**
- * Plan 749: one forecast / actual pair of the monthly plan. Each side starts closed as a small chip (teal when
- * filled); a press opens its short number box, a second press or Escape closes it. Controlled: the page owns the
- * values; only the open state lives here.
+ * Plans 749, 759: one forecast / actual pair of the monthly plan. Each side is a small chip (teal when filled); a
+ * press opens its short number box, and leaving the box (Enter, Escape, Tab, a press elsewhere or on the chip)
+ * closes it back to the chip. Controlled: the page owns the values; only the open state lives here.
  */
 @Component({
   selector: 'app-month-pair',
@@ -75,11 +75,13 @@ export class MonthPairComponent {
   })
 
   // 6. METHODS
-  protected toggle(side: PairSide): void {
+  protected toggle(side: PairSide, chip: HTMLButtonElement): void {
     if (this.disabled()) return
-    const open = !this.openSides_()[side]
-    this.openSides_.update((s) => ({ ...s, [side]: open }))
-    if (!open) return
+    if (this.openSides_()[side]) {
+      this.close_(side, chip)
+      return
+    }
+    this.setOpen_(side, true)
     // Render now so the focus stays inside the press (a phone opens its keyboard only then).
     this.changes_.detectChanges()
     const box = this.host_.nativeElement.querySelector<HTMLInputElement>(`#${CSS.escape(`${this.idPrefix()}-${side}`)}`)
@@ -88,11 +90,16 @@ export class MonthPairComponent {
     queueMicrotask(() => box?.select())
   }
 
-  protected close(side: PairSide, chip: HTMLButtonElement, event: Event): void {
+  /** Enter or Escape: typing is done, back to the chip. */
+  protected finish(side: PairSide, chip: HTMLButtonElement, event: Event): void {
     event.preventDefault()
-    // Moving the focus first lets the box report that it was left.
-    chip.focus()
-    this.openSides_.update((s) => ({ ...s, [side]: false }))
+    this.close_(side, chip)
+  }
+
+  /** The box lost the focus (a press elsewhere, Tab, Enter, Escape): it closes back to its chip. */
+  protected leave(side: PairSide): void {
+    this.setOpen_(side, false)
+    this.boxLeave.emit(side)
   }
 
   protected setValue(side: PairSide, value: number | string | null): void {
@@ -101,6 +108,16 @@ export class MonthPairComponent {
     const next = n === null || !Number.isFinite(n) ? null : n
     if (side === 'plan') this.planChange.emit(next)
     else this.actualChange.emit(next)
+  }
+
+  private close_(side: PairSide, chip: HTMLButtonElement): void {
+    // Moving the focus first lets the box report that it was left.
+    chip.focus()
+    this.setOpen_(side, false)
+  }
+
+  private setOpen_(side: PairSide, open: boolean): void {
+    this.openSides_.update((s) => ({ ...s, [side]: open }))
   }
 
   private view_(key: PairSide): SideView {

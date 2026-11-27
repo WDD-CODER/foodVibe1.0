@@ -15,12 +15,15 @@ export interface MonthInput {
   revenue: Pair
   foodCost: Pair
   labour: Pair & { estimate: boolean }
-  fixed: Pair & { entered: number; lines: number }
+  /** `parts`: the lines behind the sums (detailed mode only), so each can be filled from its own forecast. */
+  fixed: Pair & { entered: number; lines: number; parts?: Pair[] }
   targets: MonthTargets
   vatRatePct: number
   dealerType: 'murshe' | 'patur'
 }
 export type MissingKey = 'revenue' | 'foodCost' | 'labour' | 'fixed'
+/** A money figure of a column. */
+export type FigureKey = MissingKey | 'primeCost' | 'profit' | 'breakEven' | 'roomForTeam'
 export interface MonthColumn {
   revenue: number | null
   foodCost: number | null
@@ -37,15 +40,18 @@ export interface MonthColumn {
   profitPct: number | null
   /** The food cost came from `revenue × food target` (plan column only). */
   fromTarget: boolean
-  /** Some input a figure rests on is not entered. */
+  /** Some input a figure rests on has no number. */
   partial: boolean
   missing: MissingKey[]
+  /** The figures resting, wholly or partly, on a forecast that stands in for an empty actual (actual column only). */
+  fromForecast: FigureKey[]
 }
 export interface MonthFigures {
   plan: MonthColumn
   actual: MonthColumn
+  /** Counts typed actuals only: a figure filled from the forecast is not entered. */
   completeness: { entered: number; of: 4 }
-  /** The actual inputs that are not entered. */
+  /** The actual inputs that are not typed. */
   missing: MissingKey[]
 }
 export type Band = 'below' | 'in' | 'above'
@@ -64,7 +70,8 @@ export function fixedInputOf(fixed: MonthPlan['fixed']): MonthInput['fixed'] {
     plan: sumOf(fixed.lines.map((l) => l.plan)),
     actual: sumOf(fixed.lines.map((l) => l.actual)),
     entered: fixed.lines.filter((l) => l.actual !== null).length,
-    lines: fixed.lines.length
+    lines: fixed.lines.length,
+    parts: fixed.lines.map((l) => ({ plan: l.plan, actual: l.actual }))
   }
 }
 
@@ -138,8 +145,57 @@ function column(
     profitPct: ofRevenue(profit),
     fromTarget,
     partial: missing.length > 0,
-    missing
+    missing,
+    fromForecast: []
   }
+}
+
+const INPUT_KEYS: readonly MissingKey[] = ['revenue', 'foodCost', 'labour', 'fixed']
+
+/** The inputs each money figure is worked out from. */
+const PARTS: Record<FigureKey, readonly MissingKey[]> = {
+  revenue: ['revenue'],
+  foodCost: ['foodCost'],
+  labour: ['labour'],
+  fixed: ['fixed'],
+  primeCost: ['foodCost', 'labour'],
+  profit: INPUT_KEYS,
+  breakEven: INPUT_KEYS,
+  roomForTeam: ['revenue', 'foodCost', 'fixed']
+}
+
+/** The typed actual, else the forecast. */
+const actualOrForecast = (pair: Pair): number | null => pair.actual ?? pair.plan
+const standsIn = (pair: Pair): boolean => pair.actual === null && pair.plan !== null
+
+/**
+ * Plan 759: the actual column. Once any actual is typed, each empty one (each fixed line on its own) takes its
+ * forecast, for display only. With no actual at all there is nothing to project and the column stays empty.
+ */
+function actualColumn(input: MonthInput, planFood: number | null): MonthColumn {
+  const { revenue, labour, fixed, targets } = input
+  const food: Pair = { plan: planFood, actual: input.foodCost.actual }
+  if ([revenue, food, labour, fixed].every((p) => p.actual === null))
+    return column(null, null, null, null, targets, false)
+  const fixedParts = fixed.parts ?? [fixed]
+  const result = column(
+    actualOrForecast(revenue),
+    actualOrForecast(food),
+    actualOrForecast(labour),
+    sumOf(fixedParts.map(actualOrForecast)),
+    targets,
+    false
+  )
+  const filled: Record<MissingKey, boolean> = {
+    revenue: standsIn(revenue),
+    foodCost: standsIn(food),
+    labour: standsIn(labour),
+    fixed: fixedParts.some(standsIn)
+  }
+  const fromForecast = (Object.keys(PARTS) as FigureKey[]).filter(
+    (key) => result[key] !== null && PARTS[key].some((part) => filled[part])
+  )
+  return { ...result, fromForecast }
 }
 
 export function monthFigures(input: MonthInput): MonthFigures {
@@ -147,8 +203,15 @@ export function monthFigures(input: MonthInput): MonthFigures {
   const fromTarget = foodCost.plan === null && revenue.plan !== null
   const planFood = foodCost.plan ?? (revenue.plan === null ? null : (revenue.plan * targets.foodPct) / 100)
   const plan = column(revenue.plan, planFood, labour.plan, fixed.plan, targets, fromTarget)
-  const actual = column(revenue.actual, foodCost.actual, labour.actual, fixed.actual, targets, false)
-  return { plan, actual, completeness: { entered: 4 - actual.missing.length, of: 4 }, missing: actual.missing }
+  const actual = actualColumn(input, planFood)
+  const typed: Record<MissingKey, number | null> = {
+    revenue: revenue.actual,
+    foodCost: foodCost.actual,
+    labour: labour.actual,
+    fixed: fixed.actual
+  }
+  const missing = INPUT_KEYS.filter((key) => typed[key] === null)
+  return { plan, actual, completeness: { entered: 4 - missing.length, of: 4 }, missing }
 }
 
 export function bandOf(key: MonthTargetKey, pct: number | null): Band | null {

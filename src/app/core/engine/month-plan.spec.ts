@@ -1,5 +1,5 @@
 import type { MonthPlan } from '@schemas/entities'
-import { bandOf, breakEven, dishPrice, monthFigures, monthInputOf, type MonthInput } from './month-plan'
+import { bandOf, breakEven, dishPrice, monthFigures, monthInputOf, type FigureKey, type MonthInput } from './month-plan'
 
 const input = (over: Partial<MonthInput> = {}): MonthInput => ({
   revenue: { plan: null, actual: null },
@@ -111,6 +111,107 @@ describe('month-plan engine (plan 728)', () => {
   })
 })
 
+describe('the actual column filled from the forecast (plan 759)', () => {
+  const forecast = {
+    revenue: { plan: 120000, actual: 100000 },
+    labour: { plan: 40000, actual: null, estimate: false },
+    fixed: { plan: 20000, actual: null, entered: 0, lines: 1 }
+  }
+
+  it('only revenue typed: food, labour and fixed come from the forecast and the derived rows use the mix', () => {
+    const f = monthFigures(input(forecast))
+    // The food forecast is the forecast column's own figure: forecast revenue × the 30% food target.
+    expect(f.actual.revenue).toBe(100000)
+    expect(f.actual.foodCost).toBe(36000)
+    expect(f.actual.labour).toBe(40000)
+    expect(f.actual.fixed).toBe(20000)
+    expect(f.actual.primeCost).toBe(76000)
+    expect(f.actual.profit).toBe(4000)
+    expect(f.actual.roomForTeam).toBe(34000)
+    expect(f.actual.breakEven).toBe(breakEven(60000, 36))
+    expect(f.actual.partial).toBeFalse()
+    expect(f.actual.fromTarget).toBeFalse()
+    const marked: FigureKey[] = ['breakEven', 'fixed', 'foodCost', 'labour', 'primeCost', 'profit', 'roomForTeam']
+    expect([...f.actual.fromForecast].sort()).toEqual(marked)
+    // Filled figures are not entered.
+    expect(f.completeness).toEqual({ entered: 1, of: 4 })
+    expect(f.missing).toEqual(['foodCost', 'labour', 'fixed'])
+    expect(f.plan.fromForecast).toEqual([])
+  })
+
+  it('every actual typed: nothing is marked, even when it equals the forecast', () => {
+    const f = monthFigures(
+      input({
+        revenue: { plan: 100000, actual: 100000 },
+        foodCost: { plan: null, actual: 30000 },
+        labour: { plan: 40000, actual: 40000, estimate: false },
+        fixed: { plan: 20000, actual: 20000, entered: 1, lines: 1 }
+      })
+    )
+    expect(f.actual.fromForecast).toEqual([])
+    expect(f.actual.profit).toBe(10000)
+  })
+
+  it('a derived row is marked only when one of its own parts is filled', () => {
+    const f = monthFigures(
+      input({
+        revenue: { plan: 1, actual: 100000 },
+        foodCost: { plan: null, actual: 30000 },
+        labour: { plan: 40000, actual: null, estimate: false },
+        fixed: { plan: 5, actual: 20000, entered: 1, lines: 1 }
+      })
+    )
+    expect([...f.actual.fromForecast].sort()).toEqual(['breakEven', 'labour', 'primeCost', 'profit'])
+  })
+
+  it('no actual at all leaves the actual column empty', () => {
+    const f = monthFigures(input({ ...forecast, revenue: { plan: 120000, actual: null } }))
+    expect(f.actual.revenue).toBeNull()
+    expect(f.actual.foodCost).toBeNull()
+    expect(f.actual.labour).toBeNull()
+    expect(f.actual.fixed).toBeNull()
+    expect(f.actual.profit).toBeNull()
+    expect(f.actual.fromForecast).toEqual([])
+  })
+
+  it('a typed 0 is an actual: it starts the fill and is not replaced', () => {
+    const f = monthFigures(input({ ...forecast, revenue: { plan: 120000, actual: 0 } }))
+    expect(f.actual.revenue).toBe(0)
+    expect(f.actual.labour).toBe(40000)
+    expect(f.actual.fromForecast).not.toContain('revenue')
+  })
+
+  it('each fixed line takes its own forecast: the sum is marked as partly from the forecast', () => {
+    const line = (id: string, plan: number | null, actual: number | null) => ({ id, name: id, plan, actual })
+    const fixed = monthInputOf({
+      revenue: { plan: null, actual: null },
+      targets: input().targets,
+      vatRatePct: 18,
+      dealerType: 'murshe',
+      fixed: {
+        mode: 'lines',
+        lines: [line('a', 1000, null), line('b', 700, 500), line('c', null, null)],
+        rough: { plan: null, actual: null }
+      }
+    } as unknown as MonthPlan).fixed
+    const f = monthFigures(input({ fixed }))
+    expect(f.actual.fixed).toBe(1500)
+    expect(f.actual.fromForecast).toContain('fixed')
+    // Typed completeness is unchanged by the fill.
+    expect(f.missing).toEqual(['revenue', 'foodCost', 'labour'])
+  })
+
+  it('an input with neither forecast nor actual stays empty, listed and partial', () => {
+    const f = monthFigures(input({ revenue: { plan: null, actual: 100000 } }))
+    expect(f.actual.foodCost).toBeNull()
+    expect(f.actual.labour).toBeNull()
+    expect(f.actual.profit).toBe(100000)
+    expect(f.actual.partial).toBeTrue()
+    expect(f.actual.missing).toEqual(['foodCost', 'labour', 'fixed'])
+    expect(f.actual.fromForecast).toEqual([])
+  })
+})
+
 describe('monthInputOf fixed, labour and purchases (plan 729)', () => {
   const base = { revenue: { plan: null, actual: null }, targets: input().targets, vatRatePct: 18, dealerType: 'murshe' }
   const line = (id: string, plan: number | null, actual: number | null) => ({ id, name: id, plan, actual })
@@ -121,7 +222,12 @@ describe('monthInputOf fixed, labour and purchases (plan 729)', () => {
       ...base,
       fixed: { mode: 'lines', lines: [line('a', 100, 120), line('b', null, null), line('c', 50, 0)], rough }
     } as unknown as MonthPlan)
-    expect(i.fixed).toEqual({ plan: 150, actual: 120, entered: 2, lines: 3 })
+    expect(i.fixed).toEqual(jasmine.objectContaining({ plan: 150, actual: 120, entered: 2, lines: 3 }))
+    expect(i.fixed.parts).toEqual([
+      { plan: 100, actual: 120 },
+      { plan: null, actual: null },
+      { plan: 50, actual: 0 }
+    ])
   })
 
   it('lines mode with every line null is null, not 0', () => {
@@ -129,7 +235,7 @@ describe('monthInputOf fixed, labour and purchases (plan 729)', () => {
       ...base,
       fixed: { mode: 'lines', lines: [line('a', null, null)], rough }
     } as unknown as MonthPlan)
-    expect(i.fixed).toEqual({ plan: null, actual: null, entered: 0, lines: 1 })
+    expect(i.fixed).toEqual(jasmine.objectContaining({ plan: null, actual: null, entered: 0, lines: 1 }))
   })
 
   it('rough mode uses only the rough total even when lines hold numbers', () => {

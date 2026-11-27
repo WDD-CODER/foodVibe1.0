@@ -11,6 +11,7 @@ import {
 } from '../../core/engine/month-plan'
 import { formatMoney, formatPct1 } from '../../core/engine/rounding'
 import { missingHint } from '../../pages/monthly-plan/month-hints'
+import { TooltipDirective } from '../tooltip/tooltip.directive'
 
 type MoneyKey = 'revenue' | 'foodCost' | 'labour' | 'primeCost' | 'fixed' | 'profit' | 'breakEven' | 'roomForTeam'
 type PctKey = 'foodPct' | 'labourPct' | 'primePct' | 'fixedPct' | 'profitPct'
@@ -34,6 +35,8 @@ export interface FigureCell {
   /** What a partial figure is missing (the «חלקי» hover hint); '' when the figure is not partial. */
   hint: string
   fromTarget: boolean
+  /** The figure rests on a forecast standing in for an empty actual: shown faded, with a hint (plan 759). */
+  fromForecast: boolean
   negative: boolean
   band: 'in' | 'out' | null
 }
@@ -63,7 +66,7 @@ let instances = 0
 @Component({
   selector: 'app-month-figures',
   standalone: true,
-  imports: [TranslatePipe],
+  imports: [TranslatePipe, TooltipDirective],
   templateUrl: './month-figures.component.html',
   styleUrl: './month-figures.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -112,6 +115,7 @@ export class MonthFiguresComponent {
       partial,
       hint,
       fromTarget: !!def.food && col.fromTarget && value !== null,
+      fromForecast: col.fromForecast.includes(def.key),
       negative: (def.key === 'profit' || def.key === 'roomForTeam') && value !== null && value < 0,
       band: band === null ? null : band === 'in' ? 'in' : 'out'
     }

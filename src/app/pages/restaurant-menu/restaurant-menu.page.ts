@@ -11,7 +11,7 @@ import { ConfirmModalService } from '@services/confirm-modal.service'
 import { UserMsgService } from '@services/user-msg.service'
 import type { MenuDish } from '@models/menu-dish.model'
 import { normalizeHebrew } from 'src/app/core/utils/recipe-match.util'
-import { formatMoney, formatPct1 } from 'src/app/core/engine/rounding'
+import { formatMoney, formatPct1, roundMoney } from 'src/app/core/engine/rounding'
 import { useResponsivePanelState } from 'src/app/core/utils/panel-preference.util'
 import { useCollapsibleCategories } from 'src/app/core/utils/collapsible-categories.util'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
@@ -22,6 +22,7 @@ import { LoaderComponent } from 'src/app/shared/loader/loader.component'
 import { RowActionsMenuComponent } from 'src/app/shared/row-actions-menu/row-actions-menu.component'
 import { PartialCostBadgeComponent } from 'src/app/shared/partial-cost-badge/partial-cost-badge.component'
 import { MenuDishDialogComponent } from './components/menu-dish-dialog/menu-dish-dialog.component'
+import { TooltipDirective } from 'src/app/shared/tooltip/tooltip.directive'
 
 /** The type chip that shows dishes with no course. */
 export const NO_COURSE = '__none__'
@@ -40,7 +41,8 @@ export const NO_COURSE = '__none__'
     LoaderComponent,
     RowActionsMenuComponent,
     PartialCostBadgeComponent,
-    MenuDishDialogComponent
+    MenuDishDialogComponent,
+    TooltipDirective
   ],
   templateUrl: './restaurant-menu.page.html',
   styleUrl: './restaurant-menu.page.scss',
@@ -77,13 +79,14 @@ export class RestaurantMenuPage {
   protected readonly filterCategories = useCollapsibleCategories()
   protected readonly hasActiveFilters_ = computed(() => this.courseFilter_().size > 0 || this.showRemoved_())
 
+  private readonly isPatur_ = computed(() => this.business()?.settings?.dealerType === 'patur')
+
   /** The VAT note, the hint of the net price column title: the rate, or «עוסק פטור». */
   protected readonly vatNote_ = computed(() => {
-    const settings = this.business()?.settings
-    if (settings?.dealerType === 'patur') return this.translation.translate('restaurant_menu_vat_note_patur')
+    if (this.isPatur_()) return this.translation.translate('restaurant_menu_vat_none')
     return this.translation
-      .translate('restaurant_menu_vat_note')
-      .replace('{{rate}}', String(settings?.vatRatePct ?? 18))
+      .translate('restaurant_menu_vat_rate')
+      .replace('{{rate}}', String(this.business()?.settings?.vatRatePct ?? 18))
   })
 
   private readonly courseOrder_ = computed(() => this.metadata.courses_().map((c) => c.key))
@@ -122,6 +125,7 @@ export class RestaurantMenuPage {
           dish,
           cost,
           net,
+          vatTip: this.vatTip_(dish.priceWithVat, net),
           left,
           profitPct: left != null && net ? formatPct1((left / net) * 100) : null
         }
@@ -183,6 +187,15 @@ export class RestaurantMenuPage {
 
   protected async restore(dish: MenuDish): Promise<void> {
     await this.setActive(dish, true)
+  }
+
+  /** Plan 759: the hint of a dish's net price: its VAT amount; '' (no hint) for a dish without a price. */
+  private vatTip_(gross: number | undefined, net: number | null): string {
+    if (this.isPatur_()) return this.translation.translate('restaurant_menu_vat_none')
+    if (gross == null || net == null) return ''
+    return this.translation
+      .translate('restaurant_menu_vat_amount')
+      .replace('{{amount}}', formatMoney(roundMoney(gross - net)))
   }
 
   private async setActive(dish: MenuDish, active: boolean): Promise<void> {

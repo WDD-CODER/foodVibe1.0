@@ -43,7 +43,12 @@
     <div class="c-grid-header-cell">{{ 'menu_dish_name' | translatePipe }}</div>
     <div class="c-grid-header-cell rm-row__wide">{{ 'menu_dish_col_type' | translatePipe }}</div>
     <div class="c-grid-header-cell">{{ 'menu_dish_price_with_vat' | translatePipe }}</div>
-    <div class="c-grid-header-cell rm-row__wide" data-testid="restaurant-menu-net-title" [attr.title]="vatNote_()">
+    <div
+      class="c-grid-header-cell rm-row__wide"
+      data-testid="restaurant-menu-net-title"
+      tabindex="0"
+      [appTooltip]="vatNote_()"
+    >
       {{ 'menu_dish_col_net' | translatePipe }}
     </div>
     <div class="c-grid-header-cell">{{ 'menu_dish_cost_per_portion' | translatePipe }}</div>
@@ -86,7 +91,13 @@
       <div class="c-list-body-cell rm-row__cell rm-row__num" role="cell" data-testid="menu-dish-price">
         {{ money(row.dish.priceWithVat ?? null) }}
       </div>
-      <div class="c-list-body-cell rm-row__cell rm-row__num rm-row__wide" role="cell" data-testid="menu-dish-net">
+      <div
+        class="c-list-body-cell rm-row__cell rm-row__num rm-row__wide"
+        role="cell"
+        data-testid="menu-dish-net"
+        [attr.tabindex]="row.vatTip ? 0 : null"
+        [appTooltip]="row.vatTip"
+      >
         <span class="rm-row__ellipsis">{{ money(row.net) }}</span>
       </div>
       <div class="c-list-body-cell rm-row__cell rm-row__num" role="cell" data-testid="menu-dish-cost">
