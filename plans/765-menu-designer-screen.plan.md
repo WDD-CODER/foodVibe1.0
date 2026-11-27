@@ -123,7 +123,8 @@ once, saves it under a name, and then renames, duplicates, deletes it or makes i
   shows the header button «עיצובי תפריט»; with the defaults (no `menu_design`) the button is absent and `/menu-design`
   sends the browser to `/dashboard`. Restores the defaults in `finally`. Screenshot `screens/765-1.png`.
 - [ui] `e2e/ui/765-2.spec.ts`: on `/menu-design` with no designs, the empty state says «עוד אין עיצובים לתפריט» with
-  «עיצוב חדש»; pressing it and picking «קלאסי» opens the editor whose preview frame contains «תפריט לדוגמה». Screenshot `screens/765-2.png`.
+  «עיצוב חדש»; pressing it and picking «קלאסי» opens the editor whose preview frame contains «תפריט ערב» (the title of
+  `SAMPLE_MENU_DOC`; amended by the Human's answer to ask 765-1). Screenshot `screens/765-2.png`.
 - [ui] `e2e/ui/765-3.spec.ts`: in the editor, typing «מסעדת הים» in «שם העסק» makes the preview frame show «מסעדת הים»
   without saving; «שמירה» with the name «ערב חתונה» returns to the list, which shows «ערב חתונה». Screenshot `screens/765-3.png`.
 - [ui] `e2e/ui/765-4.spec.ts`: with two saved designs, the row menu «קביעה כברירת מחדל» on the second moves the
@@ -422,6 +423,9 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
   section, shown only with the `menu_design` module on, and a restore reloads the designs list; two specs added.
 - 765-2 expects the sample menu's title «תפריט ערב»; the plan's «תפריט לדוגמה» was a drafting slip (the Human's answer).
   `shared/schemas/menu-design/menu-doc.ts` is not changed.
+- Fix round 1 (finding rev-1): the `[ui]` 765-2 line of `## Goals & Success Criteria` now names «תפריט ערב», as the
+  Human's answer to ask 765-1 says («the plan's quoted title was a drafting slip»). The spec and the criterion agree;
+  this closes the «that line fails» remark of the A7 evidence above. No code changed.
 - behaviour: the Trash section is titled «עיצובי תפריט», sits after the events section and has no History button (the type
   keeps no version history) — reverse: move or rename the `menuDesigns` row of `TRASH_SECTIONS`.
 - `pnpm run build` -> exit 0; `pnpm run lint` -> exit 0 (69 older warnings); `pnpm run test:ci` -> exit 0,
