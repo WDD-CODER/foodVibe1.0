@@ -8,7 +8,8 @@
  *
  * Flags:
  *   userData   — reachable through the generic `/api/v1/data/:type` CRUD pipe
- *   cloneable  — copied into a new user's namespace at signup / kept in sync at login
+ *   cloneable  — copied into a new user's namespace at signup / kept in sync at login; only these carry
+ *                `_masterId` / `_userModified` (the generic routes stamp them from this flag, plan 771)
  *   backup     — was the client localStorage mirror list (removed in Plan 321 P1.3); no runtime consumer today
  *   searchable — has the lean prefix-match `/search` endpoint
  *   softDelete — delete stamps `deletedAt`/`deletedBy` on the doc; Trash lists it (plan 407)
