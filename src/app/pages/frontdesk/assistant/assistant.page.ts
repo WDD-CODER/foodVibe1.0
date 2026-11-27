@@ -120,6 +120,7 @@ export class AssistantPage {
       untracked(() => void this.data.list(options))
     })
     effect(() => {
+      this.user.user_() // a user who signs in while the tab is open has no setup read yet
       if (!this.allowed_() || this.activeTab_() === 'runs') return
       untracked(() => void this.data.loadSetup())
     })

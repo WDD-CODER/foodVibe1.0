@@ -73,6 +73,7 @@ describe('AssistantPage (plan 752)', () => {
   let open: jasmine.Spy
   let loadSetup: jasmine.Spy
   let query: BehaviorSubject<ParamMap>
+  let signedIn: WritableSignal<{ _id: string }>
 
   async function create(options: { id?: string; query?: Record<string, string> } = {}) {
     const params = convertToParamMap(options.id ? { id: options.id } : {})
@@ -90,7 +91,7 @@ describe('AssistantPage (plan 752)', () => {
         { provide: ActivatedRoute, useValue: route },
         { provide: AssistantRunDataService, useValue: data },
         { provide: PermissionService, useValue: { isOwner_: owner } },
-        { provide: UserService, useValue: { isPlatformAdmin_: admin } },
+        { provide: UserService, useValue: { isPlatformAdmin_: admin, user_: signedIn } },
         { provide: ModuleService, useValue: { has: () => true } },
         { provide: TranslationService, useValue: { translate: (k: string) => DICT[k] ?? k } }
       ]
@@ -103,6 +104,7 @@ describe('AssistantPage (plan 752)', () => {
   beforeEach(() => {
     owner = signal(true)
     admin = signal(false)
+    signedIn = signal({ _id: 'u1' })
     runs = signal<AssistantRunRow[]>([])
     loaded = signal(true)
     listFailed = signal(false)
@@ -301,6 +303,14 @@ describe('AssistantPage (plan 752)', () => {
       expect(byId('asr-list')).toBeNull()
       expect(byId('asr-refresh')).toBeNull()
       expect(loadSetup).toHaveBeenCalled()
+    })
+
+    it('reads the setup again when another user signs in while the tab is open', async () => {
+      await create({ query: { tab: 'flow' } })
+      loadSetup.calls.reset()
+      signedIn.set({ _id: 'u2' })
+      await settle()
+      expect(loadSetup).toHaveBeenCalledOnceWith()
     })
 
     it('loads the list when the address moves to the runs', async () => {

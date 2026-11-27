@@ -1,8 +1,10 @@
 import { TestBed } from '@angular/core/testing'
+import { signal, WritableSignal } from '@angular/core'
 import { provideHttpClient } from '@angular/common/http'
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing'
 import { AssistantRunDataService } from './assistant-run-data.service'
 import { LoggingService } from './logging.service'
+import { UserService } from './user.service'
 import type { AssistantRunRow, AssistantSetup } from '@models/assistant-run.model'
 
 const row = (id: string, startedAt: number): AssistantRunRow => ({
@@ -19,6 +21,7 @@ const row = (id: string, startedAt: number): AssistantRunRow => ({
 describe('AssistantRunDataService (plan 752)', () => {
   let service: AssistantRunDataService
   let http: HttpTestingController
+  let signedIn: WritableSignal<{ _id: string; businessId: string } | null>
   const logging = jasmine.createSpyObj<LoggingService>('LoggingService', ['warn', 'error'])
   const listCall = () => http.expectOne((r) => r.url.endsWith('/api/v1/assistant-runs'))
   const oneCall = (id: string) => http.expectOne((r) => r.url.endsWith(`/api/v1/assistant-runs/${id}`))
@@ -26,8 +29,14 @@ describe('AssistantRunDataService (plan 752)', () => {
   beforeEach(() => {
     logging.warn.calls.reset()
     logging.error.calls.reset()
+    signedIn = signal({ _id: 'u1', businessId: 'b1' })
     TestBed.configureTestingModule({
-      providers: [provideHttpClient(), provideHttpClientTesting(), { provide: LoggingService, useValue: logging }]
+      providers: [
+        provideHttpClient(),
+        provideHttpClientTesting(),
+        { provide: LoggingService, useValue: logging },
+        { provide: UserService, useValue: { user_: signedIn } }
+      ]
     })
     service = TestBed.inject(AssistantRunDataService)
     http = TestBed.inject(HttpTestingController)
@@ -126,6 +135,55 @@ describe('AssistantRunDataService (plan 752)', () => {
     const again = service.loadSetup(true)
     setupCall().flush(setup)
     await again
+  })
+
+  it('the setup of one business (plan 756) is not shown to the next signed-in user', async () => {
+    const first = service.loadSetup()
+    setupCall().flush(setup)
+    await first
+    signedIn.set(null)
+    expect(service.setup_()).toBeNull()
+    signedIn.set({ _id: 'u2', businessId: 'b2' })
+    expect(service.setup_()).toBeNull()
+    expect(service.setupLoaded_()).toBeFalse()
+    const next = service.loadSetup()
+    const theirs = { engine: { quietMs: 3000 }, business: null } as unknown as AssistantSetup
+    setupCall().flush(theirs)
+    await next
+    expect(service.setup_()).toEqual(theirs)
+    expect(service.setupLoaded_()).toBeTrue()
+  })
+
+  it('another business of the same user (plan 756) is read again, and its failure shows nothing of the first', async () => {
+    const first = service.loadSetup()
+    setupCall().flush(setup)
+    await first
+    signedIn.set({ _id: 'u1', businessId: 'b2' })
+    expect(service.setupLoaded_()).toBeFalse()
+    const next = service.loadSetup()
+    setupCall().flush('x', { status: 500, statusText: 'Server error' })
+    await next
+    expect(service.setup_()).toBeNull()
+    expect(service.setupFailed_()).toBeTrue()
+    signedIn.set({ _id: 'u3', businessId: 'b3' })
+    expect(service.setupFailed_()).toBeFalse()
+  })
+
+  it('a setup answer (plan 756) that arrives after the user changed is dropped', async () => {
+    const old = service.loadSetup()
+    const oldCall = setupCall()
+    signedIn.set({ _id: 'u2', businessId: 'b2' })
+    const next = service.loadSetup()
+    const nextCall = setupCall()
+    oldCall.flush(setup)
+    await old
+    expect(service.setup_()).toBeNull()
+    expect(service.setupLoaded_()).toBeFalse()
+    const together = service.loadSetup()
+    http.expectNone((r) => r.url.endsWith('/api/v1/assistant-runs/setup'))
+    nextCall.flush(setup)
+    await Promise.all([next, together])
+    expect(service.setupLoaded_()).toBeTrue()
   })
 
   it('a failed setup read (plan 756) sets setupFailed_, keeps setup_ null and logs the status only', async () => {
