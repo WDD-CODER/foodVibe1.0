@@ -157,7 +157,7 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
 - [x] C2: Fill empty actuals from the forecast in the actual column and mark them — src/app/core/engine/month-plan.ts
 - [x] C3: Show filled-in figures faded with the shared tooltip in the month picture — src/app/shared/month-figures/month-figures.component.html
 - [x] C4: Make every forecast/actual pair the same chip that opens and closes — src/app/pages/monthly-plan/components/month-pair/month-pair.component.ts
-- [ ] C5: Run every automatic check and paste the outputs under Execution Notes — plans/759-biz-numbers-grading-round-two.plan.md
+- [x] C5: Run every automatic check and paste the outputs under Execution Notes — plans/759-biz-numbers-grading-round-two.plan.md
 
 ## What happens when
 - A fixed line has a forecast but no actual, another has an actual: the fixed actual is their sum, marked as partly
@@ -194,24 +194,22 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
   Reverse: the `mousedown` line in `month-pair.component.html`, `.mpp__side` in its stylesheet.
 - `behaviour:` a dish with no price has no VAT hint; the net title and the priced net cells take keyboard focus. The
   old dictionary keys `restaurant_menu_vat_note(_patur)` stay unused (the dictionary is append-only).
-- `seen:` `_shared/debt-baseline.json` allows 202 tooltip copies; `origin/orch/biz-house` already holds 241 (the
-  merge of biz-fixes and house style), so `kit-checks` fails on this branch with 240.
-- `seen:` `business-settings-tab.component.spec.ts:134` and `:191` expect a native `disabled` Save button; the
-  template (line 50) now uses `[appDisabledWhy]`, so both tests fail on this branch. No file under
-  `src/app/pages/settings/` differs from `origin/orch/biz-house`.
+- Ask 759-1 (advisor): `business-settings-tab.component.spec.ts` `:134` and `:195` now read `aria-disabled`;
+  `_shared/debt-baseline.json` `reuse-copy.tooltip` 202 → 240 (only that kind changed; the added entries are the
+  copies the run-branch merge brought, and this branch holds one fewer than the run branch's 241).
+- `seen:` `business-settings-tab.component.ts:170` — `saveWhy_` compares only the five number fields, so changing just
+  the dealer type or a month target leaves «שמור» blocked with «אין מה לשמור» (הגדרות → change only «סוג עוסק» →
+  press «שמור»). The component is outside this plan's scope and is unchanged. The two assertions at spec `:145` and
+  `:183` (`disabled` false) pass trivially and carry a note. Fix: `saveWhy_` uses `differs(value, stored)`.
 
-### Check outputs (code commit `5194697c`)
+### Check outputs (code commit `05bdba8a`)
 
 - `pnpm run build` → exit 0 (budget and CommonJS warnings only).
 - `pnpm run lint` → exit 0, 0 errors, 69 warnings.
-- `pnpm run test:ci` → `TOTAL: 2 FAILED, 3080 SUCCESS`; both are the `BusinessSettingsTabComponent` tests above. That
-  spec alone → `TOTAL: 2 FAILED, 13 SUCCESS`.
-- Focused specs (month-plan, month-figures, monthly-plan, restaurant-menu page) → `TOTAL: 138 SUCCESS`.
+- `pnpm run test:ci` → exit 0, `TOTAL: 3082 SUCCESS`.
 - `kit-manifest-check.mjs --root .` → `KIT_MANIFEST: ok`; `scope-check.mjs --diff=origin/orch/biz-house` → `SCOPE: ok`.
-- `kit-checks.mjs` → `KIT_CHECKS: fail (0 findings, 1 debt kinds raised)`: `reuse-copy.tooltip 202 → 240` (run branch
-  241, this branch 240).
+- `kit-checks.mjs --base origin/orch/biz-house` → `KIT_CHECKS: ok (6 checks)`.
 - `--arch` → `ARCH: ok INV-1, INV-none, INV-6`; `--reuse` → `REUSE: ok`; `breadcrumbs-check` → clean;
   `inventory --check` → ok; `override-check` → ok; `lint:icons` → ok; `lint:no-native-select` → exit 0;
   `plan-ledger-check` → OK; `ci-scope-check --checkout-branch` → skipped, exit 0; `log-query` → `SKIP: no database
   configured`.
-- C5 stays open until `test:ci` and `kit-checks` pass.
