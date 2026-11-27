@@ -6,6 +6,15 @@ Earlier (75 runs): plans 217 · merged 195 · parked 19 · fix rounds 96 · esca
 
 | Date | Run | Plans | Merged | Parked | Parked reasons | Fix rounds | Escalations | Gate fails | Final gate | ✗ | Checker misses | ✗ per plan |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+Earlier (70 runs): plans 207 · merged 185 · parked 19 · fix rounds 86 · escalations 40 · gate fails 20 · ✗ 14 · checker misses 0 — per run: plans 2.96 · parked 0.27 · fix rounds 1.23 · ✗ per plan 0.07
+
+| Date | Run | Plans | Merged | Parked | Parked reasons | Fix rounds | Escalations | Gate fails | Final gate | ✗ | Checker misses | ✗ per plan |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| 2026-11-18 | mod-stock-srv | 635 | 1 | 0 | - | 1 | 0 | 0 | ok | 0 | 0 | 0 |
+| 2026-11-19 | mod-diag | 633,634 | 2 | 0 | - | 2 | 0 | 2 | ok | 0 | 0 | 0 |
+| 2026-11-19 | mod-stock | 636,637 | 2 | 0 | - | 1 | 0 | 1 | ok | 0 | 0 | 0 |
+| 2026-11-19 | mod-fixes | 641,642,643,644 | 4 | 0 | - | 5 | 1 | 2 | ok | 0 | 0 | 0 |
+| 2026-11-19 | mod-fixes-2 | 645 | 1 | 0 | - | 1 | 1 | 0 | ok | 0 | 0 | 0 |
 | 2026-11-19 | mod-alerts | 646 | 1 | 0 | - | 1 | 0 | 1 | ok | 0 | 0 | 0 |
 | 2026-11-19 | mod-learning | 647 | 1 | 0 | - | 1 | 1 | 1 | ok | 0 | 0 | 0 |
 | 2026-11-19 | mod-data-fix | 648,649 | 2 | 0 | - | 1 | 0 | 0 | ok | 0 | 0 | 0 |
@@ -26,3 +35,4 @@ Earlier (75 runs): plans 217 · merged 195 · parked 19 · fix rounds 96 · esca
 | 2026-11-26 | house-style-finish | 758 | 1 | 0 | - | 0 | 0 | 0 | ok | 0 | 0 | 0 |
 | 2026-11-27 | biz-house | 759 | 1 | 0 | - | 1 | 1 | 0 | ok | 0 | 0 | 0 |
 | 2026-11-27 | biz-house2 | 762 | 1 | 0 | - | 0 | 0 | 0 | ok | - | - | - |
+| 2026-11-26 | repo-polish | 738 | 1 | 0 | - | 0 | 0 | 0 | ok | - | - | - |

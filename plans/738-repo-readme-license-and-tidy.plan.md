@@ -192,13 +192,13 @@ Screenshots (A3): file names `docs/images/<screen>.png`, 1280 px wide desktop sh
 
 These are the plan's milestones: a Worker does them in order and ticks each one after it is checked.
 
-- [ ] A1: Stop the server test that sometimes fails on main — wait for the usage writes before reading them, in both tests; run `pnpm run test:server` three times — server/test/ai-logistics-extract.test.js, server/test/ai-stock-extract.test.js
-- [ ] A2: Count the tests for the README — unit: the `Executed N of N` line of `pnpm run test:ci`; server: the `Tests N passed` line of `pnpm run test:server`; end-to-end: the `Total: N tests` line of `pnpm exec playwright test --list`; paste the three lines under Execution Notes — (no file)
-- [ ] A3: Take the screenshots from the running app — in the slot (`node scripts/slot-serve.mjs`), with gstack `/browse`, signed in as the QA user (the `ORCH_QA_USER` / `QA_USER` login the e2e `signInQa` helper uses; never print it), take the dashboard, the recipe or dish page with costing, an event, inventory, and one AI helper screen; check each image shows no real person's name, phone or email (blur or skip it); if the app cannot be signed into or the data is empty, take none and list the names for the Human's card — docs/images/**
-- [ ] A4: Write the new README — the twelve sections of P0 with A2's counts and A3's images — README.md
-- [ ] A5: Add the license, the contributing note and the security note — LICENSE, CONTRIBUTING.md, SECURITY.md
-- [ ] A6: Tidy the root folder — the moves and removal of P0 with `git mv` / `git rm`, the `.gitignore` additions, the package name — ROUTE_INVENTORY.md, .qa-reports/**, .clone/**, docs/archive/**, .gitignore, package.json
-- [ ] A7: Run every automatic check and paste the outputs under Execution Notes — all `[auto]` items
+- [x] A1: Stop the server test that sometimes fails on main — wait for the usage writes before reading them, in both tests; run `pnpm run test:server` three times — server/test/ai-logistics-extract.test.js, server/test/ai-stock-extract.test.js
+- [x] A2: Count the tests for the README — unit: the `Executed N of N` line of `pnpm run test:ci`; server: the `Tests N passed` line of `pnpm run test:server`; end-to-end: the `Total: N tests` line of `pnpm exec playwright test --list`; paste the three lines under Execution Notes — (no file)
+- [x] A3: Take the screenshots from the running app — in the slot (`node scripts/slot-serve.mjs`), with gstack `/browse`, signed in as the QA user (the `ORCH_QA_USER` / `QA_USER` login the e2e `signInQa` helper uses; never print it), take the dashboard, the recipe or dish page with costing, an event, inventory, and one AI helper screen; check each image shows no real person's name, phone or email (blur or skip it); if the app cannot be signed into or the data is empty, take none and list the names for the Human's card — docs/images/**
+- [x] A4: Write the new README — the twelve sections of P0 with A2's counts and A3's images — README.md
+- [x] A5: Add the license, the contributing note and the security note — LICENSE, CONTRIBUTING.md, SECURITY.md
+- [x] A6: Tidy the root folder — the moves and removal of P0 with `git mv` / `git rm`, the `.gitignore` additions, the package name — ROUTE_INVENTORY.md, .qa-reports/**, .clone/**, docs/archive/**, .gitignore, package.json
+- [x] A7: Run every automatic check and paste the outputs under Execution Notes — all `[auto]` items
 
 ## What happens when
 - The slot's database is empty or holds real customer data: A3 takes no screenshot of that screen; the README keeps the section with the images that are clean, and the third `[human]` card lists the missing ones.
@@ -249,3 +249,28 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
 
 ## Execution Notes
 - Planner 2026-11-25: written from Dandan's requests of 2026-11-25
+- Builder 2026-11-26 (build, round 0):
+- A1: added `await _waitForUsageWritesForTests()` before the `aiUsage` read in both listed tests. `pnpm run test:server` three times in a row, each exit 0:
+  - run 1: `Test Files  149 passed (149)` / `Tests  1983 passed (1983)`
+  - run 2: `Test Files  149 passed (149)` / `Tests  1983 passed (1983)`
+  - run 3: `Test Files  149 passed (149)` / `Tests  1983 passed (1983)`
+- A2: counts used in the README:
+  - unit: `Executed 2789 of 2789` (`TOTAL: 2789 SUCCESS`)
+  - server: `Tests  1983 passed (1983)`
+  - end-to-end: `Total: 157 tests in 137 files`
+- A3: no screenshot taken: this worktree is not a slot, has no running app and no QA login. For the third [human] card, add these under `docs/images/` (1280 px wide, no real name, phone or email): `dashboard.png`, `recipe-costing.png`, `event.png`, `inventory.png`, `ai-menu-draft.png`. The README holds their image lines and captions inside an HTML comment under «Screenshots»: move the lines of each added image out of the comment (no broken image shows meanwhile).
+- A4: plan 736 (100 AI calls) is not in this branch; the README states the sentence as the plan writes it.
+- A4: `pnpm run build:schemas` added to the local-run steps: the server loads `server/generated/schemas` and its `dev:local` script does not build it.
+- A5: GitHub private vulnerability reporting is off for the repository today (`gh api .../private-vulnerability-reporting` → `{"enabled":false}`); SECURITY.md names it «when that button is shown» and the email on the GitHub profile otherwise. No address is written in the repository files.
+- A7: checks on commit 2abdbd94:
+  - `node scripts/orch-state.mjs prepare --missing server/generated/schemas --script build:schemas --pm pnpm` → exit 0
+  - `pnpm run build` → exit 0; `pnpm run lint` → exit 0 (0 errors, 69 warnings)
+  - `pnpm run test:ci` → exit 0, `TOTAL: 2789 SUCCESS`. An earlier counting run (before the commit) exited 1 with `1 FAILED, 2788 SUCCESS`; the failing test name was not captured; this plan changes no file under `src/`; the rerun passed.
+  - `pnpm run test:server` → exit 0, `Tests  1983 passed (1983)`
+  - `kit-manifest-check.mjs` (main copy with `--root .`, and the local copy) → exit 0, `452 classified, 0 unclassified`
+  - scope: `scopeCheck` of the kit copy against origin/orch/repo-polish → `SCOPE: ok — 15 changed file(s) inside the scope`; `scope-check.mjs --diff=…` (local) → `SCOPE: ok`
+  - `kit-checks.mjs --base origin/orch/repo-polish` → `KIT_CHECKS: ok (6 checks)`; `override-check` → ok; `lint:icons`, `lint:no-native-select`, `plan-ledger-check` → exit 0
+  - `breadcrumbs-check` → `BREADCRUMBS: clean`; `ci-scope-check --checkout-branch` → exit 0 (`skipped (branch "" is not feat/NNN-*)`)
+  - `scope-check --arch` → `ARCH: ok INV-none`; `--reuse` → `REUSE: ok none`; `log-query` → `SKIP: no database configured`
+  - `git ls-files .clone ROUTE_INVENTORY.md .qa-reports` → empty; the four new files are listed; `git check-ignore -q docs/images/dashboard.png` → 1; the root screenshot name → 0
+  - README grep for the workflow terms → `0`; `grep -c "All rights reserved" LICENSE` → `1`; `grep -c '"name": "foodvibe"' package.json` → `1`
