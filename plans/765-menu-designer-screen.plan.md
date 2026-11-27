@@ -188,6 +188,9 @@ src/app/core/utils/breadcrumbs.md
 docs/brain/component-families.md
 docs/brain/inventory.md
 docs/menu-design/menu-design-map.md
+src/app/core/services/trash.service.ts
+src/app/core/services/trash.service.spec.ts
+shared/schemas/menu-design/menu-doc.ts
 ```
 
 ## Read Scope
