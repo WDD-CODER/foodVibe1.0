@@ -344,6 +344,7 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 - Use: `src/app/core/utils/` (one file per topic, each with a spec); money / quantity / percent rounding and
   formatting only from `src/app/core/engine/rounding.ts`; Hebrew-insensitive matching: `normalizeHebrew` in
   `src/app/core/utils/recipe-match.util.ts`. Import through `@utils/*` (and pipes through `@pipes/*`).
+- a run of the assistant as labelled lines (plan 752): `verdictOf`, `stepRows`, `STEP_FIELDS`, `outcomeTone` in `src/app/pages/frontdesk/assistant/assistant-run-view.util.ts`.
 - the state of a table at a moment (plan 671): `tableStatesAt`, `stripTimes` in `src/app/core/utils/table-state.util.ts` (`table-state.util.ts`) — free, reserved soon, seated, over time, late, not active; first match wins; any screen that shows a table's state reads this, never a second copy.
 - the unit mapping after a pick (plan 653): `unitForSpoken` in `src/app/pages/inventory/components/stock-count/spoken-unit.ts` — the spoken unit mapped to
   the picked product's own units, same table as the server `resolveUnit`; none fits → flagged, not counted.
@@ -382,6 +383,7 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 - When: any call to the server API; never a raw `fetch` or a hand-built `/api/v1` URL.
 - `WaitlistDataService` (`src/app/core/services/waitlist-data.service.ts`): the five calls of the waiting list (`list`, `add`, `notify`, `seat`, `left`), each returning its result or the server's error code as a code (plan 673).
 - `ConversationDataService` (`src/app/core/services/conversation-data.service.ts`) and `InboxBadgeService` (`src/app/core/services/inbox-badge.service.ts`): the conversations routes (list, open a thread, reply, template, take over, hand back, close; codes returned as codes) and the one pending-conversations number (plan 677); `suggest` and `fixAnswer` call `/api/v1/ai/frontdesk/suggest` and `/fix` (plan 682).
+- `AssistantRunDataService` (`src/app/core/services/assistant-run-data.service.ts`) and `API.assistantRuns`: the paged, filtered list of the assistant's runs and one run, read only (plan 752).
 - `SimulatorService` (`src/app/pages/frontdesk/simulator/services/simulator.service.ts`) and `API.sim`: the simulator's guest sends, button taps, run-a-job-now and clear-test-data calls, codes returned as codes, no phone, name or text in a log (plan 678).
 - `PlatformAdminService.updatePlatform` (`src/app/core/services/platform-admin.service.ts`): one PUT of a business's modules, monthly AI cap and private mode with a reason, then reloads the table (plan 620).
 - `PlatformAdminService.eraseLearnedData(businessId, reason)` (same file): one POST that erases what the platform learned from a business, returns the counts; `UserAdminService.deleteUser(userId, eraseLearned)` adds `?eraseLearned=true` (plan 639).
@@ -466,6 +468,7 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
   `invoice-alias.schema.ts`, `supplier-profile.schema.ts`, `ai-draft.schema.ts`, `stored-file.schema.ts`,
   `business-access.schema.ts`, `diagnosis.schema.ts`, `stock-count.schema.ts`), each one `z.strictObject` registered in
   `SCHEMA_BY_COLLECTION` in `shared/schemas/entities/index.ts`.
+- `assistantRunSchema` in `shared/schemas/entities/assistant-run.schema.ts` (plan 752, family assistant-runs): one run of the front-desk assistant.
 - When: a new stored collection needs a shape.
 - Known copies: none.
 
@@ -1027,8 +1030,8 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 ### assistant-runs — the step-by-step record of an assistant run and its page (plan 752)
 
 - Status: stable — plan 752
-- Use: the recorder `server/services/frontdesk-runs.js` (`startRun` → `time`, `timeSync`, `step`, `set`, `end`, `discard`, `finish`; `NO_RUN`; the reads `listRuns`, `loadRun`, `markAdminView`), written by `runTurn` (`server/services/frontdesk-turn.js`); the route `server/routes/assistant-runs.js` at `/api/v1/assistant-runs`; the shape `assistantRunSchema` (`shared/schemas/entities/assistant-run.schema.ts`). Browser: `AssistantRunDataService`, `AssistantPage` (`src/app/pages/frontdesk/assistant/`), `app-run-detail`, `assistant-run-view.util.ts` (`verdictOf`, `stepRows`, `STEP_FIELDS`, `outcomeTone`).
+- Use: the recorder `server/services/frontdesk-runs.js` (`startRun` → `time`, `timeSync`, `step`, `set`, `end`, `discard`, `finish`; `NO_RUN`; the reads `listRuns`, `loadRun`, `markAdminView`), written by `runTurn` (`server/services/frontdesk-turn.js`); the route `server/routes/assistant-runs.js` at `/api/v1/assistant-runs`; the shape `assistantRunSchema` (`shared/schemas/entities/assistant-run.schema.ts`). Browser: `AssistantRunDataService`, `AssistantPage` (`src/app/pages/frontdesk/assistant/`), `app-run-detail` (`run-detail.component.ts`), `assistant-run-view.util.ts` (`verdictOf`, `stepRows`, `STEP_FIELDS`, `outcomeTone`).
 - Pieces: startRun, NO_RUN, listRuns, loadRun, markAdminView, assistantRunSchema, AssistantRunDataService, AssistantPage, RunDetailComponent, verdictOf, stepRows, STEP_FIELDS, outcomeTone.
-- Classes: page-local `.asr-*` only (the open-in-place step row is `.asr-step` with `.asr-step-panel`).
+- Classes: page-local `.asr-*` only. The step row that opens and closes is a `button.asr-step` with `aria-expanded` and `aria-controls` over `.asr-step-panel`.
 - When: any new fact about a run is a field of an existing step, registered in `STEP_FIELDS`; a second recorder, a second runs list or a log line with run content is never added.
 - Known copies: none.

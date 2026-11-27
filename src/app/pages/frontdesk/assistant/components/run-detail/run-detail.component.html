@@ -9,7 +9,7 @@
     <span>{{ 'back' | translatePipe }}</span>
   </a>
   <p class="asr-verdict" role="status" data-testid="asr-verdict">{{ verdict_() }}</p>
-  <p class="asr-facts">
+  <p class="c-chip-group asr-facts">
     <span class="c-chip c-chip--tag c-chip--sm" [class]="head_().tone">{{
       'asr_outcome_' + run().outcome | translatePipe
     }}</span>

@@ -32,21 +32,21 @@
 
   <div class="asr-body" role="tabpanel">
     <aside class="asr-list" data-testid="asr-list">
-      <div class="asr-controls">
-        <div class="c-chip-group asr-filters" role="radiogroup">
-          @for (f of filters; track f) {
-          <label class="c-chip c-chip--toggle">
-            <input
-              type="radio"
-              name="asr-filter"
-              [checked]="filter_() === f"
-              [attr.data-testid]="'asr-filter-' + f"
-              (change)="setFilter(f)"
-            />
-            <span>{{ 'asr_filter_' + f | translatePipe }}</span>
-          </label>
-          }
-        </div>
+      <div class="c-chip-group" role="radiogroup">
+        @for (f of filters; track f) {
+        <label class="c-chip c-chip--toggle">
+          <input
+            type="radio"
+            name="asr-filter"
+            [checked]="filter_() === f"
+            [attr.data-testid]="'asr-filter-' + f"
+            (change)="setFilter(f)"
+          />
+          <span>{{ 'asr_filter_' + f | translatePipe }}</span>
+        </label>
+        }
+      </div>
+      <div>
         <label class="c-chip c-chip--toggle">
           <input type="checkbox" [checked]="testScope_()" data-testid="asr-scope-test" (change)="toggleTest()" />
           <span>{{ 'asr_scope_test' | translatePipe }}</span>
