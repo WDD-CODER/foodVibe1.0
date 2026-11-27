@@ -723,16 +723,6 @@ Every batch's plans depend only on plans in earlier batches, so the batches are 
 - [ ] G2: The leaf's box opens in the same place every time, like the triangle's — src/app/shared/nutrition-badge/nutrition-badge.component.ts
 - [ ] G3: Run every automatic check and paste the outputs under Execution Notes — plans/763-stock-count-narrow-breakpoint-and-leaf-box-placement.plan.md
 
-### Plan 765 — The menu designer screen: build, preview, save and manage designs by hand
-- [ ] A1: Let the designs data service duplicate designs, load before a page and name the default design — extends what plan 764 created (model + MenuDesignDataService): resolver, duplicateDesign, defaultDesign_ per C-SETTINGS; setMenuDesignDefault on the business service — src/app/core/models/menu-design.model.ts, src/app/core/services/menu-design-data.service.ts (+ spec), src/app/core/services/business.service.ts (+ spec)
-- [ ] A2: Map the designer form to a design and back, and build one font link for the curated fonts — designFromForm, formFromDesign, menuFontsHref; specs as in Done-when — src/app/core/utils/menu-design-form.util.ts, src/app/core/utils/menu-fonts-link.util.ts (+ specs)
-- [ ] A3: Show any design on the sample menu in a safe frame that scales to its box — sandboxed srcdoc iframe of renderMenuDocument, ResizeObserver scale, no element recreate on change — src/app/shared/menu-preview/**
-- [ ] A4: Build the self-contained designer with every look control and the live preview — the seven groups, uploads through CloudinaryService with downscaleImage, chip groups, counter, color fields with hex check; never saves — src/app/shared/menu-designer/**
-- [ ] A5: Add the designs list, the base-template popup and the edit page, reached from the menu library — routes (append), list page (cards, row menu, empty and error states), popup, edit page with save, cancel and leave guard, the header button with the module check, dictionary keys, icons — src/app/pages/menu-design/**, src/app/pages/menu-library/components/menu-library-list/*, src/app/app.routes.ts, public/assets/data/dictionary.json, src/app/app.config.ts
-- [ ] A6: Make sure the preview frame is allowed in the served build — build, serve through the slot's server (port 300N), open the editor; if the console shows a frame-src refusal, change only `frameSrc: ["'none'"]` to `frameSrc: ["'self'"]` in server/app.js and record the line in Execution Notes; else record "no change" — server/app.js
-- [ ] A7: Prove the designer in the running app with four short UI tests — the four specs as in Done-when, each restoring the business's modules — e2e/ui/765-1.spec.ts, e2e/ui/765-2.spec.ts, e2e/ui/765-3.spec.ts, e2e/ui/765-4.spec.ts
-- [ ] A8: Record the new pieces in the folder maps and the family registry — breadcrumbs for pages, shared, services, models and utils; menu-designer and menu-preview as new families; inventory lines — src/app/pages/breadcrumbs.md, src/app/shared/breadcrumbs.md, src/app/core/services/breadcrumbs.md, src/app/core/models/breadcrumbs.md, src/app/core/utils/breadcrumbs.md, docs/brain/component-families.md, docs/brain/inventory.md
-
 ### Plan 766 — AI in the designer: three variants from a picture, link or description, then refine in words
 - [ ] A1: Describe what the browser may send for a style reference or a refine request — the two request schemas and the image limits, exported from the schemas index; build:schemas — shared/schemas/ai-menu-design.schema.ts, shared/schemas/index.ts
 - [ ] A2: Write the instructions for the AI and the cleaning that keeps only valid designs — menuDesignPrompt, cleanDesignVariant, cleanRefinedDesign (no pictures from the AI, fixed texts kept, base fallback) with their own tests — server/utils/menu-design-ai.js, server/test/menu-design-ai-clean.test.js
@@ -743,13 +733,13 @@ Every batch's plans depend only on plans in earlier batches, so the batches are 
 - [ ] A7: Record the new route, helpers and panel in the folder maps and the family registry — server/breadcrumbs.md, src/app/shared/breadcrumbs.md, src/app/core/services/breadcrumbs.md, docs/brain/component-families.md, docs/brain/inventory.md
 
 ### Plan 767 — PDF proof on the real Render server: headless browser, memory and start-up measured
-- [ ] A1: Add the small Chromium and its driver to the server without any install step — puppeteer-core and @sparticuz/chromium pinned exact — server/package.json, server/pnpm-lock.yaml
-- [ ] A2: Build the one render service that turns menu HTML into a PDF and a page into a picture — renderPdf, screenshotUrl, one browser, idle close, queue of 3, navigation allow-list, private-address guard, launch-failure log — server/services/menu-pdf.js (helpers in server/services/menu-pdf/ if it grows past ~250 lines)
-- [ ] A3: Prove the guards and the queue with the browser faked — server/test/menu-pdf.test.js
-- [ ] A4: Render the sample menu for real when a browser exists, and skip cleanly when not — server/test/menu-pdf-real.test.js
-- [ ] A5: Give the platform admin one address that renders the sample menu and reports time and memory — pdf-smoke route, mount — server/routes/menu-design.js, server/app.js, server/test/menu-design-route.test.js
-- [ ] A6: Keep two fonts on the server to compare against loading them from Google — fetch script, woff2 files — server/scripts/menu-fonts-fetch.js, server/assets/menu-fonts/**
-- [ ] A7: Register the new render service so later plans reuse it — family `menu-pdf` entry, inventory line, server folder map, render.yaml comment — docs/brain/component-families.md, docs/brain/inventory.md, server/breadcrumbs.md, render.yaml
+- [x] A1: Add the small Chromium and its driver to the server without any install step — puppeteer-core and @sparticuz/chromium pinned exact — server/package.json, server/pnpm-lock.yaml
+- [x] A2: Build the one render service that turns menu HTML into a PDF and a page into a picture — renderPdf, screenshotUrl, one browser, idle close, queue of 3, navigation allow-list, private-address guard, launch-failure log — server/services/menu-pdf.js (helpers in server/services/menu-pdf/ if it grows past ~250 lines)
+- [x] A3: Prove the guards and the queue with the browser faked — server/test/menu-pdf.test.js
+- [x] A4: Render the sample menu for real when a browser exists, and skip cleanly when not — server/test/menu-pdf-real.test.js
+- [x] A5: Give the platform admin one address that renders the sample menu and reports time and memory — pdf-smoke route, mount — server/routes/menu-design.js, server/app.js, server/test/menu-design-route.test.js
+- [x] A6: Keep two fonts on the server to compare against loading them from Google — fetch script, woff2 files — server/scripts/menu-fonts-fetch.js, server/assets/menu-fonts/**
+- [x] A7: Register the new render service so later plans reuse it — family `menu-pdf` entry, inventory line, server folder map, render.yaml comment — docs/brain/component-families.md, docs/brain/inventory.md, server/breadcrumbs.md, render.yaml
 - [ ] A8: Measure on a real free Render instance and write the numbers and the decision — the human step in Done-when; the builder writes the decision line template in Execution Notes — this plan file
 
 ### Plan 768 — Customer menu PDF export: one complete A4 file, powered-by line, latest export kept
