@@ -1,6 +1,6 @@
 import { RUN_REASONS, RUN_STEP_KEYS } from '@models/assistant-run.model'
 import type { AssistantEngine } from '@models/assistant-run.model'
-import { FLOW_STEPS, flowReadsKey, flowWhatKey } from './assistant-flow.data'
+import { FLOW_STEPS, flowWhatKey } from './assistant-flow.data'
 
 /** A record so that a new engine number cannot be left out of this list without a compile error. */
 const ENGINE: Record<keyof AssistantEngine, true> = {
@@ -42,8 +42,7 @@ describe('FLOW_STEPS (plan 756)', () => {
     }
   })
 
-  it('builds the dictionary keys of a step', () => {
+  it('builds the dictionary key of a step', () => {
     expect(flowWhatKey('ai')).toBe('asr_flow_what_ai')
-    expect(flowReadsKey('send')).toBe('asr_flow_reads_send')
   })
 })

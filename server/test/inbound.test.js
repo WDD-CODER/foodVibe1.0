@@ -89,7 +89,7 @@ describe('handleInbound', () => {
     expect(turn).toHaveBeenCalledTimes(1)
     const options = turn.mock.calls[0][2]
     expect(options.inbound).toEqual({
-      at: NOW + 2000, waitedMs: expect.any(Number), quietMs: 2000, capped: false, arrivedAt: expect.any(Number),
+      at: NOW + 2000, waitedMs: expect.any(Number), quietMs: 3000, capped: false, arrivedAt: expect.any(Number),
     })
     expect(options.inbound.waitedMs).toBeGreaterThanOrEqual(0)
   })
@@ -154,7 +154,7 @@ describe('handleInbound', () => {
 })
 
 describe('plan 753: what a message does next', () => {
-  const { nextStep, COALESCE_MS } = require('../services/inbound')
+  const { nextStep } = require('../services/inbound')
   const at = 90000
   const now = 100000
   const bot = (over = {}) => ({ status: 'bot', lastInboundAt: at, ...over })
@@ -162,7 +162,6 @@ describe('plan 753: what a message does next', () => {
   const step = (conversation, over = {}) => nextStep({ conversation, at, now, waited: false, ...over })
 
   it('a conversation a person holds, or none, stops', () => {
-    expect(COALESCE_MS).toBe(6000)
     expect(step(bot({ status: 'human' }))).toEqual({ do: 'stop', why: 'not_bot' })
     expect(step(null)).toEqual({ do: 'stop', why: 'not_bot' })
   })
@@ -174,13 +173,13 @@ describe('plan 753: what a message does next', () => {
   })
 
   it('a free conversation waits, then runs unless a newer message came', () => {
-    expect(step(bot())).toEqual({ do: 'wait', ms: 2000, capped: false })
+    expect(step(bot())).toEqual({ do: 'wait', ms: 3000, capped: false })
     expect(step(bot({ lastInboundAt: at + 1 }), { waited: true })).toEqual({ do: 'leave', why: 'newer' })
     expect(step(bot(), { waited: true })).toEqual({ do: 'run' })
   })
 
   it('a follow-up waits what is left of the quiet wait', () => {
-    expect(step(bot(), { holder: true, at: now - 2000 })).toEqual({ do: 'wait', ms: 0, capped: false })
+    expect(step(bot(), { holder: true, at: now - 3000 })).toEqual({ do: 'wait', ms: 0, capped: false })
     expect(step(bot(), { holder: true, at: now - 9000 })).toEqual({ do: 'wait', ms: 0, capped: false })
   })
 
@@ -216,32 +215,32 @@ describe('plan 753: what a message does next', () => {
 })
 
 describe('plan 754: the quiet wait', () => {
-  const { nextStep, burstAtOf, QUIET_MS, MAX_WAIT_MS, COALESCE_MS } = require('../services/inbound')
+  const { nextStep, burstAtOf, QUIET_MS, MAX_WAIT_MS } = require('../services/inbound')
   const now = 100000
   const free = { status: 'bot', lastInboundAt: 50000 }
   const step = over => nextStep({ conversation: free, at: 50000, now, waited: false, ...over })
   const waits = (ms, capped) => ({ do: 'wait', ms, capped })
 
-  it('the numbers: 2 quiet seconds, 6 at most, the old name kept', () => {
-    expect([QUIET_MS, MAX_WAIT_MS, COALESCE_MS]).toEqual([2000, 6000, 6000])
+  it('the default numbers: 3 quiet seconds, 6 at most', () => {
+    expect([QUIET_MS, MAX_WAIT_MS]).toEqual([3000, 6000])
   })
 
-  it('nextStep waits 2 quiet seconds, and at most 6 from the first message of the burst', () => {
-    expect(step()).toEqual(waits(2000, false))
-    expect(step({ burstAt: 50000 })).toEqual(waits(2000, false))
-    expect(step({ burstAt: 46000 })).toEqual(waits(2000, false))
+  it('nextStep waits 3 quiet seconds, and at most 6 from the first message of the burst', () => {
+    expect(step()).toEqual(waits(3000, false))
+    expect(step({ burstAt: 50000 })).toEqual(waits(3000, false))
+    expect(step({ burstAt: 47000 })).toEqual(waits(3000, false))
     expect(step({ burstAt: 45500 })).toEqual(waits(1500, true))
     expect(step({ burstAt: 44500 })).toEqual(waits(500, true))
     expect(step({ burstAt: 44000 })).toEqual(waits(0, true))
     expect(step({ burstAt: 10000 })).toEqual(waits(0, true))
-    expect(step({ burstAt: 60000 })).toEqual(waits(2000, false))
+    expect(step({ burstAt: 60000 })).toEqual(waits(3000, false))
   })
 
-  it('nextStep: a follow-up waits what is left of 2 seconds since the newest guest message', () => {
-    expect(step({ holder: true, at: now - 500 })).toEqual(waits(1500, false))
-    expect(step({ holder: true, at: now - 2000 })).toEqual(waits(0, false))
+  it('nextStep: a follow-up waits what is left of 3 seconds since the newest guest message', () => {
+    expect(step({ holder: true, at: now - 500 })).toEqual(waits(2500, false))
+    expect(step({ holder: true, at: now - 3000 })).toEqual(waits(0, false))
     expect(step({ holder: true, at: now - 9000 })).toEqual(waits(0, false))
-    expect(step({ holder: true, at: now + 5000 })).toEqual(waits(2000, false))
+    expect(step({ holder: true, at: now + 5000 })).toEqual(waits(3000, false))
   })
 
   it('burstAtOf walks the guest messages until anything else', () => {
@@ -269,18 +268,18 @@ describe('plan 754: the quiet wait', () => {
     await r.settled
   }
 
-  it('one message: one wait of 2 seconds, then the turn is told the numbers', async () => {
+  it('one message: one wait of 3 seconds, then the turn is told the numbers', async () => {
     const { w, turn } = held()
     const r = await inbound({ at: NOW })
     await waiting(w, 1)
     await new Promise(resolve => setTimeout(resolve, 20))
-    expect(w.calls).toEqual([2000])
+    expect(w.calls).toEqual([3000])
     expect(turn).not.toHaveBeenCalled()
     w.release()
     await r.settled
     expect(turn).toHaveBeenCalledTimes(1)
     expect(turn.mock.calls[0][2].inbound).toMatchObject({
-      at: NOW, quietMs: 2000, capped: false, waitedMs: expect.any(Number), arrivedAt: expect.any(Number),
+      at: NOW, quietMs: 3000, capped: false, waitedMs: expect.any(Number), arrivedAt: expect.any(Number),
     })
   })
 
@@ -292,7 +291,7 @@ describe('plan 754: the quiet wait', () => {
       sent.push(await inbound({ at: NOW + offset }))
       await waiting(w, sent.length)
     }
-    expect([...w.calls].sort((a, b) => a - b)).toEqual([500, 1500, 2000, 2000, 2000])
+    expect([...w.calls].sort((a, b) => a - b)).toEqual([500, 1500, 3000, 3000, 3000])
     w.release()
     await Promise.all(sent.map(r => r.settled))
     expect(turn).toHaveBeenCalledTimes(1)
@@ -305,7 +304,7 @@ describe('plan 754: the quiet wait', () => {
     const { w, turn } = held()
     await sendReleased(w, 1, NOW)
     await sendReleased(w, 2, NOW + 7000)
-    expect(w.calls).toEqual([2000, 2000])
+    expect(w.calls).toEqual([3000, 3000])
     expect(turn).toHaveBeenCalledTimes(2)
   })
 
@@ -318,7 +317,7 @@ describe('plan 754: the quiet wait', () => {
       at: NOW + 1000, providerMessageId: 'out-1', status: 'delivered', test: true,
     })
     await sendReleased(w, 2, NOW + 5000)
-    expect(w.calls).toEqual([2000, 2000])
+    expect(w.calls).toEqual([3000, 3000])
   })
 })
 

@@ -5,11 +5,12 @@
  * business always comes from the signed token; every query lives in `services/frontdesk-runs.js`. A real guest's words
  * reach the acting platform admin only by opening the run, and that leaves a trace on it. Logs carry ids, counts and
  * enums only — never text from a run. Plan 756 adds `GET /setup`: how the assistant is set up
- * (`services/assistant-setup.js`), for the same readers.
+ * (`services/assistant-setup.js`), for the same readers. Plan 760 adds the one write, `PUT /engine-settings`: the
+ * platform admin saves one engine number (`services/assistant-engine-settings.js`).
  */
 const { Router } = require('express');
 const mongoose = require('mongoose');
-const { verifyToken, isPlatformAdmin } = require('../middleware/auth');
+const { verifyToken, isPlatformAdmin, requirePlatformAdmin } = require('../middleware/auth');
 const { requireModule } = require('../middleware/require-module');
 const { dataWriteLimiter } = require('../middleware/write-limit');
 const { scopeFilter } = require('../utils/business-scope');
@@ -18,6 +19,8 @@ const { logger } = require('../logger');
 const { listRuns, loadRun, markAdminView } = require('../services/frontdesk-runs');
 const { TURN_SYSTEM_PROMPT, TABLE_SYSTEM_PROMPT } = require('../services/frontdesk-prompt');
 const { assistantSetup } = require('../services/assistant-setup');
+const { engineSettings, engineRanges, saveEngineSetting } = require('../services/assistant-engine-settings');
+const { engineSettingSaveSchema } = require('../generated/schemas/front-desk/engine-settings.schema');
 
 const router = Router();
 const db = () => mongoose.connection.db;
@@ -82,6 +85,23 @@ router.get('/setup', async (req, res) => {
     return res.json(out);
   } catch (err) {
     return failed(req, res, 'assistant_runs.setup.failed', err);
+  }
+});
+
+// Plan 760: the numbers are platform-wide, so the platform admin only; no business data is read or written.
+router.put('/engine-settings', requirePlatformAdmin, async (req, res) => {
+  const body = engineSettingSaveSchema.safeParse(req.body);
+  if (!body.success) return badInput(res);
+  try {
+    const saved = await saveEngineSetting(db(), body.data, { userId: req.user.userId, log: logOf(req) });
+    if (!saved.ok) {
+      const { min, max } = saved;
+      return res.status(400).json({ error: 'OUT_OF_RANGE', field: body.data.field, min, max });
+    }
+    const engine = await engineSettings(db());
+    return res.json({ engine, ranges: engineRanges(engine) });
+  } catch (err) {
+    return failed(req, res, 'assistant_engine.save.failed', err);
   }
 });
 

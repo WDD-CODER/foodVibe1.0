@@ -9,8 +9,10 @@ import { ModuleService } from '@services/module.service'
 import { PermissionService } from '@services/permission.service'
 import { TranslationService } from '@services/translation.service'
 import { UserService } from '@services/user.service'
+import { UserMsgService } from '@services/user-msg.service'
 import { RUN_STEP_KEYS } from '@models/assistant-run.model'
 import type { AssistantRunRow, AssistantRunView } from '@models/assistant-run.model'
+import { AssistantEngineService } from './assistant-engine.service'
 import { AssistantPage } from './assistant.page'
 
 const DICT: Record<string, string> = {
@@ -93,6 +95,8 @@ describe('AssistantPage (plan 752)', () => {
         { provide: PermissionService, useValue: { isOwner_: owner } },
         { provide: UserService, useValue: { isPlatformAdmin_: admin, user_: signedIn } },
         { provide: ModuleService, useValue: { has: () => true } },
+        { provide: AssistantEngineService, useValue: {} },
+        { provide: UserMsgService, useValue: {} },
         { provide: TranslationService, useValue: { translate: (k: string) => DICT[k] ?? k } }
       ]
     }).compileComponents()

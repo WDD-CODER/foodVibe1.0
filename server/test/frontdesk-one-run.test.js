@@ -174,7 +174,7 @@ describe('one run per conversation', () => {
     await expectNoRun();
   });
 
-  it('plan 754: the follow-up waits what is left of 2 seconds', async () => {
+  it('plan 754: the follow-up waits what is left of 3 seconds', async () => {
     const calls = [];
     setWaitForTest(async ms => { calls.push(ms); });
     const held = holdCall();
@@ -185,9 +185,9 @@ describe('one run per conversation', () => {
     held.answer({ reply: 'A1', intent: 'smalltalk' });
     await m1.settled;
     expect(calls).toHaveLength(2);
-    expect(calls[0]).toBe(2000);
+    expect(calls[0]).toBe(3000);
     expect(calls[1]).toBeGreaterThanOrEqual(0);
-    expect(calls[1]).toBeLessThanOrEqual(2000);
+    expect(calls[1]).toBeLessThanOrEqual(3000);
     const { next } = await firstAndFollowUp();
     expect(stepOf(next, 'inbound').out).toMatchObject({ via: 'follow_up', quietMs: calls[1], capped: false });
     expect(fetchMock).toHaveBeenCalledTimes(2);

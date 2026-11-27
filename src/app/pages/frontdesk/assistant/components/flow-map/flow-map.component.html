@@ -44,10 +44,6 @@
             }
             <dl class="asr-fields">
               <div class="asr-field">
-                <dt>{{ 'asr_flow_reads' | translatePipe }}</dt>
-                <dd>{{ readsKey(step.key) | translatePipe }}</dd>
-              </div>
-              <div class="asr-field">
                 <dt>{{ 'asr_flow_stops' | translatePipe }}</dt>
                 <dd>
                   @if (step.stops.length === 0) {

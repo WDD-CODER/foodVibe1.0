@@ -35,14 +35,14 @@ export const FLOW_STEPS: readonly FlowStep[] = [
     kind: 'script',
     stops: ['quota'],
     facts: ['dailyTurns'],
-    code: 'server/services/frontdesk-turn.js · FRONTDESK_DAILY_TURNS (aiUsage)'
+    code: 'server/services/frontdesk-turn.js · runTurnInner (aiUsage) · server/services/assistant-engine-settings.js · engineSettings'
   },
   {
     key: 'history',
     kind: 'data',
     stops: [],
     facts: ['historyWindow'],
-    code: 'server/services/frontdesk-prompt.js · HISTORY_WINDOW'
+    code: 'server/services/frontdesk-turn.js · runTurnInner (messages) · server/services/assistant-engine-settings.js · engineSettings'
   },
   {
     key: 'precheck',
@@ -120,4 +120,3 @@ export const FLOW_STEPS: readonly FlowStep[] = [
 ]
 
 export const flowWhatKey = (key: RunStepKey): string => 'asr_flow_what_' + key
-export const flowReadsKey = (key: RunStepKey): string => 'asr_flow_reads_' + key

@@ -5,7 +5,7 @@ import { TranslationService } from '@services/translation.service'
 import type { AssistantEngine, RunStepKey } from '@models/assistant-run.model'
 import { reasonKey } from '../../assistant-run-view.util'
 import { engineAmount } from '../../assistant-settings-value.util'
-import { FLOW_STEPS, flowReadsKey, flowWhatKey } from '../../assistant-flow.data'
+import { FLOW_STEPS, flowWhatKey } from '../../assistant-flow.data'
 import type { FlowKind, FlowStep } from '../../assistant-flow.data'
 import { SETTING_ROWS, settingNameKey } from '../../assistant-settings.data'
 import type { SettingRow } from '../../assistant-settings.data'
@@ -40,7 +40,6 @@ export class FlowMapComponent {
   protected readonly kindTone = KIND_TONE
   protected readonly kinds: readonly FlowKind[] = ['script', 'data', 'ai']
   protected readonly whatKey = flowWhatKey
-  protected readonly readsKey = flowReadsKey
   protected readonly reasonKey = reasonKey
 
   /** The settings that affect each step, built once from the fixed list. */
@@ -67,12 +66,12 @@ export class FlowMapComponent {
   }
 
   /** One "current value" line of a step, or `null` while the engine's numbers are not here. */
-  protected engineLine(fact: FlowStep['facts'][number]): { key: string; n: number } | null {
+  protected engineLine(fact: FlowStep['facts'][number]): { key: string; n: number | string } | null {
     const engine = this.engine()
     return engine ? { key: `asr_engine_${fact}`, n: engineAmount(fact, engine) } : null
   }
 
-  protected engineText(line: { key: string; n: number }): string {
+  protected engineText(line: { key: string; n: number | string }): string {
     return this.translation.translate(line.key).replace('{n}', String(line.n))
   }
 }
