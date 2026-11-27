@@ -131,7 +131,7 @@ describe('BusinessSettingsTabComponent', () => {
   it('101 in the VAT rate shows the range error and disables save (plan 723)', () => {
     type('vatRatePct', '101')
     expect(el().querySelector('[data-testid="business-error-vatRatePct"]')?.textContent).toContain('vat_rate_range')
-    expect(saveBtn().disabled).toBeTrue()
+    expect(saveBtn().getAttribute('aria-disabled')).toBe('true')
   })
 
   it('changing only the dealer type enables save, sends all six and counts as unsaved (plan 723)', async () => {
@@ -140,6 +140,8 @@ describe('BusinessSettingsTabComponent', () => {
     cmp.form.controls.dealerType.setValue('patur')
     fixture.detectChanges()
     expect(cmp.hasRealChanges()).toBeTrue()
+    // Known gap (plan 759 notes): passes trivially. The button is never natively disabled, and saveWhy_ skips
+    // dealerType and monthTargets, so aria-disabled stays set here until the component is fixed.
     expect(saveBtn().disabled).toBeFalse()
     await cmp.save()
     expect(updateSettings).toHaveBeenCalledWith({
@@ -176,6 +178,8 @@ describe('BusinessSettingsTabComponent', () => {
     box.dispatchEvent(new Event('input'))
     fixture.detectChanges()
     expect(cmp.hasRealChanges()).toBeTrue()
+    // Known gap (plan 759 notes): passes trivially. The button is never natively disabled, and saveWhy_ skips
+    // dealerType and monthTargets, so aria-disabled stays set here until the component is fixed.
     expect(saveBtn().disabled).toBeFalse()
     await cmp.save()
     expect(updateSettings).toHaveBeenCalledWith(
@@ -188,7 +192,13 @@ describe('BusinessSettingsTabComponent', () => {
     box.value = '101'
     box.dispatchEvent(new Event('input'))
     fixture.detectChanges()
-    expect(saveBtn().disabled).toBeTrue()
+    expect(fixture.componentInstance.form.controls.monthTargets.controls.foodPct.hasError('max')).toBeTrue()
+    // aria-disabled alone stays set without the range check (nothing to save), so read the reason it gives.
+    saveBtn().click()
+    expect(saveBtn().getAttribute('aria-disabled')).toBe('true')
+    const tipId = saveBtn().getAttribute('aria-describedby')!
+    expect(document.getElementById(tipId)?.textContent).toContain('why_settings_fix_invalid')
+    expect(updateSettings).not.toHaveBeenCalled()
   })
 
   it('a server refusal shows the invalid-settings toast', async () => {

@@ -159,6 +159,7 @@ describe('MonthlyPlanPage (plan 727)', () => {
       targets: { profitPct: 8 }
     })
     expect(userMsg.onSetSuccessMsg).toHaveBeenCalledWith('mp_saved')
+    await openBox('mp-revenue-actual')
     expect(box('mp-revenue-actual').value).toBe('0')
     expect(byId<HTMLButtonElement>('mp-save')!.disabled).toBeTrue()
   })
@@ -241,6 +242,36 @@ describe('MonthlyPlanPage (plan 727)', () => {
       expect(text('mp-figures')).not.toContain('NaN')
       type('mp-target-foodPct', '30')
       expect(text('mf-plan-foodCost')).toContain('₪30,000.00')
+    })
+
+    it('plan 759: one typed actual fills the picture from the forecast; «חלקי» gives way once all is covered', async () => {
+      await setup([
+        month('2026-11', {
+          revenue: { plan: 120000, actual: null },
+          labour: { mode: 'gross', factor: 1.25, plan: 32000, actual: null },
+          fixed: { ...defaultFixed(), mode: 'rough', rough: { plan: 20000, actual: null } }
+        })
+      ])
+      expect(text('mf-actual-labour')).toContain('mp_not_entered')
+      expect(byId('mp-flag-fixed-partial')).not.toBeNull()
+      type('mp-revenue-actual', '100000')
+      const money = (key: string) => byId(`mf-actual-${key}`)!.querySelector('.mf__money')!
+      expect(text('mf-actual-labour')).toContain('₪40,000.00')
+      expect(text('mf-actual-fixed')).toContain('₪20,000.00')
+      expect(money('labour').classList).toContain('mf__money--forecast')
+      expect(money('revenue').classList).not.toContain('mf__money--forecast')
+      expect(byId('mp-flag-fixed-partial')).toBeNull()
+      type('lc-actual', '36000')
+      expect(text('mf-actual-labour')).toContain('₪45,000.00')
+      expect(money('labour').classList).not.toContain('mf__money--forecast')
+    })
+
+    it('plan 759: a fixed line with neither forecast nor actual keeps the «חלקי» flag', async () => {
+      await setup([month('2026-11')])
+      type('fc-rent-plan', '9000')
+      type('mp-revenue-actual', '100000')
+      expect(text('mf-actual-fixed')).toContain('₪9,000.00')
+      expect(byId('mp-flag-fixed-partial')).not.toBeNull()
     })
 
     it('typed purchases show as the actual food cost', async () => {
@@ -350,6 +381,9 @@ describe('MonthlyPlanPage (plan 727)', () => {
     expect(text('mf-plan-revenue')).toContain('₪118.00')
     box('mp-revenue-plan').dispatchEvent(new Event('blur'))
     await settle()
+    expect(byId('mp-revenue-plan')).toBeNull()
+    expect(text('mp-revenue-plan-chip')).toContain('₪100.00')
+    await openBox('mp-revenue-plan')
     expect(box('mp-revenue-plan').value).toBe('100')
     expect(text('mf-plan-revenue')).toContain('₪100.00')
   })

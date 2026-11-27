@@ -62,7 +62,8 @@ describe('MonthFiguresComponent (plan 728)', () => {
     it('a partial cell lists the missing inputs of its own column', () => {
       render(partly, { mp_missing: 'חסר: {{list}}' })
       expect(partial('mf-plan-profit').title).toBe('חסר: mp_missing_plan_labour, mp_missing_plan_fixed')
-      expect(partial('mf-actual-profit').title).toBe('חסר: mp_missing_food, mp_missing_labour')
+      // The actual food cost is filled from the forecast (plan 759), so only labour is missing.
+      expect(partial('mf-actual-profit').title).toBe('חסר: mp_missing_labour')
     })
 
     it('adds the fixed lines hint and describes the tag with the same text', () => {
@@ -80,6 +81,72 @@ describe('MonthFiguresComponent (plan 728)', () => {
       const badge = el().querySelector<HTMLElement>('[data-testid="mf-badge"]')!
       expect(badge.title).toBe('mp_missing')
       expect(el().querySelector('#' + badge.getAttribute('aria-describedby'))!.textContent).toContain('mp_missing')
+    })
+  })
+
+  describe('plan 759: figures from the forecast', () => {
+    const WORDS = { mp_actual_from_forecast: 'מהתחזית — עוד לא הוזן בפועל' }
+    const el = () => fixture.nativeElement as HTMLElement
+    const money = (id: string) => el().querySelector<HTMLElement>(`[data-testid="${id}"] .mf__money`)!
+    const tip = () => document.body.querySelector('.c-tooltip')
+    const onlyRevenue = input({
+      revenue: { plan: 120000, actual: 100000 },
+      labour: { plan: 40000, actual: null, estimate: false },
+      fixed: { plan: 20000, actual: null, entered: 0, lines: 1 }
+    })
+
+    afterEach(() => {
+      fixture.destroy()
+      fixture.nativeElement.remove()
+    })
+
+    it('a filled cell is faded and the shared tooltip says it is from the forecast', () => {
+      render(onlyRevenue, WORDS)
+      document.body.appendChild(fixture.nativeElement)
+      for (const key of ['foodCost', 'labour', 'fixed', 'primeCost', 'profit']) {
+        const cell = money(`mf-actual-${key}`)
+        expect(cell.classList).withContext(key).toContain('mf__money--forecast')
+        expect(cell.tabIndex).withContext(key).toBe(0)
+      }
+      const labour = money('mf-actual-labour')
+      expect(labour.textContent!.trim()).toBe('₪40,000.00')
+      expect(labour.getAttribute('title')).toBeNull()
+      labour.dispatchEvent(new PointerEvent('pointerdown', { pointerType: 'touch', bubbles: true }))
+      labour.click()
+      expect(tip()?.textContent).toContain('מהתחזית')
+      expect(text('mf-actual-profit')).not.toContain('mp_partial')
+    })
+
+    it('a typed actual renders plain, with no hint; so does the forecast column', () => {
+      render(onlyRevenue, WORDS)
+      document.body.appendChild(fixture.nativeElement)
+      for (const id of ['mf-actual-revenue', 'mf-plan-labour', 'mf-plan-profit']) {
+        const cell = money(id)
+        expect(cell.classList).withContext(id).not.toContain('mf__money--forecast')
+        expect(cell.getAttribute('tabindex')).withContext(id).toBeNull()
+        cell.dispatchEvent(new PointerEvent('pointerdown', { pointerType: 'touch', bubbles: true }))
+        cell.click()
+        expect(tip()).withContext(id).toBeNull()
+      }
+    })
+
+    it('the faded figure takes the placeholder colour, also when it is negative', () => {
+      render(
+        input({
+          revenue: { plan: null, actual: 1000 },
+          labour: { plan: 5000, actual: null, estimate: false }
+        })
+      )
+      const host = fixture.nativeElement as HTMLElement
+      document.body.appendChild(host)
+      host.style.setProperty('--color-text-muted-light', 'rgb(1, 2, 3)')
+      host.style.setProperty('--color-text-main', 'rgb(4, 5, 6)')
+      host.style.setProperty('--color-danger', 'rgb(7, 8, 9)')
+      expect(money('mf-actual-labour').classList).toContain('mf__money--forecast')
+      expect(getComputedStyle(money('mf-actual-labour')).color).toBe('rgb(1, 2, 3)')
+      expect(money('mf-actual-profit').classList).toContain('mf__money--neg')
+      expect(getComputedStyle(money('mf-actual-profit')).color).toBe('rgb(1, 2, 3)')
+      expect(getComputedStyle(money('mf-actual-revenue')).color).toBe('rgb(4, 5, 6)')
     })
   })
 

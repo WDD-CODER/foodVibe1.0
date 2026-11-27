@@ -14,6 +14,7 @@ import { ConfirmModalService } from '@services/confirm-modal.service'
 import { UserMsgService } from '@services/user-msg.service'
 import type { MenuDish } from '@models/menu-dish.model'
 import { TEST_LUCIDE_ICONS } from 'src/testing/test-lucide-icons'
+import { TOOLTIP_HOVER_DELAY_MS } from 'src/app/shared/tooltip/tooltip.directive'
 
 @Component({ selector: 'app-menu-dish-dialog', standalone: true, template: '<div data-testid="dialog-stub"></div>' })
 class DialogStub {
@@ -63,7 +64,10 @@ describe('RestaurantMenuPage (plan 725)', () => {
     return { state: 'costed', costPerPortion: d.typedCost ?? 0, missing: [] }
   }
 
-  async function setup(list: MenuDish[], opts: { staff?: boolean } = {}): Promise<void> {
+  async function setup(
+    list: MenuDish[],
+    opts: { staff?: boolean; settings?: Record<string, unknown>; words?: Record<string, string> } = {}
+  ): Promise<void> {
     dishes_ = signal(list)
     loadFailed_ = signal(false)
     data = Object.assign(jasmine.createSpyObj('MenuDishDataService', ['load', 'updateDish']), {
@@ -77,7 +81,7 @@ describe('RestaurantMenuPage (plan 725)', () => {
     })
     confirm = jasmine.createSpyObj('ConfirmModalService', ['open'])
     const translation = jasmine.createSpyObj<TranslationService>('TranslationService', ['translate'])
-    translation.translate.and.callFake((k: string | undefined) => k ?? '')
+    translation.translate.and.callFake((k: string | undefined) => opts.words?.[k ?? ''] ?? k ?? '')
     const cost = {
       costOf,
       netPrice: (d: MenuDish) => (d.priceWithVat == null ? null : d.priceWithVat / 1.18),
@@ -94,7 +98,10 @@ describe('RestaurantMenuPage (plan 725)', () => {
         { provide: MenuDishCostService, useValue: cost },
         { provide: PermissionService, useValue: { isStaff_: signal(!!opts.staff) } },
         { provide: MetadataRegistryService, useValue: { courses_: signal([{ key: 'starter' }, { key: 'main' }]) } },
-        { provide: BusinessService, useValue: { business_: signal(null) } },
+        {
+          provide: BusinessService,
+          useValue: { business_: signal(opts.settings ? { settings: opts.settings } : null) }
+        },
         { provide: TranslationService, useValue: translation },
         { provide: ConfirmModalService, useValue: confirm },
         {
@@ -286,7 +293,72 @@ describe('RestaurantMenuPage (plan 725)', () => {
     expect(clearButton()).toBeNull()
   })
 
-  it('the column titles are the new ones and the VAT note is the hint of the net title', async () => {
+  describe('plan 759: VAT in the shared tooltip', () => {
+    const WORDS = {
+      restaurant_menu_vat_rate: 'מע"מ {{rate}}%',
+      restaurant_menu_vat_none: 'עוסק פטור — אין מע"מ',
+      restaurant_menu_vat_amount: 'מע"מ: {{amount}}'
+    }
+    const tip = () => document.body.querySelector('.c-tooltip')?.textContent?.trim() ?? null
+    const netCell = (i = 0) => rows()[i].querySelector<HTMLElement>('[data-testid="menu-dish-net"]')!
+    const title = () => el().querySelector<HTMLElement>('[data-testid="restaurant-menu-net-title"]')!
+    const hover = (target: HTMLElement) => {
+      target.dispatchEvent(new PointerEvent('pointerenter', { pointerType: 'mouse' }))
+      jasmine.clock().tick(TOOLTIP_HOVER_DELAY_MS)
+    }
+    const leave = (target: HTMLElement) =>
+      target.dispatchEvent(new PointerEvent('pointerleave', { pointerType: 'mouse' }))
+
+    afterEach(() => {
+      jasmine.clock().uninstall()
+      fixture.destroy()
+      document.body.querySelectorAll('.c-tooltip').forEach((n) => n.remove())
+    })
+
+    it('hovering a net price says the dish VAT: the price with VAT minus the price without, money-rounded', async () => {
+      await setup([dish('1', { name: 'א', priceWithVat: 100 }), dish('2', { name: 'ב' })], { words: WORDS })
+      jasmine.clock().install()
+      // 100 − 100 / 1.18 = 15.2542…
+      hover(netCell(0))
+      expect(tip()).toBe('מע"מ: ₪15.25')
+      leave(netCell(0))
+      expect(tip()).toBeNull()
+      hover(netCell(1))
+      expect(tip()).toBe('מע"מ: ₪18.00')
+    })
+
+    it('the column title says the rate in the same tooltip, and no native title carries a VAT note', async () => {
+      await setup([dish('1')], { words: WORDS, settings: { dealerType: 'murshe', vatRatePct: 17 } })
+      jasmine.clock().install()
+      hover(title())
+      expect(tip()).toBe('מע"מ 17%')
+      expect(title().getAttribute('title')).toBeNull()
+      expect(netCell().getAttribute('title')).toBeNull()
+      const titles = Array.from(el().querySelectorAll('[title]')).map((n) => n.getAttribute('title')!)
+      expect(titles.filter((t) => t.includes('מע"מ'))).toEqual([])
+      expect(netCell().tabIndex).toBe(0)
+    })
+
+    it('a dealer without VAT (patur) reads «עוסק פטור — אין מע"מ» on the title and on a dish', async () => {
+      await setup([dish('1')], { words: WORDS, settings: { dealerType: 'patur' } })
+      jasmine.clock().install()
+      hover(title())
+      expect(tip()).toBe('עוסק פטור — אין מע"מ')
+      leave(title())
+      hover(netCell())
+      expect(tip()).toBe('עוסק פטור — אין מע"מ')
+    })
+
+    it('a dish without a price has no VAT hint', async () => {
+      await setup([dish('1', { priceWithVat: undefined })], { words: WORDS })
+      jasmine.clock().install()
+      hover(netCell())
+      expect(tip()).toBeNull()
+      expect(netCell().getAttribute('tabindex')).toBeNull()
+    })
+  })
+
+  it('the column titles are the new ones and the VAT note is not written beside them', async () => {
     await setup([dish('1')])
     const titles = Array.from(el().querySelectorAll('.table-header .c-grid-header-cell'))
     expect(titles.map((t) => t.textContent?.trim())).toEqual([
@@ -299,8 +371,8 @@ describe('RestaurantMenuPage (plan 725)', () => {
       'menu_dish_col_profit_pct',
       ''
     ])
-    expect(titles[3].getAttribute('title')).toBe('restaurant_menu_vat_note')
-    expect(el().textContent).not.toContain('restaurant_menu_vat_note')
+    expect(titles[3].getAttribute('title')).toBeNull()
+    expect(el().textContent).not.toContain('restaurant_menu_vat')
   })
 
   it('net 100 and cost 25: the net is a number only, profit 75 and profit percent 75.0%', async () => {
