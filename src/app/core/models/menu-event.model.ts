@@ -94,6 +94,8 @@ export interface MenuItemSelection {
 export interface MenuSection {
   _id: string
   name: string
+  /** Plan 764: a menu-only section title; `name` is '' while it is set */
+  unlinkedName?: string
   sortOrder: number
   items: MenuItemSelection[]
 }
@@ -191,6 +193,13 @@ export interface MenuEvent {
   createdAt?: number
   updatedAt?: number
   createdFromTemplateId?: string
+  /** Plan 764: the menu design this menu wears; missing = the business default */
+  designId?: string
+  /** Plan 764: printed on the menu */
+  subtitle?: string
+  bottomNote?: string
+  /** Plan 764: the last exported file (server-owned) */
+  latestExport?: { fileId: string; at: number; designId: string }
   /** Resolved equipment + venue context (contextual logistics) */
   logistics?: EventLogistics
   /** Plan 442: set and changed only by the server (`API.events`) */

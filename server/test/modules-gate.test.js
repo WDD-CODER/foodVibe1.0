@@ -75,6 +75,17 @@ describe('events', () => {
   })
 })
 
+describe('menu_design (plan 764)', () => {
+  const url = '/api/v1/data/menuDesigns'
+
+  it('is off for a business with the defaults and on once the module is stored', async () => {
+    expectOff(await request(app).get(url).set(as(ALL)), 'menu_design')
+    expectOff(await request(app).post(url).set(as(ALL)).send({ name: 'x' }), 'menu_design')
+    await setModules('bAll', ['menu_design'])
+    expect((await request(app).get(url).set(as(ALL))).status).toBe(200)
+  })
+})
+
 describe('event_logistics', () => {
   it('PUT /events/:id/logistics needs event_logistics, which needs events', async () => {
     const url = '/api/v1/events/e1/logistics'

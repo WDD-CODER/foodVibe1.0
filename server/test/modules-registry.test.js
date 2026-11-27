@@ -141,7 +141,7 @@ describe('registry probe', () => {
     '/api/v1/files', '/api/v1/access', '/api/v1/stock', '/api/v1/diag', '/api/v1/admin/learning',
     '/api/v1/ai/voice', '/api/v1/ai/logistics', '/api/v1/ai/invoices', '/api/v1/ai/diag', '/api/v1/ai/stock',
   ]
-  const ALL_MODULES = ['events', 'event_logistics', 'frontdesk', 'ai_create', 'consultant_diag']
+  const ALL_MODULES = ['events', 'event_logistics', 'frontdesk', 'ai_create', 'consultant_diag', 'menu_design']
 
   beforeEach(async () => {
     await testDb().collection('businesses').insertOne({
