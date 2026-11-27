@@ -332,14 +332,14 @@ line or file this plan names was removed, renamed or rewritten).
 
 These are the plan's milestones: a Worker does them in order and ticks each one after it is checked.
 
-- [ ] A1: Let the designs data service duplicate designs, load before a page and name the default design — extends what plan 764 created (model + MenuDesignDataService): resolver, duplicateDesign, defaultDesign_ per C-SETTINGS; setMenuDesignDefault on the business service — src/app/core/models/menu-design.model.ts, src/app/core/services/menu-design-data.service.ts (+ spec), src/app/core/services/business.service.ts (+ spec)
-- [ ] A2: Map the designer form to a design and back, and build one font link for the curated fonts — designFromForm, formFromDesign, menuFontsHref; specs as in Done-when — src/app/core/utils/menu-design-form.util.ts, src/app/core/utils/menu-fonts-link.util.ts (+ specs)
-- [ ] A3: Show any design on the sample menu in a safe frame that scales to its box — sandboxed srcdoc iframe of renderMenuDocument, ResizeObserver scale, no element recreate on change — src/app/shared/menu-preview/**
-- [ ] A4: Build the self-contained designer with every look control and the live preview — the seven groups, uploads through CloudinaryService with downscaleImage, chip groups, counter, color fields with hex check; never saves — src/app/shared/menu-designer/**
-- [ ] A5: Add the designs list, the base-template popup and the edit page, reached from the menu library — routes (append), list page (cards, row menu, empty and error states), popup, edit page with save, cancel and leave guard, the header button with the module check, dictionary keys, icons — src/app/pages/menu-design/**, src/app/pages/menu-library/components/menu-library-list/*, src/app/app.routes.ts, public/assets/data/dictionary.json, src/app/app.config.ts
-- [ ] A6: Make sure the preview frame is allowed in the served build — build, serve through the slot's server (port 300N), open the editor; if the console shows a frame-src refusal, change only `frameSrc: ["'none'"]` to `frameSrc: ["'self'"]` in server/app.js and record the line in Execution Notes; else record "no change" — server/app.js
-- [ ] A7: Prove the designer in the running app with four short UI tests — the four specs as in Done-when, each restoring the business's modules — e2e/ui/765-1.spec.ts, e2e/ui/765-2.spec.ts, e2e/ui/765-3.spec.ts, e2e/ui/765-4.spec.ts
-- [ ] A8: Record the new pieces in the folder maps and the family registry — breadcrumbs for pages, shared, services, models and utils; menu-designer and menu-preview as new families; inventory lines — src/app/pages/breadcrumbs.md, src/app/shared/breadcrumbs.md, src/app/core/services/breadcrumbs.md, src/app/core/models/breadcrumbs.md, src/app/core/utils/breadcrumbs.md, docs/brain/component-families.md, docs/brain/inventory.md
+- [x] A1: Let the designs data service duplicate designs, load before a page and name the default design — extends what plan 764 created (model + MenuDesignDataService): resolver, duplicateDesign, defaultDesign_ per C-SETTINGS; setMenuDesignDefault on the business service — src/app/core/models/menu-design.model.ts, src/app/core/services/menu-design-data.service.ts (+ spec), src/app/core/services/business.service.ts (+ spec)
+- [x] A2: Map the designer form to a design and back, and build one font link for the curated fonts — designFromForm, formFromDesign, menuFontsHref; specs as in Done-when — src/app/core/utils/menu-design-form.util.ts, src/app/core/utils/menu-fonts-link.util.ts (+ specs)
+- [x] A3: Show any design on the sample menu in a safe frame that scales to its box — sandboxed srcdoc iframe of renderMenuDocument, ResizeObserver scale, no element recreate on change — src/app/shared/menu-preview/**
+- [x] A4: Build the self-contained designer with every look control and the live preview — the seven groups, uploads through CloudinaryService with downscaleImage, chip groups, counter, color fields with hex check; never saves — src/app/shared/menu-designer/**
+- [x] A5: Add the designs list, the base-template popup and the edit page, reached from the menu library — routes (append), list page (cards, row menu, empty and error states), popup, edit page with save, cancel and leave guard, the header button with the module check, dictionary keys, icons — src/app/pages/menu-design/**, src/app/pages/menu-library/components/menu-library-list/*, src/app/app.routes.ts, public/assets/data/dictionary.json, src/app/app.config.ts
+- [x] A6: Make sure the preview frame is allowed in the served build — build, serve through the slot's server (port 300N), open the editor; if the console shows a frame-src refusal, change only `frameSrc: ["'none'"]` to `frameSrc: ["'self'"]` in server/app.js and record the line in Execution Notes; else record "no change" — server/app.js
+- [x] A7: Prove the designer in the running app with four short UI tests — the four specs as in Done-when, each restoring the business's modules — e2e/ui/765-1.spec.ts, e2e/ui/765-2.spec.ts, e2e/ui/765-3.spec.ts, e2e/ui/765-4.spec.ts
+- [x] A8: Record the new pieces in the folder maps and the family registry — breadcrumbs for pages, shared, services, models and utils; menu-designer and menu-preview as new families; inventory lines — src/app/pages/breadcrumbs.md, src/app/shared/breadcrumbs.md, src/app/core/services/breadcrumbs.md, src/app/core/models/breadcrumbs.md, src/app/core/utils/breadcrumbs.md, docs/brain/component-families.md, docs/brain/inventory.md
 
 ## Technical Considerations
 - Dependencies: plan 764's schema, settings route and `shared/schemas/menu-design/` template (`@schemas/menu-design/*`); `CloudinaryService`; `ModuleService`.
@@ -366,3 +366,38 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
 - behaviour: deleting the default design leaves no default; C-SETTINGS then uses the first live design by `createdAt`.
 - behaviour: on a phone the sample menu sits above the controls, capped at 60% of the screen height.
 - behaviour: a design's copy is named «<name> (עותק)».
+
+### Build evidence (orch-builder, run md-1, 2026-11-27)
+- A1-A5: build -> exit 0; focused specs 117 SUCCESS; `pnpm run test:ci` -> exit 0, `TOTAL: 2881 SUCCESS`;
+  `pnpm run lint` -> 0 errors (69 older warnings); `lint:icons` -> 0 violations; `lint:no-native-select` -> exit 0;
+  `reuse-lint --diff=origin/orch/md-1` -> `REUSE: ok`; `scope-check --arch` -> `ARCH: ok INV-1, INV-3, INV-4, INV-6`;
+  `scope-check --reuse` -> `REUSE: ok`.
+- A5: the header button sits in the page header's leading slot. `page-header.component.scss:190` puts every
+  `[header-actions]` button in one grid cell, so a button there lies under «תפריט חדש» (a spec showed the overlap).
+- A6: no change to `server/app.js`. The real app's policy (`frame-src 'none'`) was read from `/api/v1/health` of the app
+  built by the server test harness, then served to headless Chromium on a page with a `sandbox=""` `srcdoc` frame of
+  `renderMenuDocument(classic)`: the title rendered in the frame (794px page), no console message. Control: an ordinary
+  frame on the same page was refused (`Framing ... violates ... "frame-src 'none'"`). Not opened in a slot's served
+  build: a builder folder has no QA login.
+- A7: the four specs are written, not run (no running app or QA login here). 765-2 asserts «תפריט לדוגמה» as the plan
+  quotes it, but `SAMPLE_MENU_DOC` (plan 764, `shared/schemas/menu-design/menu-doc.ts:58`) is titled «תפריט ערב», so
+  that line fails until one of the two changes.
+- A8: `breadcrumbs-check` -> `BREADCRUMBS: clean`; `reuse-lint --check-registry` -> `registry ok (71 families)`. No
+  `src/app/core/utils/breadcrumbs.md`: the checker allows folder maps only at its six seams (`utils/` is a row of
+  `core/breadcrumbs.md`).
+- Open, outside the scope: the delete `[human]` item says Trash lists a deleted design, but `TrashService`
+  (`src/app/core/services/trash.service.ts:35`) has a fixed list of types without `menuDesigns`.
+- behaviour: the leave question is the shared one of `pendingChangesGuard` (Defaults), with «ביטול» / «יציאה בלי לשמור»,
+  not the words «לצאת בלי לשמור?» / «הישאר» of the `[human]` item — reverse: give the page its own `confirmLeave()` and
+  the confirm popup a cancel label.
+- behaviour: on a phone a design card hides the title font's name so the row stays on one line — reverse: remove the
+  phone rule of `.design-card__font`.
+- behaviour: rename, copy and «make default» are icon buttons with a tooltip beside the pencil and trash — reverse: give
+  them text in the card's row menu.
+- behaviour: staff see edit, rename and delete only on designs they created; one who opens another's design by address
+  sees the editor and the server refuses the save — reverse: gate the page's save button with `PermissionService`.
+- behaviour: an unknown design address shows «העיצוב לא נמצא» with «חזרה» — reverse: redirect to the list.
+- behaviour: a picture over 300KB is re-encoded as JPEG by `downscaleImage`, so a transparent logo gets a white
+  background — reverse: upload logos without shrinking.
+- behaviour: a successful copy, rename or «make default» answers «העיצוב נשמר», a delete «העיצוב נמחק» — reverse: drop
+  the messages.

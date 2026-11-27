@@ -28,7 +28,7 @@ test('765-1: the menu designs button and page exist only with the menu_design mo
 
     await put(DEFAULTS)
     await page.goto('/menu-library')
-    await expect(page.getByRole('button', { name: 'תפריט חדש' })).toBeVisible()
+    await expect(page.locator('app-page-header').getByRole('button', { name: 'תפריט חדש' })).toBeVisible()
     await expect(button).toHaveCount(0)
     await page.goto('/menu-design')
     await expect(page).toHaveURL(/\/dashboard/)
