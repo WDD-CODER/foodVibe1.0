@@ -426,6 +426,8 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
 - Fix round 1 (finding rev-1): the `[ui]` 765-2 line of `## Goals & Success Criteria` now names «תפריט ערב», as the
   Human's answer to ask 765-1 says («the plan's quoted title was a drafting slip»). The spec and the criterion agree;
   this closes the «that line fails» remark of the A7 evidence above. No code changed.
+- Fix round 1 checks: `pnpm run build` -> exit 0; `pnpm run lint` -> exit 0 (0 errors, 69 older warnings);
+  `pnpm run test:ci` -> exit 0, `TOTAL: 2883 SUCCESS`.
 - behaviour: the Trash section is titled «עיצובי תפריט», sits after the events section and has no History button (the type
   keeps no version history) — reverse: move or rename the `menuDesigns` row of `TRASH_SECTIONS`.
 - `pnpm run build` -> exit 0; `pnpm run lint` -> exit 0 (69 older warnings); `pnpm run test:ci` -> exit 0,
