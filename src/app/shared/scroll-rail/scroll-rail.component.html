@@ -27,13 +27,17 @@
   >
     <ng-content></ng-content>
   </div>
-  <span class="sr-more sr-more--prev" [class.is-shown]="morePrev()" aria-hidden="true">
-    <lucide-icon class="sr-icon-rtl" name="chevron-right" [size]="16"></lucide-icon>
-    <lucide-icon class="sr-icon-ltr" name="chevron-left" [size]="16"></lucide-icon>
+  <span class="sr-more sr-more--strong sr-more--prev" [class.is-shown]="morePrev()" aria-hidden="true">
+    <span class="sr-more__badge">
+      <lucide-icon class="sr-icon-rtl" name="chevron-right" [size]="20" [strokeWidth]="3"></lucide-icon>
+      <lucide-icon class="sr-icon-ltr" name="chevron-left" [size]="20" [strokeWidth]="3"></lucide-icon>
+    </span>
   </span>
-  <span class="sr-more sr-more--next" [class.is-shown]="moreNext()" aria-hidden="true">
-    <lucide-icon class="sr-icon-rtl" name="chevron-left" [size]="16"></lucide-icon>
-    <lucide-icon class="sr-icon-ltr" name="chevron-right" [size]="16"></lucide-icon>
+  <span class="sr-more sr-more--strong sr-more--next" [class.is-shown]="moreNext()" aria-hidden="true">
+    <span class="sr-more__badge">
+      <lucide-icon class="sr-icon-rtl" name="chevron-left" [size]="20" [strokeWidth]="3"></lucide-icon>
+      <lucide-icon class="sr-icon-ltr" name="chevron-right" [size]="20" [strokeWidth]="3"></lucide-icon>
+    </span>
   </span>
 </div>
 @if (arrowsRendered()) {

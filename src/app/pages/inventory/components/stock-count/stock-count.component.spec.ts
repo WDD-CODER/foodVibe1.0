@@ -19,6 +19,8 @@ import { StockCountComponent } from './stock-count.component'
 import { PastCountsService } from './past-counts.service'
 import { CounterComponent } from 'src/app/shared/counter/counter.component'
 import { ReturnToService } from '@services/return-to.service'
+import { mockTooltipMode } from 'src/app/shared/tooltip/tooltip-mode.testing'
+import { PHONE_QUERY } from '@utils/breakpoints'
 
 const product = (id: string, name: string, min = 0): Product =>
   ({ _id: id, nameHebrew: name, baseUnit: 'kg', purchaseOptions: [], minStockLevel: min }) as unknown as Product
@@ -820,6 +822,8 @@ describe('StockCountComponent', () => {
       await settle()
       await pendingScrollSent()
       const control = rows()[0].querySelector<HTMLButtonElement>('[data-testid="stk-base-btn"]')!
+      // Plan 762: a click opens the tooltip only where a tap does (a phone, or a touch screen).
+      mockTooltipMode(width === 'phone' ? 'phone' : 'no-hover')
       control.click()
       await settle()
       return control
@@ -898,6 +902,65 @@ describe('StockCountComponent', () => {
     })
   })
 
+  describe('plan 762 — the name in its own container, the controls in another', () => {
+    const withCrates = (id: string, name: string): Product =>
+      ({
+        ...product(id, name),
+        baseUnit: 'gram',
+        purchaseOptions: [{ unitSymbol: 'crate', conversionRate: 10000 }]
+      }) as unknown as Product
+
+    for (const narrow of [false, true]) {
+      it(`each row has a name container and one controls container (${narrow ? 'narrow' : 'desktop'})`, async () => {
+        narrowMode = narrow
+        await setup([withCrates('a', 'עגבניות'), product('b', 'קמח')])
+        ;(fixture.componentInstance as unknown as { setUnit(p: Product, u: string): void }).setUnit(
+          withCrates('a', 'עגבניות'),
+          'crate'
+        )
+        await settle()
+        expect(rows().length).toBe(2)
+        for (const row of rows()) {
+          const nameBoxes = row.querySelectorAll<HTMLElement>(':scope > .stock-count__name-box')
+          const controls = row.querySelectorAll<HTMLElement>(':scope > .stock-count__controls')
+          expect(nameBoxes.length).toBe(1)
+          expect(controls.length).toBe(1)
+          expect(nameBoxes[0].children.length).toBe(1)
+          expect(nameBoxes[0].firstElementChild!.classList).toContain('stock-count__name')
+          const held = controls[0]
+          expect(held.querySelector('.stock-count__name')).toBeNull()
+          expect(held.querySelector(':scope > .c-list-body-cell > app-counter')).not.toBeNull()
+          expect(held.querySelector(':scope > .c-list-body-cell > app-custom-select')).not.toBeNull()
+          expect(held.querySelector(':scope > .stock-count__counted')).not.toBeNull()
+          expect(held.querySelector(':scope > .stock-count__unit-cell') !== null).toBe(narrow)
+          expect(held.querySelector(':scope > app-column-carousel-cell') !== null).toBe(!narrow)
+          // No control sits outside the two containers.
+          expect(row.querySelectorAll(':scope > .c-list-body-cell, :scope > app-column-carousel-cell').length).toBe(0)
+          // Above a phone the containers take no box (one line, as before); on a phone each is a line of its own.
+          const display = window.matchMedia(PHONE_QUERY).matches ? 'grid' : 'contents'
+          expect(getComputedStyle(nameBoxes[0]).display).toBe(display)
+          expect(getComputedStyle(held).display).toBe(display)
+          if (display === 'grid') {
+            const name = nameBoxes[0].getBoundingClientRect()
+            const line = held.getBoundingClientRect()
+            expect(name.bottom).toBeLessThanOrEqual(line.top + 1)
+            expect(Math.abs(name.width - line.width)).toBeLessThanOrEqual(1)
+            const cells = Array.from(held.querySelectorAll<HTMLElement>(':scope > .c-list-body-cell'))
+            expect(new Set(cells.map((c) => Math.round(c.getBoundingClientRect().top))).size).toBe(1)
+          }
+        }
+      })
+    }
+
+    it('the phone grid has tracks for the controls only: the name takes its own line', async () => {
+      narrowMode = true
+      await setup()
+      const template = (fixture.componentInstance as unknown as { mobileGridTemplate_(): string }).mobileGridTemplate_()
+      expect(template).toBe('auto minmax(6rem, 1fr) auto')
+      expect(el().querySelector('.stock-count__name-head')).not.toBeNull()
+    })
+  })
+
   describe('plan 655 — a question per missing part, a compact row below desktop', () => {
     const withCrates = (id: string, name: string): Product =>
       ({
@@ -972,6 +1035,7 @@ describe('StockCountComponent', () => {
       expect(control.getAttribute('aria-label')).toContain('20')
       expect(document.body.querySelector('.c-tooltip')).toBeNull()
       await pendingScrollSent()
+      mockTooltipMode('no-hover')
       control.click()
       await settle()
       const box = document.body.querySelector<HTMLElement>('.c-tooltip')!

@@ -12,6 +12,7 @@ import {
   signal
 } from '@angular/core'
 import { DOCUMENT } from '@angular/common'
+import { PHONE_QUERY } from 'src/app/core/utils/breakpoints'
 import { placeInViewport } from 'src/app/core/utils/viewport-placement.util'
 import { TooltipBoxComponent } from './tooltip-box.component'
 
@@ -24,11 +25,14 @@ let nextTooltipId_ = 0
 let closeOpenTooltip_: (() => void) | null = null
 
 /**
- * The one hint for every control (plans 744, 747): a translated string or a template. Opens on mouse hover (after
- * a short delay), keyboard focus, or — with `tooltipOnClick` — a click that pins it. On touch (a touch pointer or a
- * device with no hover) hover does nothing: a tap on the control toggles it and a tap elsewhere closes it; the
- * control's own action still runs. Closes on leave, blur, Escape, an outside press, scroll and destroy. The box is
- * appended to <body> and placed with `placeInViewport`, whole inside the viewport on both sides.
+ * The one hint for every control (plans 744, 747, 762): a translated string or a template. The screen decides how
+ * it opens:
+ * - Tap mode (phone width, or a device with no hover): a tap on the control opens it — the control's own action
+ *   still runs — and the next press anywhere (the same control too) or any scroll closes it.
+ * - Otherwise: a click or a tap never opens or pins it.
+ * In both, a mouse hover (after a short delay; not on a device with no hover) or keyboard focus opens it, and leave
+ * or blur closes a box no tap opened. Escape, scroll and destroy close it. The box is appended to <body> and placed with `placeInViewport`,
+ * whole inside the viewport on both sides.
  */
 @Directive({
   selector: '[appTooltip]',
@@ -37,6 +41,7 @@ let closeOpenTooltip_: (() => void) | null = null
     '(pointerenter)': 'onPointerEnter($event)',
     '(pointerleave)': 'onPointerLeave($event)',
     '(pointerdown)': 'onPointerDown($event)',
+    '(pointercancel)': 'onPointerCancel()',
     '(focusin)': 'onFocusIn()',
     '(focusout)': 'close()',
     '(click)': 'onClick()'
@@ -45,25 +50,29 @@ let closeOpenTooltip_: (() => void) | null = null
 export class TooltipDirective {
   readonly appTooltip = input<TooltipContent>(null)
   readonly tooltipPlacement = input<'above' | 'below'>('above')
+  /** No effect since plan 762 (no click pins a tooltip); kept because templates still bind it. */
   readonly tooltipOnClick = input(false)
 
-  /** Set by a directive that composes this one (`appDisabledWhy`): its content and click rule win over the inputs. */
-  private readonly held_ = signal<{ content: TooltipContent; onClick: boolean } | null>(null)
+  /** Set by a directive that composes this one (`appDisabledWhy`): its content wins over `appTooltip`. */
+  private readonly held_ = signal<{ content: TooltipContent } | null>(null)
   private readonly content_ = computed<TooltipContent>(() => {
     const held = this.held_()
     return held ? held.content : this.appTooltip()
   })
-  private readonly opensOnClick_ = computed(() => this.held_()?.onClick ?? this.tooltipOnClick())
 
   private readonly host_ = inject<ElementRef<HTMLElement>>(ElementRef)
   private readonly vcr_ = inject(ViewContainerRef)
   private readonly document_ = inject(DOCUMENT)
 
   private box_: ComponentRef<TooltipBoxComponent> | null = null
-  private pinned_ = false
+  /** The open box was opened by a tap: the pointer leaving the control does not close it. */
+  private tapped_ = false
+  /** A press on the control that has not ended in a click yet: had a tap's tooltip been open when it began? */
+  private openAtPress_: boolean | null = null
+  /** The last press on the control itself that closed the box (see `onPress_`). */
+  private closingPress_: Event | null = null
   private previousDescribedBy_: string | null = null
   private hoverTimer_: ReturnType<typeof setTimeout> | null = null
-  private touchPointer_ = false
   private placeFrame_ = 0
   /** Set by a composing directive: the element the box is placed against instead of the host (see `anchorTo`). */
   private anchor_: HTMLElement | null = null
@@ -73,9 +82,18 @@ export class TooltipDirective {
   private readonly onKeydown_ = (event: KeyboardEvent): void => {
     if (event.key === 'Escape') this.close()
   }
-  private readonly onOutsidePress_ = (event: Event): void => {
+  /**
+   * A press anywhere while the box is open closes it, except a press on the control itself — that one closes only
+   * a box a tap opened (tap mode), and is remembered so the click that follows does not open it again.
+   */
+  private readonly onPress_ = (event: Event): void => {
     const target = event.target as Node | null
-    if (target && (this.host_.nativeElement.contains(target) || this.anchor_?.contains(target))) return
+    const onControl = !!target && (this.host_.nativeElement.contains(target) || !!this.anchor_?.contains(target))
+    if (onControl) {
+      if (!this.tapped_) return
+      this.openAtPress_ = true
+      this.closingPress_ = event
+    }
     this.close()
   }
   private readonly onScroll_ = (event: Event): void => {
@@ -101,20 +119,19 @@ export class TooltipDirective {
     inject(DestroyRef).onDestroy(() => this.close())
   }
 
-  /** Touch: the last press was a finger, or the device has no hover at all. */
-  private isTouch_(): boolean {
-    if (this.touchPointer_) return true
+  private matches_(query: string): boolean {
     const view = this.document_.defaultView
-    return !!view && typeof view.matchMedia === 'function' && view.matchMedia('(hover: none)').matches
+    return !!view && typeof view.matchMedia === 'function' && view.matchMedia(query).matches
+  }
+
+  /** Tap mode: a phone-wide screen, or a device with no hover at all. */
+  private isTapMode_(): boolean {
+    return this.matches_(PHONE_QUERY) || this.matches_('(hover: none)')
   }
 
   onPointerEnter(event: PointerEvent): void {
-    if (event.pointerType === 'touch') {
-      this.touchPointer_ = true
-      return
-    }
-    if (event.pointerType === 'mouse') this.touchPointer_ = false
-    if (this.isTouch_()) return
+    // A finger does not hover, and a device with no hover has none to show.
+    if (event.pointerType === 'touch' || this.matches_('(hover: none)')) return
     if (this.box_ || this.isEmpty_(this.content_())) return
     this.clearHoverTimer_()
     this.hoverTimer_ = setTimeout(() => {
@@ -127,15 +144,24 @@ export class TooltipDirective {
     // Leaving the host into its own anchor (a checkbox into the label around it) is not leaving the control.
     const next = event?.relatedTarget as Node | null | undefined
     if (next && this.anchor_?.contains(next)) return
+    // A mouse dragged off the control ends the press with no click. (A finger leaves before its click arrives.)
+    if (event?.pointerType === 'mouse') this.openAtPress_ = null
     this.clearHoverTimer_()
-    if (!this.pinned_) this.close()
+    if (!this.tapped_) this.close()
   }
 
   onPointerDown(event: PointerEvent): void {
-    this.touchPointer_ = event.pointerType === 'touch'
+    this.openAtPress_ = this.tapped_ || event === this.closingPress_
+  }
+
+  /** The press turned into a scroll or another gesture: no click follows. */
+  onPointerCancel(): void {
+    this.openAtPress_ = null
   }
 
   onFocusIn(): void {
+    // Focus that comes from a press is not keyboard focus: the press rules decide.
+    if (this.openAtPress_ !== null) return
     if (this.box_ || this.isEmpty_(this.content_())) return
     let focusVisible = false
     try {
@@ -147,21 +173,18 @@ export class TooltipDirective {
   }
 
   onClick(): void {
-    if (this.isEmpty_(this.content_())) return
-    // On touch every control toggles by tap, whatever `tooltipOnClick` says; the control's own click still runs.
-    if (!this.opensOnClick_() && !this.isTouch_()) return
+    const wasOpen = this.openAtPress_ ?? this.tapped_
+    this.openAtPress_ = null
+    // With a hovering pointer a click opens nothing and pins nothing.
+    if (!this.isTapMode_() || this.isEmpty_(this.content_())) return
     this.clearHoverTimer_()
-    if (this.box_ && this.pinned_) this.close()
-    else if (this.box_) this.pinned_ = true
+    if (wasOpen) this.close()
     else this.open_(true)
   }
 
-  /**
-   * For a directive that composes this one through `hostDirectives`: gives the tooltip its content and says
-   * whether a mouse click pins it, instead of the `appTooltip` / `tooltipOnClick` inputs.
-   */
-  hold(content: TooltipContent, onClick: boolean): void {
-    this.held_.set({ content, onClick })
+  /** For a directive that composes this one through `hostDirectives`: gives the tooltip its content. */
+  hold(content: TooltipContent): void {
+    this.held_.set({ content })
   }
 
   /**
@@ -179,10 +202,10 @@ export class TooltipDirective {
     const box = this.box_
     if (!box) return
     this.box_ = null
-    this.pinned_ = false
+    this.tapped_ = false
     if (closeOpenTooltip_ === this.closeSelf_) closeOpenTooltip_ = null
     this.document_.removeEventListener('keydown', this.onKeydown_)
-    this.document_.removeEventListener('pointerdown', this.onOutsidePress_, true)
+    this.document_.removeEventListener('pointerdown', this.onPress_, true)
     this.document_.removeEventListener('scroll', this.onScroll_, true)
     this.document_.defaultView?.removeEventListener('resize', this.onResize_)
     const element = this.host_.nativeElement
@@ -203,11 +226,11 @@ export class TooltipDirective {
     return value === null || value === undefined || value === ''
   }
 
-  private open_(pinned: boolean): void {
+  private open_(tapped: boolean): void {
     const value = this.content_()
     if (this.isEmpty_(value)) return
     if (this.box_) {
-      this.pinned_ = this.pinned_ || pinned
+      this.tapped_ = this.tapped_ || tapped
       return
     }
     closeOpenTooltip_?.()
@@ -219,7 +242,7 @@ export class TooltipDirective {
     const element = box.location.nativeElement as HTMLElement
     this.document_.body.appendChild(element)
     this.box_ = box
-    this.pinned_ = pinned
+    this.tapped_ = tapped
     closeOpenTooltip_ = this.closeSelf_
     const host = this.host_.nativeElement
     this.previousDescribedBy_ = host.getAttribute('aria-describedby')
@@ -236,7 +259,7 @@ export class TooltipDirective {
       this.place_()
     })
     this.document_.addEventListener('keydown', this.onKeydown_)
-    this.document_.addEventListener('pointerdown', this.onOutsidePress_, true)
+    this.document_.addEventListener('pointerdown', this.onPress_, true)
     this.document_.addEventListener('scroll', this.onScroll_, true)
     this.document_.defaultView?.addEventListener('resize', this.onResize_)
   }

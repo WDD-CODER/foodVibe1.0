@@ -85,8 +85,11 @@ append the path to the scope block above and retry.
 - INV-6: preserves — the scope glob `src/app/**/breadcrumbs.md` matches `*ai*` paths only by name; no AI call is touched.
 
 ## Reuse Check
-- none — changes inside the existing shared tooltip, `scroll-rail` and the stock count; the phone breakpoint comes from
-  the app's one breakpoint set.
+- `.stock-count__name-box`, `.stock-count__controls`, `.stock-count__name-head` — family: list-page — rung: 3 — why: page-local row containers and heading class for the stock count's two-line phone row.
+- `.sr-more--strong`, `.sr-more__badge` — family: sideways-row — rung: 3 — why: the stronger look of the rail's existing "more" sign.
+- `mockTooltipMode` (`src/app/shared/tooltip/tooltip-mode.testing.ts`) — family: tooltip — rung: 3 — why: specs choose the screen the shared tooltip sees; used by four spec files.
+
+The phone breakpoint comes from the app's one breakpoint set.
 
 ## Defaults
 
@@ -130,9 +133,9 @@ line or file this plan names was removed, renamed or rewritten).
 
 These are the plan's milestones: a Worker does them in order and ticks each one after it is checked.
 
-- [ ] F1: Tooltip opens on tap only on phones and closes on any tap or scroll; hover-only elsewhere — src/app/shared/tooltip/tooltip.directive.ts
-- [ ] F2: Make the inside "more" sign clearly visible — src/app/shared/scroll-rail/scroll-rail.component.scss
-- [ ] F3: Stock count rows: name container above a controls container on phones — src/app/pages/inventory/components/stock-count/stock-count.component.html
+- [x] F1: Tooltip opens on tap only on phones and closes on any tap or scroll; hover-only elsewhere — src/app/shared/tooltip/tooltip.directive.ts
+- [x] F2: Make the inside "more" sign clearly visible — src/app/shared/scroll-rail/scroll-rail.component.scss
+- [x] F3: Stock count rows: name container above a controls container on phones — src/app/pages/inventory/components/stock-count/stock-count.component.html
 - [ ] F4: Run every automatic check and paste the outputs under Execution Notes — plans/762-house-style-grading-round-three.plan.md
 
 ## What happens when
@@ -149,3 +152,24 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
 - none
 
 ## Execution Notes
+
+- F1: `TooltipDirective` — a tap opens only at phone width (`PHONE_QUERY`) or with no hover; the next press or any scroll
+  closes; elsewhere a click or tap opens and pins nothing. `tooltipOnClick` is now without effect (two templates outside
+  the scope still bind it).
+- F2: `.sr-more--strong` + `.sr-more__badge` — a 1.75rem solid round badge (`--color-primary-strong`), 20px chevron, on a
+  3.5rem fade.
+- F3: `.stock-count__name-box` above `.stock-count__controls` (subgrid) at phone width; `display: contents` above it.
+- The test window is phone-wide, so the stock count spec's computed-layout assertions run the phone branch.
+- Evidence (2026-11-27):
+  - `pnpm run build` → exit 0
+  - `pnpm run lint` → exit 0 (0 errors, 69 warnings)
+  - `pnpm run test:ci` → exit 0, `TOTAL: 3111 SUCCESS`
+  - `kit-manifest-check.mjs --root .` → `KIT_MANIFEST: ok`
+  - `scripts/scope-check.mjs --diff=origin/orch/biz-house2` → `SCOPE: ok`
+  - `kit-checks.mjs --base origin/orch/biz-house2` → `KIT_CHECKS: ok (6 checks)`
+  - `override-check.mjs` → ok; `lint:icons` → 0 violations; `lint:no-native-select` → no findings
+  - `breadcrumbs-check.mjs` → `BREADCRUMBS: clean`; `scope-check.mjs --arch` → `ARCH: ok`; `inventory.mjs --check` → ok
+  - `ci-scope-check.mjs --checkout-branch` → skipped (reads no branch name here)
+  - `log-query.mjs --since=plan-start --level=error` → `SKIP: no database configured`
+  - `plan-ledger-check.mjs` → **FAIL**: `.claude/todo.md` on the run branch names plans 760 and 761, whose files are not on
+    this branch (they are on `origin/main`). The same check is in the pre-commit hook, so nothing can be committed.

@@ -231,9 +231,9 @@ export class StockCountComponent implements OnInit {
   })
   protected readonly mobileGridTemplate_ = computed(() => {
     if (this.view_() !== 'sheet') return '1fr'
-    // The unit column keeps room for the unit and the fixed slot beside it (plan 747): never under 6rem, which
-    // leaves the unit select the width it had before the slot.
-    const cols = 'minmax(0, 1.5fr) auto minmax(6rem, 1fr) auto'
+    // Plan 762: on a phone the name has its own line, so the tracks are the controls only: amount, unit, counted.
+    // The unit column keeps room for the unit and the fixed slot beside it (plan 747): never under 6rem.
+    const cols = 'auto minmax(6rem, 1fr) auto'
     return this.baseColumn_() ? cols + ' minmax(3.5rem, auto)' : cols
   })
 

@@ -9,6 +9,7 @@ import { ListRowCheckboxComponent } from 'src/app/shared/list-selection/list-row
 import { ApproveStampComponent } from 'src/app/shared/approve-stamp/approve-stamp.component'
 import { RatingStarsComponent } from 'src/app/shared/rating-stars/rating-stars.component'
 import { DateFieldComponent } from 'src/app/shared/date-field/date-field.component'
+import { mockTooltipMode } from './tooltip-mode.testing'
 
 @Component({
   standalone: true,
@@ -55,6 +56,8 @@ describe('disabledWhy on the shared controls (plan 747)', () => {
   }
 
   beforeEach(async () => {
+    // Plan 762: a click shows the reason only on a screen where a tap does.
+    mockTooltipMode('no-hover')
     await TestBed.configureTestingModule({
       imports: [HostComponent, LucideAngularModule.pick(TEST_LUCIDE_ICONS)],
       providers: [{ provide: TranslationService, useValue: { translate: (k: string) => k || '' } }]
@@ -104,7 +107,7 @@ describe('disabledWhy on the shared controls (plan 747)', () => {
     expect(wrap.getAttribute('aria-disabled')).toBe('true')
     wrap.click()
     expect(box()?.textContent?.trim()).toBe('no permission')
-    // A click on the box itself is blocked too (a second click only closes the pinned tooltip).
+    // A click on the box itself is blocked too (a second click only closes the open tooltip).
     q<HTMLInputElement>('app-list-row-checkbox input').click()
     expect(host.toggles).toBe(0)
     enable()

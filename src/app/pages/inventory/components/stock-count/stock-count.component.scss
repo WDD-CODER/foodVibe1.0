@@ -1,6 +1,33 @@
+@use '../../../../core/styles/breakpoints' as *;
+
 @layer components.stock-count {
   :host {
     display: block;
+  }
+
+  // Plan 762: above a phone the two row containers take no box, so their cells sit in the list's columns.
+  .stock-count__name-box,
+  .stock-count__controls {
+    display: contents;
+  }
+
+  // On a phone each row is two lines: the name across the whole row, then the controls in the list's columns. The
+  // product heading takes its own line too, so the other headings stay over their controls.
+  @media (max-width: $break-phone-max) {
+    .stock-count__name-head,
+    .stock-count__name-box,
+    .stock-count__controls {
+      grid-column: 1 / -1;
+    }
+
+    .stock-count__name-box {
+      display: grid;
+    }
+
+    .stock-count__controls {
+      display: grid;
+      grid-template-columns: subgrid;
+    }
   }
 
   // Plan 651: the date, then the tabs, on one row under the header (the header keeps one action: finish the count).
@@ -95,7 +122,8 @@
     color: var(--color-danger);
   }
 
-  .stock-count__row--error > * {
+  .stock-count__row--error .c-list-body-cell,
+  .stock-count__row--error > .stock-count__unit-note {
     background: color-mix(in srgb, var(--color-danger) 12%, transparent);
   }
 
@@ -160,6 +188,16 @@
   .stock-count__date {
     inline-size: 12rem;
     max-inline-size: 12rem;
+  }
+}
+
+// On a phone no line splits a name from its own controls. Outside @layer so it wins over the unlayered
+// .c-list-body-cell border and padding in styles.scss.
+@media (max-width: $break-phone-max) {
+  :host .c-list-body-cell.stock-count__name {
+    padding-block-end: var(--space-1);
+
+    border-block-end: none;
   }
 }
 

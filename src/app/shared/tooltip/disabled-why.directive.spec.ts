@@ -2,6 +2,7 @@ import { Component, signal } from '@angular/core'
 import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing'
 import { DisabledWhyDirective } from './disabled-why.directive'
 import { TOOLTIP_HOVER_DELAY_MS } from './tooltip.directive'
+import { TooltipTestMode, mockTooltipMode } from './tooltip-mode.testing'
 
 @Component({
   standalone: true,
@@ -69,7 +70,15 @@ describe('DisabledWhyDirective (plan 747)', () => {
     fixture.detectChanges()
   }
 
+  /** A whole tap or click: the press, then its click. */
+  const tap = (target: HTMLElement, pointerType = 'touch'): void => {
+    pointer(target, 'pointerdown', pointerType)
+    target.click()
+  }
+  let setMode: (mode: TooltipTestMode) => void
+
   beforeEach(() => {
+    setMode = mockTooltipMode('hover')
     TestBed.configureTestingModule({ imports: [HostComponent] })
     fixture = TestBed.createComponent(HostComponent)
     host = fixture.componentInstance
@@ -91,13 +100,58 @@ describe('DisabledWhyDirective (plan 747)', () => {
       expect(btn.hasAttribute('disabled')).toBeFalse()
     })
 
-    it('does not run its click handler, and a click shows the reason', () => {
-      el('btn').click()
+    it('above the phone width a click runs nothing and opens nothing (plan 762)', () => {
+      tap(el('btn'), 'mouse')
+      expect(host.presses).toBe(0)
+      expect(box()).toBeNull()
+    })
+
+    it('above the phone width hover opens the reason, leave and Escape close it (plan 762)', fakeAsync(() => {
+      pointer(el('btn'), 'pointerenter')
+      tick(TOOLTIP_HOVER_DELAY_MS)
+      tap(el('btn'), 'mouse')
+      expect(box()?.textContent?.trim()).toBe('sign in first')
+      pointer(el('btn'), 'pointerleave')
+      expect(box()).toBeNull()
+      pointer(el('btn'), 'pointerenter')
+      tick(TOOLTIP_HOVER_DELAY_MS)
+      key(el('btn'), 'Escape')
+      expect(box()).toBeNull()
+    }))
+
+    it('at phone width a tap opens the reason; a later tap anywhere closes it (plan 762)', () => {
+      setMode('phone')
+      tap(el('btn'))
       expect(host.presses).toBe(0)
       expect(box()?.textContent?.trim()).toBe('sign in first')
-      // Pinned by the click: leaving with the mouse keeps it.
-      pointer(el('btn'), 'pointerleave')
+      pointer(el('btn'), 'pointerleave', 'touch')
       expect(box()).not.toBeNull()
+      pointer(document.body, 'pointerdown', 'touch')
+      expect(box()).toBeNull()
+      tap(el('btn'))
+      tap(el('btn'))
+      expect(box()).toBeNull()
+    })
+
+    it('at phone width a scroll of the page or of a scroll container, and Escape, close it (plan 762)', () => {
+      setMode('phone')
+      tap(el('btn'))
+      document.dispatchEvent(new Event('scroll'))
+      expect(box()).toBeNull()
+      tap(el('btn'))
+      el('btn').parentElement!.dispatchEvent(new Event('scroll'))
+      expect(box()).toBeNull()
+      tap(el('btn'))
+      key(el('btn'), 'Escape')
+      expect(box()).toBeNull()
+    })
+
+    it('at phone width a tap on another blocked control moves the tooltip to it (plan 762)', () => {
+      setMode('phone')
+      tap(el('btn'))
+      tap(el('plain'))
+      expect(document.body.querySelectorAll('.c-tooltip').length).toBe(1)
+      expect(el('plain').getAttribute('aria-describedby')).toBe(box()!.id)
     })
 
     it('swallows Enter and Space and lets Tab through', () => {
@@ -122,9 +176,9 @@ describe('DisabledWhyDirective (plan 747)', () => {
       expect(box()?.textContent?.trim()).toBe('sign in first')
     })
 
-    it('a tap on touch shows the reason', () => {
-      pointer(el('btn'), 'pointerdown', 'touch')
-      el('btn').click()
+    it('a tap on a touch screen with no hover shows the reason', () => {
+      setMode('no-hover')
+      tap(el('btn'))
       expect(host.presses).toBe(0)
       expect(box()?.textContent?.trim()).toBe('sign in first')
     })
@@ -167,6 +221,7 @@ describe('DisabledWhyDirective (plan 747)', () => {
   })
 
   it('the reason wins over the ordinary hint, and a reason that goes away closes the open tooltip', () => {
+    setMode('phone')
     host.tip.set('saves the form')
     fixture.detectChanges()
     el('btn').click()
@@ -177,6 +232,7 @@ describe('DisabledWhyDirective (plan 747)', () => {
 
   describe('a link', () => {
     it('does not navigate or run its handler with a reason', () => {
+      setMode('phone')
       const event = new MouseEvent('click', { bubbles: true, cancelable: true })
       el('link').dispatchEvent(event)
       expect(event.defaultPrevented).toBeTrue()
@@ -195,7 +251,16 @@ describe('DisabledWhyDirective (plan 747)', () => {
       expect(field.classList).toContain('is-disabled')
     })
 
+    it('above the phone width a click that focuses the field opens nothing (plan 762)', () => {
+      const field = el<HTMLInputElement>('text')
+      pointer(field, 'pointerdown')
+      field.focus()
+      field.click()
+      expect(box()).toBeNull()
+    })
+
     it('swallows typing keys and the click, lets Tab, Escape and copy through', () => {
+      setMode('phone')
       const field = el<HTMLInputElement>('text')
       expect(key(field, 'a').defaultPrevented).toBeTrue()
       expect(key(field, 'Enter').defaultPrevented).toBeTrue()
@@ -245,8 +310,9 @@ describe('DisabledWhyDirective (plan 747)', () => {
       expect(pick.classList).toContain('is-disabled')
     })
 
-    it('shows the reason on click', () => {
-      el('pick').click()
+    it('shows the reason on a tap at phone width', () => {
+      setMode('phone')
+      tap(el('pick'))
       expect(box()?.textContent?.trim()).toBe('sign in first')
     })
 
@@ -278,13 +344,22 @@ describe('DisabledWhyDirective (plan 747)', () => {
       expect(box()).toBeNull()
     }))
 
-    it('a click or tap on the label text does not toggle the checkbox and shows the reason', () => {
-      el('chipText').click()
+    it('a tap on the label text does not toggle the checkbox, shows the reason, and the next tap closes it', () => {
+      setMode('phone')
+      tap(el('chipText'))
       expect(el<HTMLInputElement>('chipInput').checked).toBeFalse()
       expect(box()?.textContent?.trim()).toBe('sign in first')
-      // A press on the chip is a press on the control: the pinned reason stays until the next tap.
-      el('chipText').dispatchEvent(new PointerEvent('pointerdown', { bubbles: true }))
+      tap(el('chipText'))
+      expect(box()).toBeNull()
+      tap(el('chipText'))
       expect(box()).not.toBeNull()
+      expect(el<HTMLInputElement>('chipInput').checked).toBeFalse()
+    })
+
+    it('above the phone width a click on the label text toggles nothing and opens nothing (plan 762)', () => {
+      tap(el('chipText'), 'mouse')
+      expect(el<HTMLInputElement>('chipInput').checked).toBeFalse()
+      expect(box()).toBeNull()
     })
 
     it('with no reason the label hover shows nothing and the chip toggles', fakeAsync(() => {

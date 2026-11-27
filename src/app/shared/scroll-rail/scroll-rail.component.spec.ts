@@ -220,6 +220,20 @@ describe('ScrollRailComponent', () => {
       expect(more('prev').classList).toContain('is-shown')
     })
 
+    it('is the stronger look: a solid round badge with a chevron, on the side that has more (plan 762)', () => {
+      setPhone(true)
+      const next = more('next')
+      expect(next.classList).toContain('sr-more--strong')
+      expect(next.classList).toContain('is-shown')
+      expect(getComputedStyle(next).visibility).toBe('visible')
+      expect(more('prev').classList).toContain('sr-more--strong')
+      expect(getComputedStyle(more('prev')).visibility).toBe('hidden')
+      const badge = next.querySelector<HTMLElement>('.sr-more__badge')!
+      expect(getComputedStyle(badge).backgroundColor).not.toBe('rgba(0, 0, 0, 0)')
+      expect(badge.getBoundingClientRect().width).toBeGreaterThanOrEqual(24)
+      expect(badge.querySelector('lucide-icon')).not.toBeNull()
+    })
+
     it('shows no sign when the content fits', () => {
       fixture.componentInstance.items.set([1, 2])
       fixture.detectChanges()

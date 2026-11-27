@@ -13,9 +13,10 @@ type HostKind = 'press' | 'text' | 'picker'
  *
  * `[appDisabledWhy]="reason"` — the reason is already translated; `null` or `''` means the control works as usual.
  * With a reason the host gets `aria-disabled="true"` and the class `is-disabled`, stays reachable (hover, focus,
- * tap), its action never runs, and the reason shows in the shared tooltip: on hover and keyboard focus, and on a
- * click or tap. The native `disabled` attribute is never set — a natively disabled control gets no pointer or focus
- * events, so it could not explain itself. Keep `[disabled]` only for "its own action is running".
+ * tap), its action never runs, and the reason shows in the shared tooltip, by that tooltip's rules (plan 762): on a
+ * tap at phone width or with no hover; otherwise on hover and keyboard focus only. The native `disabled` attribute
+ * is never set — a natively disabled control gets no pointer or focus events, so it could not explain itself. Keep
+ * `[disabled]` only for "its own action is running".
  *
  * - `<button>`, `<a>` and other pressable hosts: `click` and Enter / Space are swallowed in the capture phase.
  * - `<input>` (text-like) and `<textarea>`: also `readOnly` while the reason holds; every key but Tab / Escape is
@@ -55,11 +56,14 @@ export class DisabledWhyDirective {
 
   private readonly onLabelEnter_ = (event: PointerEvent): void => this.tooltip_.onPointerEnter(event)
   private readonly onLabelLeave_ = (): void => this.tooltip_.onPointerLeave()
+  /** A press on the label is a press on the control: the focus it gives is not keyboard focus. */
+  private readonly onLabelPress_ = (event: PointerEvent): void => this.tooltip_.onPointerDown(event)
+  private readonly onLabelCancel_ = (): void => this.tooltip_.onPointerCancel()
 
   private readonly onClick_ = (event: Event): void => {
     if (!this.reason_()) return
     this.swallow_(event)
-    // The tooltip's own click listener sits on this element and was just stopped: open (or pin) it here.
+    // The tooltip's own click listener sits on this element and was just stopped: pass the tap on here.
     this.tooltip_.onClick()
   }
 
@@ -94,12 +98,12 @@ export class DisabledWhyDirective {
 
     effect(() => {
       const reason = this.reason_()
-      this.tooltip_.hold(reason ?? this.disabledWhyTip(), !!reason)
+      this.tooltip_.hold(reason ?? this.disabledWhyTip())
     })
 
     effect(() => {
       const blocked = !!this.reason_()
-      // A tooltip left open from the other state would show the wrong text pinned.
+      // A tooltip left open from the other state would keep showing the wrong text.
       this.tooltip_.close()
       this.applyReadOnly_(blocked)
       this.applyTabindex_(blocked)
@@ -110,7 +114,7 @@ export class DisabledWhyDirective {
   /**
    * A blocked checkbox or radio inside a `<label>` (a toggle chip hides the input and shows the label): hovering
    * the label opens the reason and the box is placed against the label. A tap needs nothing extra — the label
-   * passes its click to the input, where it is swallowed and shows the reason.
+   * passes its click to the input, where it is swallowed and handed to the tooltip.
    */
   private applyLabel_(blocked: boolean): void {
     const element = this.host_.nativeElement
@@ -119,10 +123,14 @@ export class DisabledWhyDirective {
     if (label === this.label_) return
     this.label_?.removeEventListener('pointerenter', this.onLabelEnter_)
     this.label_?.removeEventListener('pointerleave', this.onLabelLeave_)
+    this.label_?.removeEventListener('pointerdown', this.onLabelPress_)
+    this.label_?.removeEventListener('pointercancel', this.onLabelCancel_)
     this.label_ = label
     this.tooltip_.anchorTo(label)
     label?.addEventListener('pointerenter', this.onLabelEnter_)
     label?.addEventListener('pointerleave', this.onLabelLeave_)
+    label?.addEventListener('pointerdown', this.onLabelPress_)
+    label?.addEventListener('pointercancel', this.onLabelCancel_)
   }
 
   private swallow_(event: Event): void {
