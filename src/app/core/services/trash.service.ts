@@ -10,13 +10,14 @@ import { VenueDataService } from './venue-data.service'
 import { MenuEventDataService } from './menu-event-data.service'
 import { SupplierDataService } from './supplier-data.service'
 import { ClientDataService } from './client-data.service'
+import { MenuDesignDataService } from './menu-design-data.service'
 import { UserMsgService } from './user-msg.service'
 import { TranslationService } from './translation.service'
 import type { VersionEntityType } from './version-history.service'
 
 /** Every collection with a Trash (plan 407: deleted items keep `deletedAt` on the doc itself). */
 export type TrashType =
-  'dishes' | 'recipes' | 'products' | 'equipment' | 'venues' | 'menuEvents' | 'suppliers' | 'clients'
+  'dishes' | 'recipes' | 'products' | 'equipment' | 'venues' | 'menuEvents' | 'menuDesigns' | 'suppliers' | 'clients'
 
 export interface TrashItem {
   _id: string
@@ -39,6 +40,7 @@ export const TRASH_SECTIONS: readonly TrashSection[] = [
   { type: 'equipment', titleKey: 'trash_equipment' },
   { type: 'venues', titleKey: 'trash_venues' },
   { type: 'menuEvents', titleKey: 'trash_menu_events' },
+  { type: 'menuDesigns', titleKey: 'trash_menu_designs' },
   { type: 'suppliers', titleKey: 'trash_suppliers' },
   { type: 'clients', titleKey: 'trash_clients' }
 ]
@@ -61,6 +63,7 @@ const emptyTrash = (): Record<TrashType, TrashItem[]> => ({
   equipment: [],
   venues: [],
   menuEvents: [],
+  menuDesigns: [],
   suppliers: [],
   clients: []
 })
@@ -80,6 +83,7 @@ export class TrashService {
     equipment: inject(EquipmentDataService),
     venues: inject(VenueDataService),
     menuEvents: inject(MenuEventDataService),
+    menuDesigns: inject(MenuDesignDataService),
     suppliers: inject(SupplierDataService),
     clients: inject(ClientDataService)
   }
@@ -87,7 +91,7 @@ export class TrashService {
   private readonly items_ = signal<Record<TrashType, TrashItem[]>>(emptyTrash())
   readonly items = this.items_.asReadonly()
 
-  /** Plan 620: the sections of the types whose module is on (`venues`, `menuEvents`, `clients` are gated). */
+  /** Plan 620: the sections of the types whose module is on (`venues`, `menuEvents`, `menuDesigns`, `clients` are gated). */
   readonly sections_ = computed(() => TRASH_SECTIONS.filter(({ type }) => this.modules.hasType(type)))
 
   readonly hasAnyTrash = computed(() => Object.values(this.items_()).some((list) => list.length > 0))

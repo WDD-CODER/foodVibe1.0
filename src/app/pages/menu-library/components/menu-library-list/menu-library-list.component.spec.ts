@@ -1,12 +1,14 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing'
 import { signal } from '@angular/core'
-import { LucideAngularModule } from 'lucide-angular'
+import { LucideAngularModule, Palette } from 'lucide-angular'
 import { TEST_LUCIDE_ICONS } from 'src/testing/test-lucide-icons'
 import { provideHttpClient } from '@angular/common/http'
 import { provideHttpClientTesting } from '@angular/common/http/testing'
-import { provideRouter } from '@angular/router'
+import { Router, provideRouter } from '@angular/router'
+import type { ModuleKey } from '@schemas/modules-pure'
 import { MenuLibraryListComponent } from './menu-library-list.component'
 import { MenuEventDataService } from '@services/menu-event-data.service'
+import { ModuleService } from '@services/module.service'
 import { UserService } from '@services/user.service'
 import type { EventStage, MenuEvent } from '@models/menu-event.model'
 
@@ -30,7 +32,10 @@ describe('MenuLibraryListComponent stage filter', () => {
     Array.from(fixture.nativeElement.querySelectorAll('.card-title')).map((n) => (n as HTMLElement).textContent?.trim())
   const filter = () => component as unknown as { stageFilter_: { (): string; set(v: string): void } }
 
+  const modulesOn = signal<ModuleKey[]>([])
+
   beforeEach(async () => {
+    modulesOn.set([])
     sessionStorage.clear()
     store = signal<MenuEvent[]>([
       make('a', 'inquiry'),
@@ -41,8 +46,9 @@ describe('MenuLibraryListComponent stage filter', () => {
       make('f', 'inquiry', { legacy: true })
     ])
     await TestBed.configureTestingModule({
-      imports: [MenuLibraryListComponent, LucideAngularModule.pick(TEST_LUCIDE_ICONS)],
+      imports: [MenuLibraryListComponent, LucideAngularModule.pick({ ...TEST_LUCIDE_ICONS, Palette })],
       providers: [
+        { provide: ModuleService, useValue: { has: (key: ModuleKey) => modulesOn().includes(key) } },
         provideHttpClient(),
         provideHttpClientTesting(),
         provideRouter([]),
@@ -130,6 +136,66 @@ describe('MenuLibraryListComponent stage filter', () => {
       fixture.detectChanges()
       expect(names()).toEqual(['אירוע high', 'אירוע low', 'אירוע none'])
     })
+  })
+
+  describe('the menu designs entry (plan 765)', () => {
+    const button = (): HTMLButtonElement | null => fixture.nativeElement.querySelector('.header-designs-btn')
+    const headerButtons = (): HTMLElement[] =>
+      Array.from(fixture.nativeElement.querySelectorAll('.ph-end > button')) as HTMLElement[]
+
+    const switchOn = (modules: ModuleKey[]): void => {
+      modulesOn.set(modules)
+      fixture.detectChanges()
+    }
+
+    it('shows the button before "new menu" only with both menu_design and events', () => {
+      expect(button()).toBeNull()
+      switchOn(['menu_design'])
+      expect(button()).toBeNull()
+      switchOn(['events'])
+      expect(button()).toBeNull()
+      switchOn(['events', 'menu_design'])
+      expect(button()?.textContent?.trim()).toBe('menu_designs')
+      const buttons = headerButtons()
+      const newMenu = buttons.find((b) => b.classList.contains('c-btn-primary'))!
+      expect(buttons.indexOf(button()!)).toBeLessThan(buttons.indexOf(newMenu))
+    })
+
+    it('goes to /menu-design', () => {
+      const router = TestBed.inject(Router)
+      const navigate = spyOn(router, 'navigate').and.resolveTo(true)
+      switchOn(['events', 'menu_design'])
+      button()!.click()
+      expect(navigate).toHaveBeenCalledWith(['/menu-design'])
+    })
+
+    for (const width of [1100, 360]) {
+      it(`lies on no other part of the header at ${width}px`, () => {
+        const host: HTMLElement = fixture.nativeElement
+        host.style.display = 'block'
+        host.style.width = `${width}px`
+        document.body.appendChild(host)
+        switchOn(['events', 'menu_design'])
+        const mine = button()!.getBoundingClientRect()
+        expect(mine.width).toBeGreaterThan(0)
+        const others = [
+          host.querySelector<HTMLElement>('.ph-title')!,
+          host.querySelector<HTMLElement>('.ph-search')!,
+          ...headerButtons().filter((b) => b !== button())
+        ].map((part) => part.getBoundingClientRect())
+        for (const other of others.filter((box) => box.width > 0)) {
+          const overlaps =
+            mine.left < other.right - 1 &&
+            other.left < mine.right - 1 &&
+            mine.top < other.bottom - 1 &&
+            other.top < mine.bottom - 1
+          expect(overlaps)
+            .withContext(`${JSON.stringify(mine)} / ${JSON.stringify(other)}`)
+            .toBeFalse()
+        }
+        host.remove()
+      })
+    }
   })
 
   describe('new-inquiry window placement (plan 460)', () => {
