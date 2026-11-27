@@ -242,7 +242,10 @@ Snapshot's)
   - The append-only test: import `withoutRetiredSheetRules` from `../lib/modal-guard.mjs`; the last line becomes
     `assert.equal(head(now), withoutRetiredSheetRules(head(base)))`; the title becomes
     `src/styles.scss above the plan 720 marker is the base file minus the sheet rules plan 757 removed (append-only)`.
-    The base lookup (the three refs, the skip with its printed reason) does not change.
+    The base lookup keeps its three refs and the skip with its printed reason, plus one ref decided in ask 757-1
+    (Planner amendment 2026-11-27): `origin/chore/restaurant-staging` goes right before `origin/main`, in both
+    append-only tests, because staging's own stylesheet changes sit above the markers and a merge-base with
+    `origin/main` counts them. That added ref is intended, not a weakened test.
 - [ ] `scripts/test/style-703.test.mjs`: the same change in its append-only test — import
   `withoutRetiredSheetRules` from `../lib/modal-guard.mjs`, last line
   `assert.equal(head(now), withoutRetiredSheetRules(head(base)))`, title
