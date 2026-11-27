@@ -220,6 +220,22 @@ describe('ScrollRailComponent', () => {
       expect(more('prev').classList).toContain('is-shown')
     })
 
+    it('plan 762: only the side with more shows the sign, as a solid round chevron (the stronger look)', () => {
+      setPhone(true)
+      const shown = fixture.debugElement.queryAll(By.css('.sr-frame .sr-more.is-shown'))
+      expect(shown.length).toBe(1)
+      const sign = shown[0].nativeElement as HTMLElement
+      expect(sign).toBe(more('next'))
+      expect(getComputedStyle(sign).visibility).toBe('visible')
+      const badge = sign.querySelector<HTMLElement>('.sr-more__badge')!
+      expect(badge).not.toBeNull()
+      expect(badge.querySelector('lucide-icon')).not.toBeNull()
+      const box = badge.getBoundingClientRect()
+      expect(Math.round(box.width)).toBe(Math.round(box.height))
+      expect(box.width).toBeGreaterThanOrEqual(24)
+      expect(parseFloat(getComputedStyle(badge).borderTopLeftRadius)).toBeGreaterThan(0)
+    })
+
     it('shows no sign when the content fits', () => {
       fixture.componentInstance.items.set([1, 2])
       fixture.detectChanges()

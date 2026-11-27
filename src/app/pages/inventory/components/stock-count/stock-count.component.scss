@@ -1,6 +1,14 @@
+@use '../../../../core/styles/breakpoints' as *;
+
 @layer components.stock-count {
   :host {
     display: block;
+  }
+
+  // Plan 762: above a phone the row's two containers take no place of their own, so the row stays one line.
+  .stock-count__name-box,
+  .stock-count__controls {
+    display: contents;
   }
 
   // Plan 651: the date, then the tabs, on one row under the header (the header keeps one action: finish the count).
@@ -95,7 +103,8 @@
     color: var(--color-danger);
   }
 
-  .stock-count__row--error > * {
+  .stock-count__row--error > *,
+  .stock-count__row--error > * > * {
     background: color-mix(in srgb, var(--color-danger) 12%, transparent);
   }
 
@@ -160,6 +169,32 @@
   .stock-count__date {
     inline-size: 12rem;
     max-inline-size: 12rem;
+  }
+}
+
+// Plan 762: on a phone each row is two lines — the name, then the controls in the list's own columns, under their
+// headings. Outside @layer so it wins over the unlayered .c-list-body-cell rules in styles.scss.
+@media (max-width: $break-phone-max) {
+  :host .stock-count__head-name,
+  :host .stock-count__name-box,
+  :host .stock-count__controls {
+    grid-column: 1 / -1;
+  }
+
+  :host .stock-count__name-box {
+    display: grid;
+  }
+
+  :host .stock-count__controls {
+    display: grid;
+    grid-template-columns: subgrid;
+  }
+
+  // the name and its controls read as one row: no line between them
+  :host .c-list-body-cell.stock-count__name {
+    padding-block-end: 0;
+
+    border-block-end-width: 0;
   }
 }
 

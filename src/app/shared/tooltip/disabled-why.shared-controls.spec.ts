@@ -3,6 +3,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing'
 import { LucideAngularModule } from 'lucide-angular'
 import { TEST_LUCIDE_ICONS } from 'src/testing/test-lucide-icons'
 import { TranslationService } from '@services/translation.service'
+import { TOOLTIP_TAP_QUERY } from './tooltip.directive'
 import { CounterComponent } from 'src/app/shared/counter/counter.component'
 import { CustomSelectComponent } from 'src/app/shared/custom-select/custom-select.component'
 import { ListRowCheckboxComponent } from 'src/app/shared/list-selection/list-row-checkbox.component'
@@ -55,6 +56,11 @@ describe('disabledWhy on the shared controls (plan 747)', () => {
   }
 
   beforeEach(async () => {
+    // Plan 762: a click shows a reason only where the tooltip works by tap (a phone width, or no hover).
+    const real = window.matchMedia.bind(window)
+    spyOn(window, 'matchMedia').and.callFake((query: string) =>
+      query === TOOLTIP_TAP_QUERY ? ({ matches: true } as MediaQueryList) : real(query)
+    )
     await TestBed.configureTestingModule({
       imports: [HostComponent, LucideAngularModule.pick(TEST_LUCIDE_ICONS)],
       providers: [{ provide: TranslationService, useValue: { translate: (k: string) => k || '' } }]
@@ -104,7 +110,7 @@ describe('disabledWhy on the shared controls (plan 747)', () => {
     expect(wrap.getAttribute('aria-disabled')).toBe('true')
     wrap.click()
     expect(box()?.textContent?.trim()).toBe('no permission')
-    // A click on the box itself is blocked too (a second click only closes the pinned tooltip).
+    // A click on the box itself is blocked too (this click lands while the tooltip is open).
     q<HTMLInputElement>('app-list-row-checkbox input').click()
     expect(host.toggles).toBe(0)
     enable()

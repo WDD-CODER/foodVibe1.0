@@ -13,9 +13,10 @@ type HostKind = 'press' | 'text' | 'picker'
  *
  * `[appDisabledWhy]="reason"` — the reason is already translated; `null` or `''` means the control works as usual.
  * With a reason the host gets `aria-disabled="true"` and the class `is-disabled`, stays reachable (hover, focus,
- * tap), its action never runs, and the reason shows in the shared tooltip: on hover and keyboard focus, and on a
- * click or tap. The native `disabled` attribute is never set — a natively disabled control gets no pointer or focus
- * events, so it could not explain itself. Keep `[disabled]` only for "its own action is running".
+ * tap), its action never runs, and the reason shows in the shared tooltip, which opens and closes as every tooltip
+ * does: on hover and keyboard focus, or by tap on a phone or a device with no hover. The native `disabled`
+ * attribute is never set — a natively disabled control gets no pointer or focus events, so it could not explain
+ * itself. Keep `[disabled]` only for "its own action is running".
  *
  * - `<button>`, `<a>` and other pressable hosts: `click` and Enter / Space are swallowed in the capture phase.
  * - `<input>` (text-like) and `<textarea>`: also `readOnly` while the reason holds; every key but Tab / Escape is
@@ -55,11 +56,13 @@ export class DisabledWhyDirective {
 
   private readonly onLabelEnter_ = (event: PointerEvent): void => this.tooltip_.onPointerEnter(event)
   private readonly onLabelLeave_ = (): void => this.tooltip_.onPointerLeave()
+  /** A press on the label is a press on the control: the focus the label then hands the input opens nothing. */
+  private readonly onLabelPress_ = (): void => this.tooltip_.onPressStart()
 
   private readonly onClick_ = (event: Event): void => {
     if (!this.reason_()) return
     this.swallow_(event)
-    // The tooltip's own click listener sits on this element and was just stopped: open (or pin) it here.
+    // The tooltip's own click listener sits on this element and was just stopped: hand it the click here.
     this.tooltip_.onClick()
   }
 
@@ -94,12 +97,12 @@ export class DisabledWhyDirective {
 
     effect(() => {
       const reason = this.reason_()
-      this.tooltip_.hold(reason ?? this.disabledWhyTip(), !!reason)
+      this.tooltip_.hold(reason ?? this.disabledWhyTip())
     })
 
     effect(() => {
       const blocked = !!this.reason_()
-      // A tooltip left open from the other state would show the wrong text pinned.
+      // A tooltip left open from the other state would show the wrong text.
       this.tooltip_.close()
       this.applyReadOnly_(blocked)
       this.applyTabindex_(blocked)
@@ -119,10 +122,12 @@ export class DisabledWhyDirective {
     if (label === this.label_) return
     this.label_?.removeEventListener('pointerenter', this.onLabelEnter_)
     this.label_?.removeEventListener('pointerleave', this.onLabelLeave_)
+    this.label_?.removeEventListener('pointerdown', this.onLabelPress_)
     this.label_ = label
     this.tooltip_.anchorTo(label)
     label?.addEventListener('pointerenter', this.onLabelEnter_)
     label?.addEventListener('pointerleave', this.onLabelLeave_)
+    label?.addEventListener('pointerdown', this.onLabelPress_)
   }
 
   private swallow_(event: Event): void {

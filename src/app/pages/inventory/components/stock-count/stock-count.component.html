@@ -84,7 +84,7 @@
       </button>
     </div>
     @if (view_() === 'sheet') {
-      <div class="c-grid-header-cell" role="columnheader">{{ 'product' | translatePipe }}</div>
+      <div class="c-grid-header-cell stock-count__head-name" role="columnheader">{{ 'product' | translatePipe }}</div>
       <div class="c-grid-header-cell" role="columnheader">{{ 'stk_col_amount' | translatePipe }}</div>
       <div class="c-grid-header-cell" role="columnheader">{{ 'stk_col_unit' | translatePipe }}</div>
       <div class="c-grid-header-cell" role="columnheader">{{ 'stk_counted' | translatePipe }}</div>
@@ -182,111 +182,118 @@
           data-testid="stk-row"
           [class.stock-count__row--error]="errorProductId_() === row.product._id"
         >
-          <div class="c-list-body-cell stock-count__name" role="cell">
-            @if (errorProductId_() === row.product._id) {
-              <lucide-icon name="alert-triangle" [size]="16" class="stock-count__error-icon"></lucide-icon>
-            }
-            {{ row.product.nameHebrew }}
-            @if (aiRows_().has(row.product._id)) {
-              <span class="c-chip c-chip--tag c-chip--amber stock-count__ai-tag" data-testid="stk-ai-tag">{{
-                'stk_ai_tag' | translatePipe
-              }}</span>
-            }
+          <!-- Plan 762: the name in one container, the row's controls in another. On a phone each is a line of its
+               own (name on top); above it both are layout-less and the row is one line. -->
+          <div class="stock-count__name-box" role="presentation">
+            <div class="c-list-body-cell stock-count__name" role="cell">
+              @if (errorProductId_() === row.product._id) {
+                <lucide-icon name="alert-triangle" [size]="16" class="stock-count__error-icon"></lucide-icon>
+              }
+              {{ row.product.nameHebrew }}
+              @if (aiRows_().has(row.product._id)) {
+                <span class="c-chip c-chip--tag c-chip--amber stock-count__ai-tag" data-testid="stk-ai-tag">{{
+                  'stk_ai_tag' | translatePipe
+                }}</span>
+              }
+            </div>
           </div>
-          <div class="c-list-body-cell" role="cell" dir="ltr">
-            <app-counter [value]="row.state.amount" [min]="0" (valueChange)="setAmount(row.product, $event)" />
-          </div>
-          <div class="c-list-body-cell" [class.stock-count__unit-cell]="narrow_()" role="cell">
-            @if (row.state.choose) {
-              <div class="c-chip-group stock-count__unit-choice" role="radiogroup" data-testid="stk-unit-choice">
-                @for (choice of row.choices; track choice.value) {
-                  @if (choice.value === addUnitValue) {
+          <div class="stock-count__controls" role="presentation">
+            <div class="c-list-body-cell" role="cell" dir="ltr">
+              <app-counter [value]="row.state.amount" [min]="0" (valueChange)="setAmount(row.product, $event)" />
+            </div>
+            <div class="c-list-body-cell" [class.stock-count__unit-cell]="narrow_()" role="cell">
+              @if (row.state.choose) {
+                <div class="c-chip-group stock-count__unit-choice" role="radiogroup" data-testid="stk-unit-choice">
+                  @for (choice of row.choices; track choice.value) {
+                    @if (choice.value === addUnitValue) {
+                      <button
+                        type="button"
+                        class="c-chip c-chip--tap"
+                        data-testid="stk-unit-add"
+                        (click)="setUnit(row.product, choice.value)"
+                      >
+                        {{ choice.label | translatePipe }}
+                      </button>
+                    } @else {
+                      <label class="c-chip c-chip--toggle">
+                        <input
+                          type="radio"
+                          [name]="'stk-unit-' + row.product._id"
+                          [value]="choice.value"
+                          (change)="setUnit(row.product, choice.value)"
+                        />
+                        <span>{{ choice.label }}</span>
+                      </label>
+                    }
+                  }
+                </div>
+              } @else {
+                <app-custom-select
+                  [options]="row.options"
+                  [compact]="true"
+                  [ngModel]="row.state.unit"
+                  (valueChange)="setUnit(row.product, $event)"
+                />
+              }
+              @if (narrow_()) {
+                <!-- A fixed slot on every row: the "i" button or nothing, so the unit column stays straight. -->
+                <span class="stock-count__base-slot" data-testid="stk-base-slot">
+                  @if (!row.state.choose && row.base) {
                     <button
                       type="button"
-                      class="c-chip c-chip--tap"
-                      data-testid="stk-unit-add"
-                      (click)="setUnit(row.product, choice.value)"
+                      class="c-icon-btn stock-count__base-btn"
+                      data-testid="stk-base-btn"
+                      [attr.aria-label]="baseLabel_(row.base)"
+                      [appTooltip]="baseLabel_(row.base)"
+                      tooltipPlacement="below"
+                      (click)="$event.stopPropagation()"
                     >
-                      {{ choice.label | translatePipe }}
+                      <lucide-icon name="info" [size]="16"></lucide-icon>
                     </button>
-                  } @else {
-                    <label class="c-chip c-chip--toggle">
-                      <input
-                        type="radio"
-                        [name]="'stk-unit-' + row.product._id"
-                        [value]="choice.value"
-                        (change)="setUnit(row.product, choice.value)"
-                      />
-                      <span>{{ choice.label }}</span>
-                    </label>
                   }
-                }
-              </div>
-            } @else {
-              <app-custom-select
-                [options]="row.options"
-                [compact]="true"
-                [ngModel]="row.state.unit"
-                (valueChange)="setUnit(row.product, $event)"
-              />
-            }
-            @if (narrow_()) {
-              <!-- A fixed slot on every row: the "i" button or nothing, so the unit column stays straight. -->
-              <span class="stock-count__base-slot" data-testid="stk-base-slot">
-                @if (!row.state.choose && row.base) {
-                  <button
-                    type="button"
-                    class="c-icon-btn stock-count__base-btn"
-                    data-testid="stk-base-btn"
-                    [attr.aria-label]="baseLabel_(row.base)"
-                    [appTooltip]="baseLabel_(row.base)"
-                    [tooltipOnClick]="true"
-                    tooltipPlacement="below"
-                    (click)="$event.stopPropagation()"
-                  >
-                    <lucide-icon name="info" [size]="16"></lucide-icon>
-                  </button>
-                }
-              </span>
-            }
-          </div>
-          <div
-            class="c-list-body-cell stock-count__counted"
-            role="cell"
-            [style.--stock-count-mark-size]="mark_().box"
-            [style.--row-checkbox-size]="mark_().box"
-            [style.--stock-count-mark-tap]="mark_().tap"
-          >
-            @if (narrow_()) {
-              <app-list-row-checkbox
-                [checked]="row.state.counted"
-                [disabledWhy]="row.state.fix || row.state.choose ? ('why_count_unit_first' | translatePipe) : null"
-                (toggle)="toggleCounted(row.product)"
-              />
-            } @else {
-              <label class="c-chip c-chip--toggle">
-                <input
-                  type="checkbox"
+                </span>
+              }
+            </div>
+            <div
+              class="c-list-body-cell stock-count__counted"
+              role="cell"
+              [style.--stock-count-mark-size]="mark_().box"
+              [style.--row-checkbox-size]="mark_().box"
+              [style.--stock-count-mark-tap]="mark_().tap"
+            >
+              @if (narrow_()) {
+                <app-list-row-checkbox
                   [checked]="row.state.counted"
-                  [appDisabledWhy]="row.state.fix || row.state.choose ? ('why_count_unit_first' | translatePipe) : null"
-                  (change)="toggleCounted(row.product)"
+                  [disabledWhy]="row.state.fix || row.state.choose ? ('why_count_unit_first' | translatePipe) : null"
+                  (toggle)="toggleCounted(row.product)"
                 />
-                <span>{{ 'stk_counted' | translatePipe }}</span>
-              </label>
+              } @else {
+                <label class="c-chip c-chip--toggle">
+                  <input
+                    type="checkbox"
+                    [checked]="row.state.counted"
+                    [appDisabledWhy]="
+                      row.state.fix || row.state.choose ? ('why_count_unit_first' | translatePipe) : null
+                    "
+                    (change)="toggleCounted(row.product)"
+                  />
+                  <span>{{ 'stk_counted' | translatePipe }}</span>
+                </label>
+              }
+            </div>
+            @if (baseColumn_()) {
+              <app-column-carousel-cell>
+                <div
+                  class="c-list-body-cell stock-count__base"
+                  appColumnSlide
+                  [label]="'stk_col_in_base' | translatePipe"
+                  dir="ltr"
+                >
+                  {{ row.base }}
+                </div>
+              </app-column-carousel-cell>
             }
           </div>
-          @if (baseColumn_()) {
-            <app-column-carousel-cell>
-              <div
-                class="c-list-body-cell stock-count__base"
-                appColumnSlide
-                [label]="'stk_col_in_base' | translatePipe"
-                dir="ltr"
-              >
-                {{ row.base }}
-              </div>
-            </app-column-carousel-cell>
-          }
           @if (row.state.choose) {
             <p class="stock-count__unit-note" data-testid="stk-unit-choose">{{ 'stk_choose_unit' | translatePipe }}</p>
           }
