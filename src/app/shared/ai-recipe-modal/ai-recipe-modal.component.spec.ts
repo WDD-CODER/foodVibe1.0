@@ -9,7 +9,7 @@ import { LucideAngularModule } from 'lucide-angular'
 import { TEST_LUCIDE_ICONS } from 'src/testing/test-lucide-icons'
 import { of, throwError } from 'rxjs'
 import { GeminiService } from '@services/gemini.service'
-import { getGeminiUsage } from '@utils/gemini-usage.util'
+import { getGeminiUsage, type GeminiUserAllowance } from '@utils/gemini-usage.util'
 import { GeminiShotsService } from '@services/gemini-shots.service'
 import { AiRecipeDraftService, type AiRecipeDraft } from '@services/ai-recipe-draft.service'
 import type { ParsedResult } from '@models/parsed-result.model'
@@ -29,6 +29,7 @@ type Internals = {
 describe('AiRecipeModalComponent paste tab (plan 439)', () => {
   const isOpen_ = signal(false)
   const initialInputMode_ = signal<AiModalInputMode>('text')
+  const mode_ = signal<'create' | 'edit'>('create')
   let gemini: jasmine.SpyObj<GeminiService>
   let shots: jasmine.SpyObj<GeminiShotsService>
   let fixture: ComponentFixture<AiRecipeModalComponent>
@@ -50,6 +51,7 @@ describe('AiRecipeModalComponent paste tab (plan 439)', () => {
     spyOn(window, 'fetch').and.rejectWith(new Error('offline'))
     isOpen_.set(false)
     initialInputMode_.set('text')
+    mode_.set('create')
     gemini = jasmine.createSpyObj<GeminiService>('GeminiService', ['parseText', 'offerModelSwitch', 'fetchUsage'])
     gemini.offerModelSwitch.and.returnValue(false)
     gemini.fetchUsage.and.callFake(() => Promise.resolve(getGeminiUsage()))
@@ -66,7 +68,7 @@ describe('AiRecipeModalComponent paste tab (plan 439)', () => {
         { provide: GeminiShotsService, useValue: shots },
         {
           provide: AiRecipeModalService,
-          useValue: { isOpen: isOpen_, initialInputMode: initialInputMode_, mode: signal('create'), close: () => {} }
+          useValue: { isOpen: isOpen_, initialInputMode: initialInputMode_, mode: mode_, close: () => {} }
         }
       ]
     })
@@ -191,5 +193,46 @@ describe('AiRecipeModalComponent paste tab (plan 439)', () => {
       fixture.detectChanges()
       expect(hint()).toBeNull()
     })
+  })
+
+  describe('daily budget bar (plan 761)', () => {
+    const usage = { ...getGeminiUsage(), budget: 100, used: 40, remaining: 60 }
+    const all = (selector: string): Element[] =>
+      Array.from((fixture.nativeElement as HTMLElement).querySelectorAll(selector))
+    const labels = () => all('.ai-usage-label').map((n) => (n.textContent ?? '').trim())
+
+    const open = async (mode: 'create' | 'edit', mine?: GeminiUserAllowance) => {
+      gemini.fetchUsage.and.callFake(() => Promise.resolve(mine ? { ...usage, mine } : usage))
+      mode_.set(mode)
+      isOpen_.set(true)
+      fixture.detectChanges()
+      await fixture.whenStable()
+      fixture.detectChanges()
+    }
+
+    for (const mode of ['create', 'edit'] as const) {
+      it(`shows a regular user only his calls-left line (${mode})`, async () => {
+        await open(mode, { allowance: 5, used: 3, remaining: 2, unlimited: false })
+        expect(all('.ai-usage-bar').length).toBe(1)
+        expect(labels()).toEqual(['ai_calls_left'])
+        expect(all('[data-testid="ai-calls-left"]').length).toBe(1)
+        expect((fixture.nativeElement as HTMLElement).textContent).not.toContain('ai_daily_budget')
+        expect(all('.ai-usage-count').length).toBe(0)
+        expect(all('.ai-usage-track').length).toBe(0)
+      })
+
+      it(`shows the platform admin the all-users bar and the unlimited line (${mode})`, async () => {
+        await open(mode, { allowance: 100, used: 0, remaining: 100, unlimited: true })
+        expect(all('.ai-usage-bar').length).toBe(1)
+        expect(labels()).toEqual(['ai_daily_budget', 'ai_calls_unlimited'])
+        expect(all('.ai-usage-count')[0]?.textContent).toContain('40 / 100')
+        expect(all('.ai-usage-track .ai-usage-fill').length).toBe(1)
+      })
+
+      it(`shows no bar when there is no allowance line (${mode})`, async () => {
+        await open(mode)
+        expect(all('.ai-usage-bar').length).toBe(0)
+      })
+    }
   })
 })

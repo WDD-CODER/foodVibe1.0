@@ -92,8 +92,10 @@ export class AiRecipeModalComponent implements OnInit {
     const offer = this.gemini.modelSwitch()
     return offer ? this.translation.translate('ai_model_switch_to').replace('{model}', offer.to) : ''
   })
-  /** Plan 736: «נשארו לך X מתוך Y קריאות AI» (or the unlimited line) under the daily bar; '' when signed out. */
+  /** Plan 736: «נשארו לך X מתוך Y קריאות AI» (or the unlimited line) in the usage bar; '' when signed out. */
   protected readonly callsLeftLine_ = computed(() => aiCallsLeftLine(this.geminiUsage_(), this.translation))
+  /** Plan 761: the all-users daily budget is the platform admin's only (the server's `unlimited` flag). */
+  protected readonly isPlatformAdmin_ = computed(() => this.geminiUsage_().mine?.unlimited === true)
   /** "נותרו X" — calls left today across the model chain (shared by all users). */
   protected readonly budgetLeftLabel_ = computed(() =>
     this.translation.translate('ai_budget_left').replace('{n}', String(this.geminiUsage_().remaining))

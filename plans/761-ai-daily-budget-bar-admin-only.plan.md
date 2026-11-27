@@ -101,9 +101,9 @@ line or file this plan names was removed, renamed or rewritten).
 
 These are the plan's milestones: a Worker does them in order and ticks each one after it is checked.
 
-- [ ] E1: Write the spec for admin and non-admin bars — src/app/shared/ai-recipe-modal/ai-recipe-modal.component.spec.ts
-- [ ] E2: Show the all-users bar only to the platform admin — src/app/shared/ai-recipe-modal/ai-recipe-modal.component.html
-- [ ] E3: Run every automatic check and paste the outputs under Execution Notes — plans/761-ai-daily-budget-bar-admin-only.plan.md
+- [x] E1: Write the spec for admin and non-admin bars — src/app/shared/ai-recipe-modal/ai-recipe-modal.component.spec.ts
+- [x] E2: Show the all-users bar only to the platform admin — src/app/shared/ai-recipe-modal/ai-recipe-modal.component.html
+- [x] E3: Run every automatic check and paste the outputs under Execution Notes — plans/761-ai-daily-budget-bar-admin-only.plan.md
 
 ## What happens when
 - A user with no allowance line (none set yet): the bar is not shown at all.
@@ -118,3 +118,30 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
 - none
 
 ## Execution Notes
+
+- `scope-check.mjs --drift` → `REALITY: clean` (Step 0 not needed).
+- Focused spec (`ng test --include=…/ai-recipe-modal.component.spec.ts`): before the template change → exit 1,
+  `TOTAL: 4 FAILED, 12 SUCCESS`; after → exit 0, `TOTAL: 16 SUCCESS`.
+- `orch-state.mjs prepare --missing server/generated/schemas` → exit 0, `PREPARE: ok (generated)`.
+- `pnpm run build` → exit 0 (budget and CommonJS warnings only).
+- `pnpm run lint` → exit 0, `69 problems (0 errors, 69 warnings)`.
+- `pnpm run test:ci` → exit 0, `TOTAL: 2800 SUCCESS`.
+- `kit-manifest-check.mjs --root .` → exit 0, `KIT_MANIFEST: ok`.
+- `scope-check.mjs --diff=origin/orch/live-fix` → exit 0, `SCOPE: ok` (run with the worktree's script; the main
+  folder's copy reads the main folder, not this worktree, and exited 1 on files there).
+- `kit-checks.mjs --base origin/orch/live-fix` → exit 0, `KIT_CHECKS: ok (6 checks)`.
+- `override-check.mjs` → exit 0, `OVERRIDE_CHECK: ok`.
+- `pnpm run lint:icons` → exit 0; `pnpm run lint:no-native-select` → exit 0.
+- `plan-ledger-check.mjs` → exit 0, `PLAN_LEDGER: OK`.
+- `breadcrumbs-check.mjs` → exit 0, `BREADCRUMBS: clean`.
+- `ci-scope-check.mjs --checkout-branch` → exit 0, `skipped (branch "" is not feat/NNN-*)`.
+- `scope-check.mjs --arch` → exit 0, `ARCH: ok INV-6, INV-none`.
+- `log-query.mjs --since=plan-start --level=error` → exit 0, `SKIP: no database configured`.
+- `[human]` items left unticked for the Human.
+- behaviour: the admin condition is the usage answer's `mine.unlimited` (the server sets it from the platform-admin
+  flag; the component already reads it for plan 736), so the admin's bar appears once that answer arrives — reverse:
+  read `UserService.isPlatformAdmin_` instead.
+- seen: `src/app/shared/ai-product-modal/ai-product-modal.component.html:20` still shows the all-users daily budget to
+  every user.
+- seen: `src/app/shared/ai-menu-modal/ai-menu-modal.component.html:19` still shows its budget-based usage bar to every
+  user.
