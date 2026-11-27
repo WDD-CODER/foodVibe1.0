@@ -67,6 +67,7 @@ src/app/**/breadcrumbs.md
 docs/agent/house-style.md
 docs/brain/component-families.md
 docs/brain/inventory.md
+docs/workflow-kit/manifest.json
 ```
 
 ## Read Scope
