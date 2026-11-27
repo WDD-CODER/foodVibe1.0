@@ -81,6 +81,18 @@ describe('UserManagementComponent', () => {
     expect(text).toContain('business_role_staff')
   })
 
+  it('the platform admin chip names itself with the shared tooltip, not the browser title', () => {
+    const chip = (fixture.nativeElement as HTMLElement).querySelector<HTMLElement>(
+      '[data-testid="platform-admin-chip"]'
+    )!
+    expect(chip.getAttribute('title')).toBeNull()
+    expect(chip.getAttribute('aria-label')).toBe('platform_admin')
+    chip.dispatchEvent(new FocusEvent('focusin'))
+    expect(document.body.querySelector('.c-tooltip')?.textContent).toContain('platform_admin')
+    chip.dispatchEvent(new FocusEvent('focusout'))
+    expect(document.body.querySelector('.c-tooltip')).toBeNull()
+  })
+
   it('deleting an owner asks, then the learned-data question, then the final confirm; keep deletes with false', async () => {
     await component.onDeleteUser(OWNER)
     expect(confirm.open).toHaveBeenCalledTimes(2)

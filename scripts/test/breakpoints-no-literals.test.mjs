@@ -18,8 +18,15 @@ function walk(dir, ext, out = []) {
   return out
 }
 
-const NAMES = ['break-phone-max', 'break-tablet-min', 'break-tablet-max', 'break-desktop-min']
-const EXPECTED = { 'break-phone-max': 767, 'break-tablet-min': 768, 'break-tablet-max': 1023, 'break-desktop-min': 1024 }
+// Plan 763: `break-phone-narrow-max` is a narrower step inside the phone range.
+const NAMES = ['break-phone-narrow-max', 'break-phone-max', 'break-tablet-min', 'break-tablet-max', 'break-desktop-min']
+const EXPECTED = {
+  'break-phone-narrow-max': 419,
+  'break-phone-max': 767,
+  'break-tablet-min': 768,
+  'break-tablet-max': 1023,
+  'break-desktop-min': 1024
+}
 
 function sassNames(text) {
   const out = {}
@@ -30,7 +37,7 @@ function sassNames(text) {
   return out
 }
 
-test('src/styles.scss and the component partial hold the same four names', () => {
+test('src/styles.scss and the component partial hold the same five names', () => {
   assert.deepEqual(sassNames(read('src/styles.scss')), EXPECTED)
   assert.deepEqual(sassNames(read('src/app/core/styles/_breakpoints.scss')), EXPECTED)
 })
@@ -44,6 +51,7 @@ test('src/styles.scss keeps no old breakpoint name', () => {
 
 test('breakpoints.ts holds the same values as the styles', () => {
   const ts = read('src/app/core/utils/breakpoints.ts')
+  assert.match(ts, /export const PHONE_NARROW_MAX = 419\b/)
   assert.match(ts, /export const PHONE_MAX = 767\b/)
   assert.match(ts, /export const TABLET_MAX = 1023\b/)
 })
@@ -55,7 +63,7 @@ test('no @media under src types a width (src/styles.scss included)', () => {
     lines.forEach((line, i) => {
       if (/@media[^{]*\(\s*m(?:in|ax)-width:\s*\d/.test(line)) bad.push(`${f}:${i + 1}: ${line.trim()}`)
       const m = /@media[^{]*\(\s*m(?:in|ax)-width:\s*([^)]+)\)/.exec(line)
-      if (m && !/^\$break-(phone-max|tablet-min|tablet-max|desktop-min)$/.test(m[1].trim())) {
+      if (m && !/^\$break-(phone-narrow-max|phone-max|tablet-min|tablet-max|desktop-min)$/.test(m[1].trim())) {
         bad.push(`${f}:${i + 1}: ${line.trim()}`)
       }
     })

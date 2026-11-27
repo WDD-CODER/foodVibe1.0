@@ -25,7 +25,13 @@
                   <span class="c-chip teal">{{ 'business_role_' + user.businessRole | translatePipe }}</span>
                 }
                 @if (user.isPlatformAdmin) {
-                  <span class="c-chip amber" [attr.title]="'platform_admin' | translatePipe">
+                  <span
+                    class="c-chip amber"
+                    role="img"
+                    data-testid="platform-admin-chip"
+                    [attr.aria-label]="'platform_admin' | translatePipe"
+                    [appTooltip]="'platform_admin' | translatePipe"
+                  >
                     <lucide-icon name="crown" [size]="12"></lucide-icon>
                   </span>
                 }
