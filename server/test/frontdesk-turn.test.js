@@ -722,6 +722,184 @@ describe('plan 733: one holding message on a technical failure', () => {
   });
 });
 
+describe('plan 754: speed', () => {
+  const { FIRST_MODEL_LIMIT_MS, TURN_BUDGET_MS } = require('../routes/ai/frontdesk');
+  const { DEFAULT_MODELS } = require('../services/gemini-client');
+  const { setChannelForTest, resetChannelsForTest } = require('../services/channels');
+  const { HANDOFF } = require('../constants/frontdesk-guard-words');
+  const [M0, M1] = DEFAULT_MODELS;
+  const LOGGER_KEYS = ['level', 'time', 'service'];
+  const timeoutError = () => Object.assign(new Error('t'), { name: 'TimeoutError' });
+
+  beforeEach(async () => { await db().collection('assistantRuns').deleteMany({}); });
+  afterEach(() => {
+    resetChannelsForTest();
+    vi.restoreAllMocks();
+    const text = JSON.stringify(logs.records);
+    for (const secret of ['GUEST-SECRET-TEXT', 'שלום']) expect(text).not.toContain(secret);
+  });
+
+  const oneRun = async () => {
+    const all = await db().collection('assistantRuns').find({}).toArray();
+    expect(all).toHaveLength(1);
+    return all[0];
+  };
+  const stepOf = (run, key) => run.steps.find(s => s.key === key);
+  /** The time limits of the model calls; other code may ask for its own. */
+  const spyLimits = () => {
+    const limits = [];
+    vi.spyOn(AbortSignal, 'timeout').mockImplementation(ms => { limits.push(ms); return new AbortController().signal; });
+    return () => limits.filter(ms => ms === 6000 || ms === 15000);
+  };
+
+  it('the first model is slow: cut after 6 s, the next one answers, both calls are recorded', async () => {
+    const { conversation } = await setup();
+    fetchMock.mockRejectedValueOnce(timeoutError()).mockResolvedValue(modelAnswer(SMALL));
+    const limits = spyLimits();
+    expect(await turn(conversation)).toEqual({ ok: true, sent: true });
+    const out = await outbound();
+    expect(out).toHaveLength(1);
+    expect(out[0]).toMatchObject({ author: 'ai', text: 'שלום' });
+    expect(limits()).toEqual([6000, 15000]);
+    const run = await oneRun();
+    expect(run).toMatchObject({ outcome: 'answered', fallbackUsed: true, model: M1 });
+    expect(stepOf(run, 'ai').status).toBe('note');
+    expect(stepOf(run, 'ai').out.attempts).toMatchObject([
+      { model: M0, ok: false, reason: 'slow', limitMs: 6000, try: 1 }, { model: M1, ok: true, try: 1 },
+    ]);
+  });
+
+  it('the first model is fast: one call, one attempt', async () => {
+    const { conversation } = await setup();
+    fetchMock.mockResolvedValue(modelAnswer(SMALL));
+    await turn(conversation);
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    const ai = stepOf(await oneRun(), 'ai');
+    expect(ai.status).toBe('ok');
+    expect(ai.out.attempts).toHaveLength(1);
+    expect(ai.out.attempts[0].ok).toBe(true);
+  });
+
+  it('every model is slow: failed as a timeout, one holding message, never a small bucket', async () => {
+    const { conversation } = await setup();
+    fetchMock.mockRejectedValue(timeoutError());
+    expect(await turn(conversation)).toEqual({ ok: false, reason: 'timeout', group: 'timeout' });
+    const out = await outbound();
+    expect(out).toHaveLength(1);
+    expect(out[0]).toMatchObject({ author: 'server', text: fixedText('fd_ai_holding_default') });
+    expect((await conv(conversation._id)).status).toBe('human');
+    const run = await oneRun();
+    expect(run).toMatchObject({ outcome: 'failed', reason: 'timeout' });
+    const { attempts } = stepOf(run, 'ai').out;
+    expect(attempts.map(a => a.model)).toEqual([M0, M1, M0, M1]);
+    expect(attempts.map(a => a.reason)).toEqual(['slow', 'timeout', 'timeout', 'timeout']);
+  });
+
+  it('a refusal that made no HTTP call is still one attempt', async () => {
+    const { conversation } = await setup();
+    const { askTurnModel } = require('../routes/ai/frontdesk');
+    fetchMock.mockResolvedValue(jsonResponse(429, {
+      error: { details: [{ violations: [{ quotaId: 'GenerateRequestsPerDayPerProjectPerModel-FreeTier' }] }] },
+    }));
+    const args = {
+      body: { contents: [] }, usage: { businessId: conversation.businessId, feature: 'frontdesk_turn' },
+      log: require('../logger').logger,
+    };
+    await askTurnModel(args);
+    await askTurnModel(args);
+    fetchMock.mockClear();
+    const asked = await askTurnModel(args);
+    expect(fetchMock).not.toHaveBeenCalled();
+    expect(asked).toMatchObject({ ok: false, reason: 'all_exhausted' });
+    expect(asked.trace.attempts).toMatchObject([{ ok: false, reason: 'all_exhausted', try: 1 }]);
+  });
+
+  it('the limit fits the budget', () => {
+    expect(FIRST_MODEL_LIMIT_MS).toBe(6000);
+    expect(FIRST_MODEL_LIMIT_MS + 15000 + 2000).toBeLessThanOrEqual(TURN_BUDGET_MS);
+    expect(TURN_BUDGET_MS).toBe(35000);
+  });
+
+  describe('typing', () => {
+    const spyTyping = (typing = vi.fn(async () => {})) => {
+      setChannelForTest('sim', {
+        name: 'sim', real: false, clientSource: 'manual',
+        send: async () => ({ providerMessageId: 'sim:t', status: 'delivered' }), typing,
+      });
+      return typing;
+    };
+    const settle = () => new Promise(resolve => setTimeout(resolve, 20));
+
+    it('a level-1 turn asks for the sign once, for the newest guest message', async () => {
+      const typing = spyTyping();
+      const { conversation } = await setup();
+      fetchMock.mockResolvedValue(modelAnswer(SMALL));
+      await turn(conversation);
+      await vi.waitFor(() => expect(typing).toHaveBeenCalledTimes(1));
+      expect(typing.mock.calls[0][2]).toEqual({ providerMessageId: 'pm1' });
+    });
+
+    it.each([
+      ['a conversation a person holds', { status: 'human' }, {}],
+      ['suggest mode', {}, { mode: 'suggest' }],
+      ['a real guest at level 0', { level: 0 }, {}],
+    ])('not for %s', async (_name, seed, options) => {
+      const typing = spyTyping();
+      const { conversation } = await setup(seed);
+      fetchMock.mockResolvedValue(modelAnswer(SMALL));
+      await turn(conversation, options);
+      await settle();
+      expect(typing).not.toHaveBeenCalled();
+    });
+
+    it('not for a turn the pre-check stops', async () => {
+      const typing = spyTyping();
+      const { conversation } = await setup();
+      await db().collection('messages').updateOne({ _id: 'g1' }, { $set: { text: HANDOFF[0] } });
+      await turn(conversation);
+      await settle();
+      expect(fetchMock).not.toHaveBeenCalled();
+      expect(typing).not.toHaveBeenCalled();
+    });
+
+    it('a sign that fails changes nothing: one warning with ids only', async () => {
+      const typing = spyTyping(vi.fn(async () => { throw new Error('no'); }));
+      const { conversation } = await setup();
+      fetchMock.mockResolvedValue(modelAnswer(SMALL));
+      expect(await turn(conversation)).toEqual({ ok: true, sent: true });
+      await vi.waitFor(() => expect(logs.byEvent('outbound.typing.failed')).toHaveLength(1));
+      expect(typing).toHaveBeenCalledTimes(1);
+      const [record] = logs.byEvent('outbound.typing.failed');
+      expect(Object.keys(record).filter(key => !LOGGER_KEYS.includes(key)).sort())
+        .toEqual(['conversationId', 'errName', 'event']);
+    });
+  });
+
+  describe('the timings in the record', () => {
+    it('the wait numbers on the first step and the time to answer on the send step', async () => {
+      const { conversation } = await setup();
+      fetchMock.mockResolvedValue(modelAnswer(SMALL));
+      await turn(conversation, {
+        inbound: { at: 5, waitedMs: 2000, quietMs: 2000, capped: false, arrivedAt: Date.now() - 3000 },
+      });
+      const run = await oneRun();
+      expect(stepOf(run, 'inbound').out).toEqual({ waitedMs: 2000, answers: 1, quietMs: 2000, capped: false });
+      const { answerMs } = stepOf(run, 'send').out;
+      expect(answerMs).toBeGreaterThanOrEqual(3000);
+      expect(answerMs).toBeLessThan(60000);
+    });
+
+    it('a run that was not told them has neither', async () => {
+      const { conversation } = await setup();
+      fetchMock.mockResolvedValue(modelAnswer(SMALL));
+      await turn(conversation, { inbound: { at: 5, waitedMs: 6000 } });
+      const run = await oneRun();
+      expect(stepOf(run, 'inbound').out).toEqual({ waitedMs: 6000, answers: 1 });
+      expect(stepOf(run, 'send').out.answerMs).toBeUndefined();
+    });
+  });
+});
+
 describe('plan 752: every turn leaves a run record', () => {
   const { RUN_STEP_KEYS } = require('../generated/schemas/entities');
   const { DEFAULT_MODELS } = require('../services/gemini-client');

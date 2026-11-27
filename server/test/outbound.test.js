@@ -5,7 +5,7 @@ const fs = require('fs')
 const path = require('path')
 const { buildTestApp, teardownTestApp, testDb } = require('./helpers/app')
 const { seedBusiness, seedConversation, NOW } = require('./helpers/conversation-fixtures')
-const { sendOut } = require('../services/outbound')
+const { sendOut, showTyping } = require('../services/outbound')
 const { setChannelForTest, resetChannelsForTest } = require('../services/channels')
 
 beforeAll(async () => { await buildTestApp() }, 60000)
@@ -116,5 +116,55 @@ describe('sendOut', () => {
     }
     walk(root)
     expect(hits).toEqual([])
+  })
+})
+
+describe('showTyping (plan 754)', () => {
+  const fake = (typing = vi.fn(async () => {})) => {
+    setChannelForTest('whatsapp', {
+      name: 'whatsapp', real: true, clientSource: 'whatsapp', typing,
+      send: async () => ({ providerMessageId: 'w:1', status: 'sent' }),
+    })
+    return typing
+  }
+  const guestMessage = conversation => db().collection('messages').insertOne({
+    _id: 'g1', businessId: 'b1', conversationId: conversation._id, direction: 'in', author: 'guest', kind: 'text',
+    text: 'hi', at: NOW, providerMessageId: 'wamid.1', status: 'delivered',
+  })
+  async function real(opts = {}, profileStatus = 'active', { withMessage = true } = {}) {
+    const { conversation } = await setup({ channel: 'whatsapp', ...opts }, profileStatus)
+    if (withMessage) await guestMessage(conversation)
+    return conversation
+  }
+
+  it('asks the channel once, for the newest guest message', async () => {
+    const typing = fake()
+    const conversation = await real()
+    expect(await showTyping(db(), conversation)).toEqual({ shown: true })
+    expect(typing).toHaveBeenCalledTimes(1)
+    expect(typing.mock.calls[0][2]).toEqual({ providerMessageId: 'wamid.1' })
+  })
+
+  it.each([
+    ['a draft profile', {}, 'draft', {}, 'not_live'],
+    ['a test conversation', { test: true }, 'active', {}, 'not_live'],
+    ['a do-not-contact guest', { doNotContact: true }, 'active', {}, 'do_not_contact'],
+    ['no guest message', {}, 'active', { withMessage: false }, 'no_message'],
+  ])('shows nothing for %s', async (_name, opts, status, extra, why) => {
+    const typing = fake()
+    const conversation = await real(opts, status, extra)
+    expect(await showTyping(db(), conversation)).toEqual({ shown: false, why })
+    expect(typing).not.toHaveBeenCalled()
+  })
+
+  it('a channel that fails is answered, never thrown', async () => {
+    fake(vi.fn(async () => { throw new Error('down') }))
+    const conversation = await real()
+    expect(await showTyping(db(), conversation)).toEqual({ shown: false, why: 'failed' })
+  })
+
+  it('the simulator has no sign', async () => {
+    const { conversation } = await setup({ test: true })
+    expect(await showTyping(db(), conversation)).toEqual({ shown: false, why: 'no_typing' })
   })
 })

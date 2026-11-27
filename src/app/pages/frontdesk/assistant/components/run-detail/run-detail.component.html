@@ -75,7 +75,14 @@
                 <div class="asr-field" [class.asr-field--raw]="row.kind === 'raw'">
                   <dt>{{ row.labelKey | translatePipe }}</dt>
                   <dd>
-                    @if (row.kind === 'raw') {
+                    @if (row.kind === 'tries') {
+                      @for (t of row.value; track $index) {
+                        <div data-testid="asr-try">
+                          <span dir="ltr">{{ t.model }}</span> · {{ t.seconds }} {{ 'asr_seconds' | translatePipe }} ·
+                          {{ t.resultKey | translatePipe }}
+                        </div>
+                      }
+                    } @else if (row.kind === 'raw') {
                       <pre class="asr-raw" dir="ltr">{{ row.value }}</pre>
                     } @else if (row.valueKey) {
                       {{ row.valueKey | translatePipe }}

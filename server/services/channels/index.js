@@ -1,7 +1,10 @@
 'use strict';
 /**
  * Plan 675 (C-CHANNEL): the only place that knows a channel by name. `channelFor(conversation)` returns the transport
- * `{ name, real, clientSource, send }` of `conversation.channel`; nothing else in the app compares a channel name.
+ * `{ name, real, clientSource, send, typing? }` of `conversation.channel`; nothing else in the app compares a channel
+ * name.
+ * Plan 754 (R-31): `typing` is optional; the simulator has none (its page draws its own dots, plan 735), WhatsApp's is
+ * written with its transport.
  */
 const { newId } = require('../../utils/id');
 const { guestActor } = require('../../utils/actor');

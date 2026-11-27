@@ -61,7 +61,7 @@ describe('handleInbound', () => {
     setTurnHandler(turn)
     const first = await inbound({ at: NOW })
     const second = await inbound({ at: NOW + 2000 })
-    await new Promise(r => setTimeout(r, 20))
+    await vi.waitFor(() => expect(w.calls).toHaveLength(2))
     expect(turn).not.toHaveBeenCalled()
     w.release()
     await Promise.all([first.settled, second.settled])
@@ -70,6 +70,7 @@ describe('handleInbound', () => {
     turn.mockClear()
     const third = await inbound({ at: NOW + 9000 })
     await db().collection('conversations').updateOne({ businessId: 'b1' }, { $set: { status: 'human' } })
+    await vi.waitFor(() => expect(w.calls).toHaveLength(3))
     w.release()
     await third.settled
     expect(turn).not.toHaveBeenCalled()
@@ -82,12 +83,14 @@ describe('handleInbound', () => {
     setTurnHandler(turn)
     const first = await inbound({ at: NOW })
     const second = await inbound({ at: NOW + 2000 })
-    await new Promise(r => setTimeout(r, 20))
+    await vi.waitFor(() => expect(w.calls).toHaveLength(2))
     w.release()
     await Promise.all([first.settled, second.settled])
     expect(turn).toHaveBeenCalledTimes(1)
     const options = turn.mock.calls[0][2]
-    expect(options.inbound).toEqual({ at: NOW + 2000, waitedMs: expect.any(Number) })
+    expect(options.inbound).toEqual({
+      at: NOW + 2000, waitedMs: expect.any(Number), quietMs: 2000, capped: false, arrivedAt: expect.any(Number),
+    })
     expect(options.inbound.waitedMs).toBeGreaterThanOrEqual(0)
   })
 
@@ -171,14 +174,14 @@ describe('plan 753: what a message does next', () => {
   })
 
   it('a free conversation waits, then runs unless a newer message came', () => {
-    expect(step(bot())).toEqual({ do: 'wait', ms: 6000 })
+    expect(step(bot())).toEqual({ do: 'wait', ms: 2000, capped: false })
     expect(step(bot({ lastInboundAt: at + 1 }), { waited: true })).toEqual({ do: 'leave', why: 'newer' })
     expect(step(bot(), { waited: true })).toEqual({ do: 'run' })
   })
 
-  it('a follow-up waits what is left of the burst wait', () => {
-    expect(step(bot(), { holder: true, at: now - 2000 })).toEqual({ do: 'wait', ms: 4000 })
-    expect(step(bot(), { holder: true, at: now - 9000 })).toEqual({ do: 'wait', ms: 0 })
+  it('a follow-up waits what is left of the quiet wait', () => {
+    expect(step(bot(), { holder: true, at: now - 2000 })).toEqual({ do: 'wait', ms: 0, capped: false })
+    expect(step(bot(), { holder: true, at: now - 9000 })).toEqual({ do: 'wait', ms: 0, capped: false })
   })
 
   it('the turn is told the id of the stored message, on a hand back too', async () => {
@@ -209,6 +212,113 @@ describe('plan 753: what a message does next', () => {
     expect(turn).not.toHaveBeenCalled()
     expect((await conv())[0].run.waiting).toEqual([r.messageId])
     expect(logs.byEvent('inbound.left_to_run').length).toBeGreaterThan(0)
+  })
+})
+
+describe('plan 754: the quiet wait', () => {
+  const { nextStep, burstAtOf, QUIET_MS, MAX_WAIT_MS, COALESCE_MS } = require('../services/inbound')
+  const now = 100000
+  const free = { status: 'bot', lastInboundAt: 50000 }
+  const step = over => nextStep({ conversation: free, at: 50000, now, waited: false, ...over })
+  const waits = (ms, capped) => ({ do: 'wait', ms, capped })
+
+  it('the numbers: 2 quiet seconds, 6 at most, the old name kept', () => {
+    expect([QUIET_MS, MAX_WAIT_MS, COALESCE_MS]).toEqual([2000, 6000, 6000])
+  })
+
+  it('nextStep waits 2 quiet seconds, and at most 6 from the first message of the burst', () => {
+    expect(step()).toEqual(waits(2000, false))
+    expect(step({ burstAt: 50000 })).toEqual(waits(2000, false))
+    expect(step({ burstAt: 46000 })).toEqual(waits(2000, false))
+    expect(step({ burstAt: 45500 })).toEqual(waits(1500, true))
+    expect(step({ burstAt: 44500 })).toEqual(waits(500, true))
+    expect(step({ burstAt: 44000 })).toEqual(waits(0, true))
+    expect(step({ burstAt: 10000 })).toEqual(waits(0, true))
+    expect(step({ burstAt: 60000 })).toEqual(waits(2000, false))
+  })
+
+  it('nextStep: a follow-up waits what is left of 2 seconds since the newest guest message', () => {
+    expect(step({ holder: true, at: now - 500 })).toEqual(waits(1500, false))
+    expect(step({ holder: true, at: now - 2000 })).toEqual(waits(0, false))
+    expect(step({ holder: true, at: now - 9000 })).toEqual(waits(0, false))
+    expect(step({ holder: true, at: now + 5000 })).toEqual(waits(2000, false))
+  })
+
+  it('burstAtOf walks the guest messages until anything else', () => {
+    const guest = at => ({ at, direction: 'in', author: 'guest' })
+    const out = at => ({ at, direction: 'out', author: 'ai' })
+    expect(burstAtOf([], 100)).toBe(100)
+    expect(burstAtOf([guest(100), guest(60), out(50), guest(10)], 100)).toBe(60)
+    expect(burstAtOf([out(100), guest(60)], 100)).toBe(100)
+    expect(burstAtOf([guest(100), guest(40)], 100)).toBe(40)
+  })
+
+  const held = () => {
+    const w = controllableWait()
+    setWaitForTest(w.wait)
+    const turn = vi.fn(async () => {})
+    setTurnHandler(turn)
+    return { w, turn }
+  }
+  const waiting = (w, count) => vi.waitFor(() => expect(w.calls).toHaveLength(count))
+  /** Sends a guest message, waits until its wait began, releases it and waits until it is done. */
+  async function sendReleased(w, count, at) {
+    const r = await inbound({ at })
+    await waiting(w, count)
+    w.release()
+    await r.settled
+  }
+
+  it('one message: one wait of 2 seconds, then the turn is told the numbers', async () => {
+    const { w, turn } = held()
+    const r = await inbound({ at: NOW })
+    await waiting(w, 1)
+    await new Promise(resolve => setTimeout(resolve, 20))
+    expect(w.calls).toEqual([2000])
+    expect(turn).not.toHaveBeenCalled()
+    w.release()
+    await r.settled
+    expect(turn).toHaveBeenCalledTimes(1)
+    expect(turn.mock.calls[0][2].inbound).toMatchObject({
+      at: NOW, quietMs: 2000, capped: false, waitedMs: expect.any(Number), arrivedAt: expect.any(Number),
+    })
+  })
+
+  it('five short messages: the last waits end 6 seconds after the first, and one turn runs', async () => {
+    const { w, turn } = held()
+    const mark = logs.records.length
+    const sent = []
+    for (const offset of [0, 1500, 3000, 4500, 5500]) {
+      sent.push(await inbound({ at: NOW + offset }))
+      await waiting(w, sent.length)
+    }
+    expect([...w.calls].sort((a, b) => a - b)).toEqual([500, 1500, 2000, 2000, 2000])
+    w.release()
+    await Promise.all(sent.map(r => r.settled))
+    expect(turn).toHaveBeenCalledTimes(1)
+    expect(turn.mock.calls[0][1].lastInboundAt).toBe(NOW + 5500)
+    expect(turn.mock.calls[0][2].inbound).toMatchObject({ at: NOW + 5500, quietMs: 500, capped: true })
+    expect(logs.records.slice(mark).filter(r => r.event === 'inbound.coalesced')).toHaveLength(4)
+  })
+
+  it('an old message does not shorten the wait', async () => {
+    const { w, turn } = held()
+    await sendReleased(w, 1, NOW)
+    await sendReleased(w, 2, NOW + 7000)
+    expect(w.calls).toEqual([2000, 2000])
+    expect(turn).toHaveBeenCalledTimes(2)
+  })
+
+  it('an answer starts a new burst', async () => {
+    const { w } = held()
+    await sendReleased(w, 1, NOW)
+    const [c] = await conv()
+    await db().collection('messages').insertOne({
+      _id: 'out1', businessId: 'b1', conversationId: c._id, direction: 'out', author: 'ai', kind: 'text', text: 'x',
+      at: NOW + 1000, providerMessageId: 'out-1', status: 'delivered', test: true,
+    })
+    await sendReleased(w, 2, NOW + 5000)
+    expect(w.calls).toEqual([2000, 2000])
   })
 })
 
@@ -293,7 +403,7 @@ describe('back to the assistant (plan 719)', () => {
     setTurnHandler(turn)
     const first = await inbound({ at: NOW + 60000 })
     const second = await inbound({ at: NOW + 62000 })
-    await new Promise(r => setTimeout(r, 20))
+    await vi.waitFor(() => expect(w.calls).toHaveLength(2))
     w.release()
     await Promise.all([first.settled, second.settled])
     expect(turn).toHaveBeenCalledTimes(1)

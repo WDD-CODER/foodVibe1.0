@@ -7,7 +7,8 @@
  * user's chosen model or the chain's first. When that model is out of its daily quota
  * (until midnight America/Los_Angeles) the caller gets 'model_exhausted' plus the next
  * usable model, and the user decides whether to switch — the server never retries on
- * another model by itself (Human decision, 2026-10-09: no unattended spend).
+ * another model by itself (Human decision, 2026-10-09: no unattended spend) (the front desk is the exception:
+ * plan 701 `fallback`, plan 754 `firstLimitMs`).
  * Default order and per-model budgets: MODEL_DAILY_BUDGETS below.
  *
  * Exhausted state lives in memory and is mirrored on today's quota doc in GEMINI_USAGE
@@ -429,7 +430,10 @@ function allExhausted(candidates) {
  * again, up to 4 calls in all, when a failure goes away by itself (network drop, 429 not daily, 5xx). With
  * `fallback` an overloaded answer (network, timeout, 429 not daily, 500/502/503/504) moves the next attempt to the next
  * usable model of the chain (wrapping; one usable model = the same model); `deadlineMs` ends the request when less
- * than 2000 ms would be left for the next call. The model is
+ * than 2000 ms would be left for the next call. Plan 754 (R-30): with `fallback`, `firstLimitMs` cuts the FIRST
+ * HTTP call of the request after that many milliseconds when a next model with a large free bucket is usable, and
+ * moves to it; the cut marks nothing and is recorded as `slow`. `onCall` is told about every HTTP call. Only the
+ * front desk passes them. The model is
  * `model` when the user picked one (it must be an enabled chain model), else the first in
  * the chain. If that model is out of its daily quota — known already, or learned from this
  * call's 429 — the result is 'model_exhausted' naming the next usable model, and the user
@@ -443,7 +447,10 @@ function allExhausted(candidates) {
  *   { kind: 'gemini_error', model, status, message }
  *   { kind: 'timeout' | 'network', model }
  */
-async function callGemini({ body, timeoutMs, log, eventPrefix, needsVision = false, needsMedia, model: requested, usage, fallback = false, deadlineMs }) {
+async function callGemini({
+  body, timeoutMs, log, eventPrefix, needsVision = false, needsMedia, model: requested, usage, fallback = false, deadlineMs,
+  firstLimitMs, onCall,
+}) {
   let meter = true;
   if (!usage || !isAiFeature(usage.feature)) {
     if (process.env.VITEST) throw new Error('callGemini: usage.feature required');
@@ -490,7 +497,7 @@ async function callGemini({ body, timeoutMs, log, eventPrefix, needsVision = fal
     const start = candidates.find(m => usableForFallback(m, now));
     if (!start) return allExhausted(candidates);
     return callWithFallback({
-      model: start, body, timeoutMs, deadlineMs, log, eventPrefix, apiKey, usage, meter, candidates, now,
+      model: start, body, timeoutMs, deadlineMs, log, eventPrefix, apiKey, usage, meter, candidates, now, firstLimitMs, onCall,
     });
   }
   if (knownReset) {
@@ -503,11 +510,13 @@ async function callGemini({ body, timeoutMs, log, eventPrefix, needsVision = fal
     // Plan 730: a model that answered "gone" earlier today is skipped; none usable -> all_exhausted as today.
     const start = usableForFallback(model, now) ? model : candidates.find(m => usableForFallback(m, now));
     if (!start) return allExhausted(candidates);
-    return callWithFallback({ model: start, body, timeoutMs, deadlineMs, log, eventPrefix, apiKey, usage, meter, candidates, now });
+    return callWithFallback({
+      model: start, body, timeoutMs, deadlineMs, log, eventPrefix, apiKey, usage, meter, candidates, now, firstLimitMs, onCall,
+    });
   }
   let result;
   for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
-    result = await callOnce({ model, body, timeoutMs, log, eventPrefix, apiKey, usage, meter, candidates, now });
+    result = await callOnce({ model, body, timeoutMs, log, eventPrefix, apiKey, usage, meter, candidates, now, onCall });
     if (!isTransient(result) || attempt === MAX_ATTEMPTS) break;
     log.warn({ event: `${eventPrefix}.retry`, model, attempt, kind: result.kind, status: result.status });
     await sleep(retryDelayMs(attempt));
@@ -517,6 +526,11 @@ async function callGemini({ body, timeoutMs, log, eventPrefix, needsVision = fal
 
 const MAX_ATTEMPTS = 4;
 const MIN_CALL_MS = 2000;
+// Plan 754 (R-30): a call cut for slowness may move only to a model with at least 100 free requests a day, and only
+// while that model has used less than half of them today (decisions D80, D81: free tier only; the small buckets are
+// not spent early).
+const SLOW_SWITCH_MIN_BUDGET = 100;
+const SLOW_SWITCH_BUDGET_SHARE = 0.5;
 const FALLBACK_STATUSES = new Set([429, 500, 502, 503, 504]);
 
 /** Plan 701: with `fallback`, a call worth moving to another model: network, timeout, 429 (not daily) or 5xx. */
@@ -540,21 +554,44 @@ function nextUsableAfter(candidates, current, now) {
   return null;
 }
 
+/** Plan 754 (R-30): the model a call cut for slowness may move to from `current`, or null (then nothing is cut). */
+async function slowTarget(candidates, current, now) {
+  const next = nextUsableAfter(candidates, current, now);
+  if (!next || next === current) return null;
+  const budget = MODEL_DAILY_BUDGETS[next] ?? 0;
+  if (budget < SLOW_SWITCH_MIN_BUDGET) return null;
+  const used = (await readQuotaDoc(now)).calls?.[encodeModelKey(next)] ?? 0;
+  return used >= budget * SLOW_SWITCH_BUDGET_SHARE ? null : next;
+}
+
 /** Plan 701: the retry loop of a caller that passes `fallback` (the front desk). At most MAX_ATTEMPTS calls in all. */
-async function callWithFallback({ model, body, timeoutMs, deadlineMs, log, eventPrefix, apiKey, usage, meter, candidates, now }) {
+async function callWithFallback({
+  model, body, timeoutMs, deadlineMs, log, eventPrefix, apiKey, usage, meter, candidates, now, firstLimitMs, onCall,
+}) {
   const startedAt = Date.now();
   const hasDeadline = typeof deadlineMs === 'number';
   let current = model;
   let result;
+  const mayCut = typeof firstLimitMs === 'number' && firstLimitMs > 0 && firstLimitMs < timeoutMs;
+  const slowTo = mayCut ? await slowTarget(candidates, current, new Date()) : null;
+  let slowed = false;
   for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
     const remaining = hasDeadline ? deadlineMs - (Date.now() - startedAt) : Infinity;
+    const cuts = attempt === 1 && !!slowTo;
+    const limit = Math.min(cuts ? firstLimitMs : timeoutMs, remaining);
     result = await callOnce({
-      model: current, body, timeoutMs: Math.min(timeoutMs, remaining), log, eventPrefix, apiKey, usage, meter, candidates, now,
+      model: current, body, timeoutMs: limit, log, eventPrefix, apiKey, usage, meter, candidates, now, onCall,
+      slowLimit: cuts && limit === firstLimitMs,
     });
     if (attempt === MAX_ATTEMPTS) break;
     let next;
     let wait;
-    if (result.kind === 'model_exhausted') {
+    if (result.slow) {
+      // The next model is another model: no pause.
+      next = slowTo;
+      wait = 0;
+      slowed = true;
+    } else if (result.kind === 'model_exhausted') {
       next = result.nextModel;
       wait = 0;
     } else if (isGone(result)) {
@@ -570,9 +607,14 @@ async function callWithFallback({ model, body, timeoutMs, deadlineMs, log, event
     } else {
       break;
     }
+    // A request whose first call was cut never reaches a small bucket: back to its first model, which was only slow.
+    if (slowed && next && (MODEL_DAILY_BUDGETS[next] ?? 0) < SLOW_SWITCH_MIN_BUDGET) next = model;
     if (!next) break;
     if (hasDeadline && deadlineMs - (Date.now() - startedAt) - wait < MIN_CALL_MS) break;
-    const fields = { from: current, to: next, attempt, kind: isGone(result) ? 'gone' : result.kind, status: result.status };
+    let kind = result.kind;
+    if (isGone(result)) kind = 'gone';
+    if (result.slow) kind = 'slow';
+    const fields = { from: current, to: next, attempt, kind, status: result.status };
     if (next !== current) log.warn({ event: `${eventPrefix}.fallback`, ...fields });
     else log.warn({ event: `${eventPrefix}.retry`, model: current, attempt, kind: result.kind, status: result.status });
     if (wait > 0) await sleep(wait);
@@ -592,11 +634,27 @@ function isTransient(result) {
 }
 
 /** One real HTTP call: one usage count and one ledger row (plan 566), whatever the outcome. */
-async function callOnce({ model, body, timeoutMs, log, eventPrefix, apiKey, usage, meter, candidates, now }) {
+async function callOnce({
+  model, body, timeoutMs, log, eventPrefix, apiKey, usage, meter, candidates, now, slowLimit = false, onCall,
+}) {
   const startedAt = Date.now();
   const record = (ok, errorCode, data) => {
     if (!meter) return;
     recordAiUsage({ usage, model, ok, errorCode, data, body, latencyMs: Date.now() - startedAt, log });
+  };
+  /** Plan 754: every way out tells `onCall` about this call. */
+  const done = result => {
+    if (typeof onCall !== 'function') return result;
+    const ok = result.kind === 'ok';
+    try {
+      onCall({
+        model, ms: Date.now() - startedAt, ok, ...(!ok && { reason: result.slow ? 'slow' : result.kind }),
+        ...(result.status !== undefined && { status: result.status }), ...(slowLimit && { limitMs: timeoutMs }),
+      });
+    } catch {
+      // A caller's callback never changes the result.
+    }
+    return result;
   };
 
   await incrementUsage(model);
@@ -612,13 +670,19 @@ async function callOnce({ model, body, timeoutMs, log, eventPrefix, apiKey, usag
     });
   } catch (err) {
     if (err?.name === 'TimeoutError' || err?.name === 'AbortError') {
+      if (slowLimit) {
+        // Cut by our own limit: nothing is marked exhausted or gone.
+        record(false, 'slow');
+        log.warn({ event: `${eventPrefix}.slow`, model, limitMs: timeoutMs });
+        return done({ kind: 'timeout', model, slow: true });
+      }
       record(false, 'timeout');
       log.warn({ event: `${eventPrefix}.timeout`, model });
-      return { kind: 'timeout', model };
+      return done({ kind: 'timeout', model });
     }
     record(false, 'network');
     log.error({ err, event: `${eventPrefix}.failed`, model });
-    return { kind: 'network', model };
+    return done({ kind: 'network', model });
   }
 
   if (!res.ok) {
@@ -628,13 +692,13 @@ async function callOnce({ model, body, timeoutMs, log, eventPrefix, apiKey, usag
       const resetAt = markExhausted(model, now);
       const nextModel = firstUsable(candidates, now);
       log.warn({ event: 'ai.model.exhausted', model, nextModel, resetAt: resetAt.toISOString() });
-      if (!nextModel) return allExhausted(candidates);
-      return { kind: 'model_exhausted', model, nextModel, resetAt: resetAt.toISOString() };
+      if (!nextModel) return done(allExhausted(candidates));
+      return done({ kind: 'model_exhausted', model, nextModel, resetAt: resetAt.toISOString() });
     }
     record(false, `http_${res.status}`);
     const message = errBody?.error?.message ?? '';
     log.error({ event: `${eventPrefix}.gemini_failed`, model, status: res.status, geminiMessage: message });
-    return { kind: 'gemini_error', model, status: res.status, message };
+    return done({ kind: 'gemini_error', model, status: res.status, message });
   }
 
   let data;
@@ -643,10 +707,10 @@ async function callOnce({ model, body, timeoutMs, log, eventPrefix, apiKey, usag
   } catch {
     record(false, 'unreadable');
     log.error({ event: `${eventPrefix}.gemini_failed`, model, status: res.status, geminiMessage: 'unreadable response body' });
-    return { kind: 'gemini_error', model, status: res.status, message: 'unreadable response body' };
+    return done({ kind: 'gemini_error', model, status: res.status, message: 'unreadable response body' });
   }
   record(true, undefined, data);
-  return { kind: 'ok', model, data };
+  return done({ kind: 'ok', model, data });
 }
 
 /** The text of the first candidate's first part, or '' — what every route parses. */

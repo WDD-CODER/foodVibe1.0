@@ -23,6 +23,8 @@ const ARRAY_MAX = 200;
 const DEPTH_MAX = 3;
 const ADMIN_VIEWS_MAX = 20;
 const DAY_MS = 86400000;
+/** The values of step 13's `action` that put a message in front of the guest. */
+const ANSWER_ACTIONS = new Set(['sent', 'holding', 'removal_notice']);
 
 const defaultInsert = (db, doc) => db.collection(COLLECTION).insertOne(doc);
 let insertForTests = null;
@@ -74,9 +76,21 @@ function createRun(db, conversation, { now, mode, inbound }) {
       for (const side of ['in', 'out']) {
         if (isRecord(patch[side])) entry[side] = { ...entry[side], ...clip(patch[side], side, 1) };
       }
+      if (key === 'send') timeAnswer(entry);
     } catch {
       // Recording never breaks a turn.
     }
+  }
+
+  /**
+   * Plan 754: from the guest's last message reaching the server to the answer leaving it. Set once, on the real clock;
+   * a refused send never left.
+   */
+  function timeAnswer(entry) {
+    const out = entry.out;
+    if (typeof inbound?.arrivedAt !== 'number' || !out || out.answerMs !== undefined) return;
+    if (!ANSWER_ACTIONS.has(out.action) || out.refused) return;
+    out.answerMs = Math.max(0, Date.now() - inbound.arrivedAt);
   }
 
   function addTime(key, since) {
@@ -131,9 +145,14 @@ function createRun(db, conversation, { now, mode, inbound }) {
       return { key: 'inbound', status: 'skipped', ms: 0, out: { via: via ?? (mode === 'suggest' ? 'suggest' : 'direct') } };
     }
     const waitedMs = inbound.waitedMs ?? 0;
+    const { quietMs, capped } = inbound;
     return {
       key: 'inbound', status: answers > 1 ? 'note' : 'ok', ms: waitedMs,
-      in: { at: inbound.at }, out: { waitedMs, answers, ...(via && { via }) },
+      in: { at: inbound.at },
+      out: {
+        waitedMs, answers, ...(typeof quietMs === 'number' && { quietMs }),
+        ...(typeof capped === 'boolean' && { capped }), ...(via && { via }),
+      },
     };
   }
 
@@ -221,7 +240,8 @@ const NO_RUN = Object.freeze({
 
 /**
  * One run of `conversation`'s turn. Reads and writes nothing; the eval's turns (`feature: 'eval'`) are not recorded.
- * `inbound` is `{ at, waitedMs }` when a guest message started the turn.
+ * `inbound` is `{ at, waitedMs, quietMs?, capped?, arrivedAt? }` when a guest message started the turn (plan 754:
+ * `arrivedAt` gives the send step its `answerMs`).
  */
 function startRun(db, conversation, { now = Date.now(), mode = 'turn', feature, inbound } = {}) {
   if (feature === 'eval') return NO_RUN;

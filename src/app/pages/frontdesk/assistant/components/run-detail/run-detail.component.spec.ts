@@ -111,6 +111,26 @@ describe('RunDetailComponent (plan 752)', () => {
     expect(el().querySelectorAll('pre.asr-raw').length).toBe(1)
   })
 
+  it('plan 754: the open AI step shows one line per try; a run with no tries shows none', async () => {
+    const attempts = [
+      { model: 'm1', ms: 6003, ok: false, reason: 'slow' },
+      { model: 'm2', ms: 1040, ok: true }
+    ]
+    await create(run({ steps: steps().map((s) => (s.key === 'ai' ? { ...s, out: { attempts } } : s)) }))
+    click('asr-step-ai')
+    const lines = Array.from(el().querySelectorAll('[data-testid="asr-try"]'))
+    expect(lines.length).toBe(2)
+    expect(lines[0].textContent).toContain('m1')
+    expect(lines[0].textContent).toContain('asr_try_slow')
+    expect(lines[0].querySelector('span[dir="ltr"]')!.textContent).toBe('m1')
+
+    fixture.componentRef.setInput('run', run())
+    fixture.detectChanges()
+    click('asr-step-ai')
+    expect(el().querySelector('#asr-step-ai pre.asr-raw')).not.toBeNull()
+    expect(byId('asr-try')).toBeNull()
+  })
+
   it('plan 753: links to the run it continues only when there is one', async () => {
     await create()
     expect(byId('asr-follows')).toBeNull()

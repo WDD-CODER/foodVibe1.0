@@ -85,6 +85,36 @@ describe('the stored run', () => {
     expect((await record()).followsRunId).toBeUndefined();
   });
 
+  it('plan 754: stores the quiet wait and times the first answer that leaves', async () => {
+    const options = {
+      now: NOW, inbound: { at: 1, waitedMs: 500, quietMs: 500, capped: true, arrivedAt: Date.now() - 1000 },
+    };
+    const sendOf = doc => doc.steps.find(s => s.key === 'send').out;
+    let first;
+    const doc = await record('answered', run => {
+      run.step('send', { out: { action: 'sent' } });
+      first = Date.now();
+      run.step('send', { out: { action: 'sent' } });
+    }, CONVERSATION, options);
+    expect(doc.steps[0].out).toMatchObject({ quietMs: 500, capped: true });
+    expect(sendOf(doc).answerMs).toBeGreaterThanOrEqual(1000);
+    expect(sendOf(doc).answerMs).toBeLessThanOrEqual(first - options.inbound.arrivedAt);
+    expect(assistantRunSchema.safeParse(doc).success).toBe(true);
+
+    for (const out of [{ action: 'draft' }, { action: 'none' }, { action: 'sent', refused: 'WINDOW_CLOSED' }]) {
+      const silent = await record('draft', run => run.step('send', { out }), CONVERSATION, options);
+      expect(sendOf(silent).answerMs, out.action).toBeUndefined();
+    }
+    for (const action of ['holding', 'removal_notice']) {
+      const left = await record('failed', run => run.step('send', { out: { action } }), CONVERSATION, options);
+      expect(sendOf(left).answerMs, action).toBeGreaterThanOrEqual(1000);
+    }
+    const untimed = await record('answered', run => run.step('send', { out: { action: 'sent' } }), CONVERSATION,
+      { now: NOW, inbound: { at: 1, waitedMs: 500 } });
+    expect(sendOf(untimed)).toEqual({ action: 'sent' });
+    expect(untimed.steps[0].out).toEqual({ waitedMs: 500, answers: 0 });
+  });
+
   it('marks a backup model', async () => {
     const doc = await record('answered', run => run.set({ model: 'second', firstModel: 'first' }));
     expect(doc).toMatchObject({ model: 'second', fallbackUsed: true });

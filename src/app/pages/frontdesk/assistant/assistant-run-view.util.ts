@@ -4,12 +4,34 @@ import type { AssistantRunView, RunOutcome, RunStep, RunStepKey } from '@models/
 /** Plan 752: pure functions that turn a run of the assistant into labelled lines. */
 
 export type OutcomeTone = 'green' | 'amber' | 'red'
-export type FieldKind = 'text' | 'number' | 'ms' | 'count' | 'bool' | 'enum' | 'list' | 'raw'
+export type FieldKind = 'text' | 'number' | 'ms' | 'count' | 'bool' | 'enum' | 'list' | 'raw' | 'tries'
 export type FieldDef = { name: string; labelKey: string; kind: FieldKind; enumPrefix?: string }
+/** One call to an AI model as the page shows it. */
+export type TryLine = { model: string; seconds: string; resultKey: string }
 /** One labelled value of a step; `valueKey` is a dictionary key shown instead of `value`. */
-export type StepRow = { labelKey: string; kind: FieldKind; value: string; valueKey?: string }
+export type StepRow =
+  | { labelKey: string; kind: Exclude<FieldKind, 'tries'>; value: string; valueKey?: string }
+  | { labelKey: string; kind: 'tries'; value: TryLine[] }
+type Attempt = { model?: unknown; ms?: unknown; ok?: unknown; reason?: unknown; status?: unknown }
 
 const LIST_MAX = 12
+const TRIES_MAX = 8
+const BUSY_STATUSES = new Set<unknown>([429, 500, 502, 503, 504])
+const TRY_KEYS: Record<string, string> = {
+  slow: 'asr_try_slow',
+  timeout: 'asr_try_timeout',
+  network: 'asr_try_busy',
+  model_exhausted: 'asr_try_quota',
+  all_exhausted: 'asr_try_quota',
+  business_cap: 'asr_try_quota'
+}
+
+/** Plan 754: the dictionary key of how one call to a model ended. */
+export function tryResultKey(attempt: Attempt): string {
+  if (attempt.ok) return 'asr_try_ok'
+  if (attempt.reason === 'gemini_error') return BUSY_STATUSES.has(attempt.status) ? 'asr_try_busy' : 'asr_try_other'
+  return TRY_KEYS[String(attempt.reason)] ?? 'asr_try_other'
+}
 
 const TONES: Record<RunOutcome, OutcomeTone> = {
   answered: 'green',
@@ -58,6 +80,8 @@ export const STEP_FIELDS: Record<RunStepKey, { in: FieldDef[]; out: FieldDef[] }
     in: [],
     out: [
       field('waitedMs', 'ms', 'asr_f_waited'),
+      field('quietMs', 'ms', 'asr_f_quiet'),
+      field('capped', 'bool', 'asr_f_capped'),
       field('answers', 'number', 'asr_f_answers'),
       field('via', 'enum', 'asr_f_via', 'asr_via_')
     ]
@@ -101,6 +125,7 @@ export const STEP_FIELDS: Record<RunStepKey, { in: FieldDef[]; out: FieldDef[] }
     out: [
       field('model', 'text', 'asr_f_model'),
       field('attempts', 'count', 'asr_f_attempts'),
+      field('attempts', 'tries', 'asr_f_try_list'),
       field('raw', 'raw', 'asr_f_raw')
     ]
   },
@@ -139,14 +164,26 @@ export const STEP_FIELDS: Record<RunStepKey, { in: FieldDef[]; out: FieldDef[] }
     out: [
       field('action', 'enum', 'asr_f_action', 'asr_send_'),
       field('refused', 'text', 'asr_f_refused'),
+      field('answerMs', 'ms', 'asr_f_answer_ms'),
       field('chars', 'number', 'asr_f_chars'),
       field('overtaken', 'number', 'asr_f_overtaken')
     ]
   }
 }
 
+/** One row with a line per call, or none when there was no call. */
+function tryRows(labelKey: string, value: unknown): StepRow[] {
+  if (!Array.isArray(value) || value.length === 0) return []
+  const lines = (value as Attempt[]).slice(0, TRIES_MAX).map((a) => ({
+    model: String(a.model ?? '—'),
+    seconds: (Number(a.ms ?? 0) / 1000).toFixed(1),
+    resultKey: tryResultKey(a)
+  }))
+  return [{ labelKey, kind: 'tries', value: lines }]
+}
+
 /** The text of one field's value, or `null` when there is nothing to show. */
-function shown(def: FieldDef, value: unknown): Pick<StepRow, 'value' | 'valueKey'> | null {
+function shown(def: FieldDef, value: unknown): { value: string; valueKey?: string } | null {
   if (value === undefined || value === null || value === '') return null
   if (def.kind === 'count') return Array.isArray(value) ? { value: String(value.length) } : null
   if (def.kind === 'list') {
@@ -162,8 +199,10 @@ function shown(def: FieldDef, value: unknown): Pick<StepRow, 'value' | 'valueKey
 /** The registered fields of one side of a step that the record holds. */
 export function stepRows(step: Pick<RunStep, 'key' | 'in' | 'out'>, side: 'in' | 'out'): StepRow[] {
   const data = step[side] ?? {}
-  return STEP_FIELDS[step.key][side].flatMap((def) => {
+  return STEP_FIELDS[step.key][side].flatMap((def): StepRow[] => {
+    const kind = def.kind
+    if (kind === 'tries') return tryRows(def.labelKey, data[def.name])
     const value = shown(def, data[def.name])
-    return value ? [{ labelKey: def.labelKey, kind: def.kind, ...value }] : []
+    return value ? [{ labelKey: def.labelKey, kind, ...value }] : []
   })
 }

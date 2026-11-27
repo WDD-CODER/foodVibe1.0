@@ -864,8 +864,8 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 ### conversation-pipeline — `handleInbound`, `sendOut`, `templateMessage`, `findOrCreateConversation`, `channelFor` (plan 675)
 
 - Status: stable — server only; the simulator is the first transport, WhatsApp joins in plan 683
-- Use: every inbound message goes through `handleInbound` (`server/services/inbound.js`), every outbound message through `sendOut` (`server/services/outbound.js`); never call a transport's `send`. Template names and parameters live once in `shared/schemas/front-desk/message-templates.ts` (`templateMessage`). The live-conversation rule is `findOrCreateConversation` (`server/services/conversations.js`); only `server/services/channels/index.js` (`channelFor`) names a channel.
-- Pieces: handleInbound, registerButton, setTurnHandler, sendOut, templateMessage, MESSAGE_TEMPLATES, findOrCreateConversation, loadConversation, closeConversation, channelFor, sim-channel, nextStep, waitFor.
+- Use: every inbound message goes through `handleInbound` (`server/services/inbound.js`), every outbound message through `sendOut` (`server/services/outbound.js`); never call a transport's `send`. Template names and parameters live once in `shared/schemas/front-desk/message-templates.ts` (`templateMessage`). The live-conversation rule is `findOrCreateConversation` (`server/services/conversations.js`); only `server/services/channels/index.js` (`channelFor`) names a channel; a transport's optional `typing` is called only by `showTyping` (plan 754).
+- Pieces: handleInbound, registerButton, setTurnHandler, sendOut, templateMessage, MESSAGE_TEMPLATES, findOrCreateConversation, loadConversation, closeConversation, channelFor, sim-channel, nextStep, waitFor, showTyping.
 - Plan 753: nextStep and waitFor in server/services/inbound.js decide what a guest message does next and hold the one wait before a turn (family assistant-run-lease).
 - When: any code that receives or sends a guest message; a new transport is a new file in `server/services/channels/`.
 - Known copies: none.
@@ -957,8 +957,8 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 
 - Status: stable — server only
 - Use: an unattended caller (the front desk) passes `fallback: true` (and `deadlineMs`) to `callGemini` in `server/services/gemini-client.js`: on overload the same request tries the next free catalog model. `failureReason(kind, status)` in `server/services/frontdesk-turn.js` maps a failure to `busy`, `timeout`, `quota` or `other`; a failed guest turn stores it as `assistantFailed` on the conversation.
-- Pieces: callGemini({ fallback, deadlineMs }), failureReason(kind, status) in server/services/frontdesk-turn.js, assistantFailed, gemini-fallback.test.js; plan 730: `isGone(result)` and the `goneUntil` map in `server/services/gemini-client.js` (a retired model is skipped), with the new cases in `server/test/gemini-fallback.test.js`.
-- When: any new unattended model call or failure reason; a second model-switching loop is never added.
+- Pieces: callGemini({ fallback, deadlineMs }), failureReason(kind, status) in server/services/frontdesk-turn.js, assistantFailed, gemini-fallback.test.js; plan 730: `isGone(result)` and the `goneUntil` map in `server/services/gemini-client.js` (a retired model is skipped), with the new cases in `server/test/gemini-fallback.test.js`; plan 754: `callGemini({ firstLimitMs, onCall })`, `slowTarget`, `FIRST_MODEL_LIMIT_MS` in `server/routes/ai/frontdesk.js`.
+- When: any new unattended model call or failure reason; a second model-switching loop is never added; a new time limit for a model is an option of `callGemini`, never a timer around it.
 - Known copies: none.
 
 ### assistant-failure — `assistantFailureKey(reason)`, `showAssistantFailure(conversation)`, the Reason lines of the suggestion bar, the small map before a time is chosen (plan 702)
@@ -1035,7 +1035,7 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 ### assistant-runs — the step-by-step record of an assistant run and its page (plan 752)
 
 - Status: stable — plan 752
-- Use: the recorder `server/services/frontdesk-runs.js` (`startRun` → `time`, `timeSync`, `step`, `set`, `end`, `discard`, `finish`; `NO_RUN`; the reads `listRuns`, `loadRun`, `markAdminView`), written by `runTurn` (`server/services/frontdesk-turn.js`); the route `server/routes/assistant-runs.js` at `/api/v1/assistant-runs`; the shape `assistantRunSchema` (`shared/schemas/entities/assistant-run.schema.ts`). Browser: `AssistantRunDataService`, `AssistantPage` (`src/app/pages/frontdesk/assistant/`), `app-run-detail` (`run-detail.component.ts`), `assistant-run-view.util.ts` (`verdictOf`, `stepRows`, `STEP_FIELDS`, `outcomeTone`). plan 753: outcomes `dropped` and `superseded`, the follow-up link.
+- Use: the recorder `server/services/frontdesk-runs.js` (`startRun` → `time`, `timeSync`, `step`, `set`, `end`, `discard`, `finish`; `NO_RUN`; the reads `listRuns`, `loadRun`, `markAdminView`), written by `runTurn` (`server/services/frontdesk-turn.js`); the route `server/routes/assistant-runs.js` at `/api/v1/assistant-runs`; the shape `assistantRunSchema` (`shared/schemas/entities/assistant-run.schema.ts`). Browser: `AssistantRunDataService`, `AssistantPage` (`src/app/pages/frontdesk/assistant/`), `app-run-detail` (`run-detail.component.ts`), `assistant-run-view.util.ts` (`verdictOf`, `stepRows`, `STEP_FIELDS`, `outcomeTone`). plan 753: outcomes `dropped` and `superseded`, the follow-up link. plan 754: the field kind `tries`, `tryResultKey`.
 - Pieces: startRun, NO_RUN, listRuns, loadRun, markAdminView, assistantRunSchema, AssistantRunDataService, AssistantPage, RunDetailComponent, verdictOf, stepRows, STEP_FIELDS, outcomeTone.
 - Classes: page-local `.asr-*` only. The step row that opens and closes is a `button.asr-step` with `aria-expanded` and `aria-controls` over `.asr-step-panel`.
 - When: any new fact about a run is a field of an existing step, registered in `STEP_FIELDS`; a second recorder, a second runs list or a log line with run content is never added.
@@ -1045,7 +1045,7 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 
 - Status: stable — server only
 - Origin: New registry family assistant-run-lease in docs/brain/component-families.md (plan 753).
-- Use: `server/services/frontdesk-lease.js` · `takeLease` gives one run the conversation (or `null`); `noteWaiting` notes a guest message on a live lease; `leaseCheck` says whether the run may still send and write, and how many noted messages it did not read; `endLease` gives the lease back or keeps it for a follow-up; `clearLease` removes it when a person steps in; `leaseLive` says whether one holds now. `server/services/inbound.js` · `nextStep` decides what a guest message does next: start a run, wait, or leave it to the running run.
-- Pieces: takeLease, noteWaiting, leaseCheck, endLease, clearLease, leaseLive, nextStep.
+- Use: `server/services/frontdesk-lease.js` · `takeLease` gives one run the conversation (or `null`); `noteWaiting` notes a guest message on a live lease; `leaseCheck` says whether the run may still send and write, and how many noted messages it did not read; `endLease` gives the lease back or keeps it for a follow-up; `clearLease` removes it when a person steps in; `leaseLive` says whether one holds now. `server/services/inbound.js` · `nextStep` decides what a guest message does next: start a run, wait, or leave it to the running run. plan 754: the wait is quiet-based (R-29).
+- Pieces: takeLease, noteWaiting, leaseCheck, endLease, clearLease, leaseLive, nextStep, QUIET_MS, MAX_WAIT_MS, burstAtOf, burstStart.
 - When: anything that must not run twice for one conversation, or must stop when a person steps in, goes through these; the timing of a guest message is changed in `nextStep` only; a second lock, an in-memory map of running turns or a second wait is never added.
 - Known copies: none.

@@ -174,6 +174,25 @@ describe('one run per conversation', () => {
     await expectNoRun();
   });
 
+  it('plan 754: the follow-up waits what is left of 2 seconds', async () => {
+    const calls = [];
+    setWaitForTest(async ms => { calls.push(ms); });
+    const held = holdCall();
+    fetchMock.mockResolvedValueOnce(say('A2'));
+    const m1 = await send('GUEST-SECRET-ONE');
+    await inFlight(1);
+    await sendSettled('GUEST-SECRET-TWO');
+    held.answer({ reply: 'A1', intent: 'smalltalk' });
+    await m1.settled;
+    expect(calls).toHaveLength(2);
+    expect(calls[0]).toBe(2000);
+    expect(calls[1]).toBeGreaterThanOrEqual(0);
+    expect(calls[1]).toBeLessThanOrEqual(2000);
+    const { next } = await firstAndFollowUp();
+    expect(stepOf(next, 'inbound').out).toMatchObject({ via: 'follow_up', quietMs: calls[1], capped: false });
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+  });
+
   it.each([[3, 3], [7, 5]])('%i messages during a run get exactly one follow-up', async (count, counted) => {
     const held = holdCall();
     fetchMock.mockResolvedValueOnce(say('A2'));
