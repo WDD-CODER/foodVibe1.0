@@ -50,6 +50,9 @@ server/routes/generic.js
 server/constants/collections.js
 server/test/generic-lineage.test.js
 docs/agent/standards-backend.md
+server/test/collections.test.js
+server/test/cross-business.test.js
+docs/workflow-kit/manifest.json
 ```
 
 ## Read Scope
