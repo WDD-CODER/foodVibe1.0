@@ -1,8 +1,10 @@
 # Orchestrator run md-1
 
-Run branch: `orch/md-1` (from `origin/main` at 6f9b825) · started 2026-11-27T18:35:42.171Z · finished 2026-11-27T21:13:33.425Z
-Result: 0 merged, 2 parked, skipped or left out, 2 in the run (counted from git and status.json).
+Run branch: `orch/md-1` (from `origin/main` at 6f9b825) · started 2026-11-27T18:35:42.171Z · finished 2026-11-27T22:45:38.694Z
+Result: 2 merged, 0 parked, skipped or left out, 2 in the run (counted from git and status.json).
 `main` untouched: yes (3 plan/todo file(s) changed on main) — origin/main is 48d8524.
+
+Final gate: ok (attempt 1)
 
 ## Decided without you
 
@@ -24,17 +26,27 @@ Result: 0 merged, 2 parked, skipped or left out, 2 in the run (counted from git 
 
 | Plan | State | Rounds | Builder tier | Merge | Why |
 | --- | --- | --- | --- | --- | --- |
-| 765 The menu designer screen: build, preview, save and manage designs by hand | parked | 1 | build → judgment |  | review STOP: major e2e/ui/765-2.spec.ts:32 done-when: 765-2 checks another preview title than the criterion names (fix rounds used: 1 of 2) — needs the Human (asked 3 times in this run) |
-| 767  | skipped | 0 |  |  | shares files with parked 765 |
+| 765 The menu designer screen: build, preview, save and manage designs by hand | merged | 1 | build → judgment | b0a10bc | review STOP: major e2e/ui/765-2.spec.ts:32 done-when: 765-2 checks another preview title than the criterion names (fix rounds used: 1 of 2) — needs the Human (asked 3 times in this run) |
+| 767 PDF proof on the real Render server: headless browser, memory and start-up measured | merged | 0 | build | 3810a54 |  |
 
 ## Scorecard
 
-- Wall: 157.8 min · gate passes: 4 · asks raised mid-run: 3
-- Minutes per state (summed over plans): queued 77.7 · building 44.5 · fixing 36.5 · parked 21.1 · asking 20.8 · gate 17.6 · checking 15.1 · merging 0
-- Checks left out (cached, skipped, not run, same tree): 3, about 6.3 min saved
-  - 765: pnpm run test:ci — 125.2 s
-  - 765: pnpm run test:ci — 125.2 s
-  - 765: pnpm run test:ci — 125.2 s
+- Wall: 245.8 min · gate passes: 5 · asks raised mid-run: 3
+- Minutes per state (summed over plans): parked 109.1 · queued 77.7 · building 73.7 · merging 38.4 · fixing 36.5 · gate 27.9 · asking 20.8 · checking 17
+- Checks left out (cached, skipped, not run, same tree): 13, about 11.8 min saved
+  - 765: pnpm run test:ci — 159.3 s
+  - 765: pnpm run test:ci — 159.3 s
+  - 765: pnpm run test:ci — 159.3 s
+  - 767: pnpm run test:ci — 159.3 s
+  - final: node scripts/orch-state.mjs prepare --missing server/generated/schemas --script build:schemas --pm pnpm — 0.2 s
+  - final: pnpm run build — 38.1 s
+  - final: pnpm run lint — 29.4 s
+  - final: node scripts/override-check.mjs — 0.1 s
+  - final: pnpm run lint:icons — 1 s
+  - final: pnpm run lint:no-native-select — 1 s
+  - final: node scripts/plan-ledger-check.mjs — 0.2 s
+  - final: node scripts/breadcrumbs-check.mjs — 0.2 s
+  - final: node scripts/ci-scope-check.mjs --checkout-branch — 0.1 s
 
 ## App errors since the run started
 
@@ -88,6 +100,16 @@ triage: shadow · agreement (last 50): 56% · collapsed: 0 · ask: 0 · follow-u
 - D35 · 765 · none · behaviour: a picture over 300KB is re-encoded as JPEG by downscaleImage, so a transparent logo gets a white background — reverse: upload logos without shrinking
 - D36 · 765 · none · behaviour: a successful copy, rename or make-default shows «העיצוב נשמר», a delete shows «העיצוב נמחק» — reverse: drop the messages
 - D37 · 765 · none · behaviour: the Trash section is titled «עיצובי תפריט», sits after events and has no History button — reverse: move or rename the menuDesigns row of TRASH_SECTIONS
+- D38 · 767 · none · behaviour: fonts that do not settle within 10 s fail the render (PDF_FAILED) instead of printing fallback fonts — reverse: catch the TimeoutError of setContent in printPage and print
+- D39 · 767 · none · behaviour: coldStartMs is the browser's launch time for that call (0 when open, Render's wake-up not included); browserRssMb and peakTotalMb are null off Linux, and on Linux the two memory figures are the parts of the highest sample — reverse: change startMemorySampler and printJob
+- D40 · 767 · none · behaviour: ?fonts=embedded keeps the classic design, so its dish font David Libre (not one of the two kept) falls back — reverse: set design.fonts.dish to frank-ruhl-libre for that mode in server/routes/menu-design.js
+- D41 · 767 · none · behaviour: --disable-web-security and --allow-running-insecure-content are removed from the small Chromium's flags — reverse: drop them from REFUSED_FLAGS in server/services/menu-pdf/browser.js
+- D42 · 767 · none · behaviour: a photographed page gets no WebSocket, WebTransport, WebRTC, workers, service worker or window.open (the request check cannot see them) and its dialogs are dismissed — reverse: remove sealPage in server/services/menu-pdf.js
+- D43 · 767 · none · behaviour: the address guard also refuses 0/8, 192.0.0/24, 198.18/15, 240/4, every IPv6 address outside 2000::/3, Teredo, 6to4 and documentation ranges — reverse: trim the lists in server/services/menu-pdf/guard.js
+- D44 · 767 · none · behaviour: screenshot width is kept within 320 to 1920; errors are URL_REFUSED 400, SCREENSHOT_FAILED 502, SCREENSHOT_TOO_LARGE 413, PDF_FAILED 500 — reverse: edit the constants and errors.js
+- D45 · 767 · none · behaviour: menu_pdf.launch_failed is logged once until a browser starts again, with the error's name and first line, addresses stripped — reverse: edit openBrowser
+- D46 · 767 · none · seen: shared/schemas/menu-design/menu-template.ts:144 the .md-content p { margin: 0 } rule outranks the margins of .md-subtitle, .md-note, .md-contact and .md-powered, so 'Powered by FoodVibe' sits tight under the bottom note
+- D47 · 767 · none · seen: shared/schemas/menu-design/menu-template.ts:156 the ornament character comes from a system font (Segoe UI Symbol on Windows); the small Chromium carries few fonts, so it may be missing on Render
 
 ## Run notes
 
@@ -131,18 +153,36 @@ triage: shadow · agreement (last 50): 56% · collapsed: 0 · ask: 0 · follow-u
 - 765: GATE: cached pnpm run test:ci — passed on the same files in plan 765
 - 765: parked: nothing to save (nothing uncommitted)
 - make this a default? on a phone a design card hides the title font's name so the row stays on one line — reverse: remove the phone rule of .design-card__font (trigger: destructive-action) — reply: default yes run-destructive-action
+- 767: the folder foodVibe1.0-orch-md-1-767 was installed (root, scripts, server)
+- 767: builder left undone (round 0): A8: not ticked - the measurement on a free Render instance and the filled decision line are the Human's; the decision template and console steps are in Execution Notes; [human] deploy to a temporary free Render service, read the numbers and check the downloaded PDF: not run; [human] approve the deci
+- 767: the folder foodVibe1.0-orch-md-1-767 was installed (server)
+- 767: GATE: skip pnpm run test:ci — no change under src/**, public/**, shared/**, angular.json, tsconfig*.json, karma.conf.*
+- 767: the folder foodVibe1.0-orch-merge-md-1 was installed (root, scripts, server)
+- FINAL: same tree as plan 767's gate — node scripts/orch-state.mjs prepare --missing server/generated/schemas --script build:schemas --pm pnpm, pnpm run build, pnpm run lint, node scripts/override-check.mjs, pnpm run lint:icons, pnpm run lint:no-native-select, node scripts/plan-ledger-check.mjs, node scripts/breadcrumbs-check.mjs, node scripts/ci-scope-check.mjs --checkout-branch skipped
 
 ## Models per agent
 
 - 765 builder: opus
 - 765 reviewer: sonnet
+- 767 builder: sonnet
+- 767 reviewer: sonnet
 
 ## What only the Human can do
 
-- nothing to validate
+### The plans' [human] items (no UI check ran)
 
-- Decide on 765: review STOP: major e2e/ui/765-2.spec.ts:32 done-when: 765-2 checks another preview title than the criterion names (fix rounds used: 1 of 2) — needs the Human (asked 3 times in this run)
-- Decide on 767: shares files with parked 765
+1. 765 The menu designer screen: build, preview, save and manage designs by hand: The look: on a desktop the controls and the sample menu sit side by side and the sample changes as you type
+2. 765 The menu designer screen: build, preview, save and manage designs by hand: the form's page · change one field, then follow a link out of the page · a question asks whether to leave or stay — here: in the designer change a color, then press the menu library link in the header: «לצאת בלי לשמור?» appears and «הישאר» keeps the change.
+3. 765 The menu designer screen: build, preview, save and manage designs by hand: the page with the delete button · press delete, then cancel · a confirmation appears and nothing is removed — here: a design's row menu «מחיקה», then «ביטול»: the design stays; with «אישור» it leaves the list (and Trash lists it).
+4. 765 The menu designer screen: build, preview, save and manage designs by hand: the list's page with no items · open the page · a message says the list is empty — here: «עיצובי תפריט» of a business with no designs says «עוד אין עיצובים לתפריט» with «עיצוב חדש».
+5. 765 The menu designer screen: build, preview, save and manage designs by hand: the screen's page with the data request failing · open the page · a readable error with a retry appears, not a blank page — here: with the server stopped, «עיצובי תפריט» shows «לא הצלחנו לטעון את העיצובים» and «נסו שוב».
+6. 765 The menu designer screen: build, preview, save and manage designs by hand: any list page on a phone and on a desktop · look at the rows · the page header matches the other list pages and every row stays on one line — here: «עיצובי תפריט» next to «ספריית תפריטים».
+7. 765 The menu designer screen: build, preview, save and manage designs by hand: any list page with row actions · look at a row's edit and remove actions · they are the pencil and trash icon buttons used on the products list, with no text buttons — here: a design row's edit and delete.
+8. 765 The menu designer screen: build, preview, save and manage designs by hand: a dialog with an explained control · hover the control · its explanation shows as a tooltip and no explanation text sits on the modal — here: the base-template popup's four choices.
+9. 765 The menu designer screen: build, preview, save and manage designs by hand: On a phone the editor shows the sample menu above the controls and every control is reachable by scrolling the page.
+10. 767 PDF proof on the real Render server: headless browser, memory and start-up measured: Dandan deploys the plan branch to a free Render test instance (see Critical Questions Q1), opens
+11. 767 PDF proof on the real Render server: headless browser, memory and start-up measured: Dandan reads the decision line in Execution Notes (adopt the measured setup, or the free fallback) and
+
 - Review and merge the run branch (PowerShell, one line each):
 
 ```powershell
@@ -152,4 +192,4 @@ gh pr create --base main --head orch/md-1 --title "Orchestrator run md-1" --body
 
 Context added by learning: 3.7k chars across 6 roles
 
-Trend (last 3 runs): ✗ per plan 0 → 0 → - · fix rounds per plan 0 → 0 → 0.5 · parked 0 → 0 → 1
+Trend (last 3 runs): ✗ per plan 0 → 0 → - · fix rounds per plan 0 → 0 → 0.5 · parked 0 → 0 → 0

@@ -9,7 +9,7 @@
       "nnn": "765",
       "title": "The menu designer screen: build, preview, save and manage designs by hand",
       "branch": "feat/765-menu-designer-screen",
-      "state": "parked",
+      "state": "merged",
       "round": 1,
       "tier": "judgment",
       "models": {
@@ -440,7 +440,7 @@
         "judgment"
       ],
       "freeDiskGb": 6.3,
-      "sha": "3227669c9563c4bbe85568c3ea34e5dc706262e2",
+      "sha": "b0a10bcbe9cfe119049c47add686bc4d061eb805",
       "calls": [
         {
           "stage": "builder",
@@ -475,11 +475,26 @@
     },
     "767": {
       "nnn": "767",
+      "title": "PDF proof on the real Render server: headless browser, memory and start-up measured",
+      "branch": "feat/767-menu-pdf-render-proof",
+      "state": "merged",
       "round": 0,
-      "models": {},
-      "state": "skipped",
-      "reason": "shares files with parked 765",
-      "freeDiskGb": 7,
+      "tier": "build",
+      "models": {
+        "builder": {
+          "model": "sonnet",
+          "tier": "build",
+          "at": "2026-11-27T21:21:38.399Z"
+        },
+        "reviewer": {
+          "model": "sonnet",
+          "at": "2026-11-27T22:01:23.335Z"
+        }
+      },
+      "humanItems": [
+        "Dandan deploys the plan branch to a free Render test instance (see Critical Questions Q1), opens",
+        "Dandan reads the decision line in Execution Notes (adopt the measured setup, or the free fallback) and"
+      ],
       "history": [
         {
           "at": "2026-11-27T19:12:41.110Z",
@@ -495,8 +510,81 @@
           "at": "2026-11-27T21:13:29.659Z",
           "state": "skipped",
           "round": 0
+        },
+        {
+          "at": "2026-11-27T21:21:38.140Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-27T21:21:38.400Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-27T21:50:52.854Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-27T22:01:12.983Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-27T22:01:23.336Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-27T22:03:06.775Z",
+          "state": "merging",
+          "round": 0
+        },
+        {
+          "at": "2026-11-27T22:41:28.369Z",
+          "state": "merged",
+          "round": 0
         }
-      ]
+      ],
+      "earlier": [
+        {
+          "nnn": "767",
+          "round": 0,
+          "models": {},
+          "state": "skipped",
+          "reason": "shares files with parked 765",
+          "freeDiskGb": 7
+        }
+      ],
+      "tiers": [
+        "build"
+      ],
+      "freeDiskGb": 7.9,
+      "sha": "3810a5455e209961ec2e8d6df5acae0a4908cca7",
+      "calls": [
+        {
+          "stage": "builder",
+          "model": "sonnet",
+          "seconds": 1751.3,
+          "tokens": {
+            "input": 6151216,
+            "output": 77089
+          },
+          "exit": 0
+        },
+        {
+          "stage": "reviewer",
+          "model": "sonnet",
+          "seconds": 100.9,
+          "tokens": {
+            "input": 406823,
+            "output": 13066
+          },
+          "exit": 0
+        }
+      ],
+      "checkedHead": "c65c8557f4b1eeac58c17a7d70268a454579a62c"
     }
   },
   "notes": [
@@ -694,12 +782,41 @@
     {
       "at": "2026-11-27T21:13:30.238Z",
       "text": "make this a default? on a phone a design card hides the title font's name so the row stays on one line — reverse: remove the phone rule of .design-card__font (trigger: destructive-action) — reply: default yes run-destructive-action"
+    },
+    {
+      "at": "2026-11-27T21:21:37.902Z",
+      "plan": "767",
+      "text": "the folder foodVibe1.0-orch-md-1-767 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-27T21:50:49.898Z",
+      "plan": "767",
+      "text": "builder left undone (round 0): A8: not ticked - the measurement on a free Render instance and the filled decision line are the Human's; the decision template and console steps are in Execution Notes; [human] deploy to a temporary free Render service, read the numbers and check the downloaded PDF: not run; [human] approve the deci"
+    },
+    {
+      "at": "2026-11-27T21:50:54.504Z",
+      "plan": "767",
+      "text": "the folder foodVibe1.0-orch-md-1-767 was installed (server)"
+    },
+    {
+      "at": "2026-11-27T21:50:55.223Z",
+      "plan": "767",
+      "text": "GATE: skip pnpm run test:ci — no change under src/**, public/**, shared/**, angular.json, tsconfig*.json, karma.conf.*"
+    },
+    {
+      "at": "2026-11-27T22:03:29.326Z",
+      "plan": "767",
+      "text": "the folder foodVibe1.0-orch-merge-md-1 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-27T22:42:22.748Z",
+      "text": "FINAL: same tree as plan 767's gate — node scripts/orch-state.mjs prepare --missing server/generated/schemas --script build:schemas --pm pnpm, pnpm run build, pnpm run lint, node scripts/override-check.mjs, pnpm run lint:icons, pnpm run lint:no-native-select, node scripts/plan-ledger-check.mjs, node scripts/breadcrumbs-check.mjs, node scripts/ci-scope-check.mjs --checkout-branch skipped"
     }
   ],
-  "attempts": 2,
+  "attempts": 3,
   "phase": "finished",
-  "freeDiskGb": 7,
-  "updatedAt": "2026-11-27T21:13:33.428Z",
+  "freeDiskGb": 7.9,
+  "updatedAt": "2026-11-27T22:45:38.697Z",
   "selfDecided": [
     {
       "plan": "767",
@@ -1199,7 +1316,144 @@
       "confidence": null,
       "rec": "",
       "why": ""
+    },
+    {
+      "id": "D38",
+      "plan": "767",
+      "type": "behaviour",
+      "text": "behaviour: fonts that do not settle within 10 s fail the render (PDF_FAILED) instead of printing fallback fonts — reverse: catch the TimeoutError of setContent in printPage and print",
+      "alsoFrom": [],
+      "attempt": 3,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D39",
+      "plan": "767",
+      "type": "behaviour",
+      "text": "behaviour: coldStartMs is the browser's launch time for that call (0 when open, Render's wake-up not included); browserRssMb and peakTotalMb are null off Linux, and on Linux the two memory figures are the parts of the highest sample — reverse: change startMemorySampler and printJob",
+      "alsoFrom": [],
+      "attempt": 3,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D40",
+      "plan": "767",
+      "type": "behaviour",
+      "text": "behaviour: ?fonts=embedded keeps the classic design, so its dish font David Libre (not one of the two kept) falls back — reverse: set design.fonts.dish to frank-ruhl-libre for that mode in server/routes/menu-design.js",
+      "alsoFrom": [],
+      "attempt": 3,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D41",
+      "plan": "767",
+      "type": "behaviour",
+      "text": "behaviour: --disable-web-security and --allow-running-insecure-content are removed from the small Chromium's flags — reverse: drop them from REFUSED_FLAGS in server/services/menu-pdf/browser.js",
+      "alsoFrom": [],
+      "attempt": 3,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D42",
+      "plan": "767",
+      "type": "behaviour",
+      "text": "behaviour: a photographed page gets no WebSocket, WebTransport, WebRTC, workers, service worker or window.open (the request check cannot see them) and its dialogs are dismissed — reverse: remove sealPage in server/services/menu-pdf.js",
+      "alsoFrom": [],
+      "attempt": 3,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D43",
+      "plan": "767",
+      "type": "behaviour",
+      "text": "behaviour: the address guard also refuses 0/8, 192.0.0/24, 198.18/15, 240/4, every IPv6 address outside 2000::/3, Teredo, 6to4 and documentation ranges — reverse: trim the lists in server/services/menu-pdf/guard.js",
+      "alsoFrom": [],
+      "attempt": 3,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D44",
+      "plan": "767",
+      "type": "behaviour",
+      "text": "behaviour: screenshot width is kept within 320 to 1920; errors are URL_REFUSED 400, SCREENSHOT_FAILED 502, SCREENSHOT_TOO_LARGE 413, PDF_FAILED 500 — reverse: edit the constants and errors.js",
+      "alsoFrom": [],
+      "attempt": 3,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D45",
+      "plan": "767",
+      "type": "behaviour",
+      "text": "behaviour: menu_pdf.launch_failed is logged once until a browser starts again, with the error's name and first line, addresses stripped — reverse: edit openBrowser",
+      "alsoFrom": [],
+      "attempt": 3,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D46",
+      "plan": "767",
+      "type": "seen",
+      "text": "seen: shared/schemas/menu-design/menu-template.ts:144 the .md-content p { margin: 0 } rule outranks the margins of .md-subtitle, .md-note, .md-contact and .md-powered, so 'Powered by FoodVibe' sits tight under the bottom note",
+      "alsoFrom": [],
+      "attempt": 3,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D47",
+      "plan": "767",
+      "type": "seen",
+      "text": "seen: shared/schemas/menu-design/menu-template.ts:156 the ornament character comes from a system font (Segoe UI Symbol on Windows); the small Chromium carries few fonts, so it may be missing on Render",
+      "alsoFrom": [],
+      "attempt": 3,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
     }
   ],
-  "finishedAt": "2026-11-27T21:13:33.425Z"
+  "finishedAt": "2026-11-27T22:45:38.694Z",
+  "finalGate": {
+    "ok": true,
+    "command": null,
+    "at": "2026-11-27T22:45:38.696Z",
+    "attempt": 1,
+    "blamed": []
+  }
 }
