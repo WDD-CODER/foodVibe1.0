@@ -730,6 +730,20 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 - When: a screen, an export or a server path shows a designed menu; never a second menu template or design fallback rule.
 - Known copies: none.
 
+### menu-pdf — the server's one headless browser (plan 767)
+
+- Status: pilot — plan 767; adopted for good only after the measurement on a free Render instance
+- Use: `server/services/menu-pdf.js` · `renderPdf(html)` (A4, JavaScript off, loads only `data:`, Google Fonts and
+  Cloudinary), `renderPdfMeasured(html)` (the same with time and memory), `screenshotUrl(url, { width })` (public https
+  pages only) and `embedFonts(html)` (the two kept fonts of `server/assets/menu-fonts/`, fetched by
+  `server/scripts/menu-fonts-fetch.js`). One browser at a time, closed after 60 s idle, three jobs may wait; failures are
+  the coded errors of `server/services/menu-pdf/errors.js` (`PDF_BUSY`, `PDF_UNAVAILABLE`, …). The helpers in
+  `server/services/menu-pdf/` are private to it. `GET /api/v1/menu-design/pdf-smoke` (`server/routes/menu-design.js`,
+  platform admin) measures it.
+- Pieces: renderPdf, renderPdfMeasured, screenshotUrl, embedFonts, isMenuPdfError, setBrowserLauncherForTests.
+- When: a server path makes a PDF from HTML or takes a picture of a web page; never a second import of a browser driver.
+- Known copies: none.
+
 ### menu-designer — every control that sets a menu's look (plan 765)
 
 - Status: stable — plan 765

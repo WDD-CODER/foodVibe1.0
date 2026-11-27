@@ -51,5 +51,6 @@ services:
         sync: false
       - key: CLOUDINARY_API_SECRET
         sync: false
+      # Menu PDF (plan 767): MENU_PDF_CHROME_PATH is optional and local only (the path of a local Chrome). Do not set it here: the live service needs no build-command change (the browser packages have no install script).
       - key: ALLOWED_ORIGIN
         value: https://foodvibe1-0-1-frankfurt.onrender.com,https://wdd-coder.github.io,http://localhost:4200
