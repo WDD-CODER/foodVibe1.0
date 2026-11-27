@@ -1,14 +1,10 @@
 'use strict';
 /**
- * Plan 756: what the assistant page shows about how the assistant is set up — the engine's fixed numbers, read from the
- * constants the turn itself uses, and this business's own values. Read-only; logs carry no profile value.
+ * Plan 756: what the assistant page shows about how the assistant is set up — the engine's numbers in force, read the
+ * way the turn itself reads them (plan 760: `engineSettings`), and this business's own values. Read-only; logs carry
+ * no profile value.
  */
-const { QUIET_MS, MAX_WAIT_MS } = require('./inbound');
-const { FRONTDESK_DAILY_TURNS } = require('./frontdesk-turn');
-const { TURN_LIMIT, FOLLOW_UP_MAX } = require('./frontdesk-guardrails');
-const { HISTORY_WINDOW, GLUE_MAX } = require('./frontdesk-prompt');
-const { MAX_FACTS_CHARS } = require('./knowledge');
-const { FIRST_MODEL_LIMIT_MS, TURN_BUDGET_MS } = require('../routes/ai/frontdesk');
+const { engineSettings, engineRanges } = require('./assistant-engine-settings');
 const { tablesFor } = require('./frontdesk-tables');
 const { tableServiceOf } = require('../generated/schemas/front-desk/table-service');
 const { modelChain } = require('./gemini-client');
@@ -17,19 +13,6 @@ const PROFILE_FIELDS = ['displayName', 'phone', 'address', 'serviceArea'];
 
 const filled = value => typeof value === 'string' && value.length > 0;
 const hasRows = value => Array.isArray(value) && value.length > 0;
-
-const engineNumbers = () => ({
-  quietMs: QUIET_MS,
-  maxWaitMs: MAX_WAIT_MS,
-  dailyTurns: FRONTDESK_DAILY_TURNS,
-  turnLimit: TURN_LIMIT,
-  followUpMax: FOLLOW_UP_MAX,
-  historyWindow: HISTORY_WINDOW,
-  glueMax: GLUE_MAX,
-  factsMaxChars: MAX_FACTS_CHARS,
-  firstModelMs: FIRST_MODEL_LIMIT_MS,
-  turnBudgetMs: TURN_BUDGET_MS,
-});
 
 /** This business's own values, as the turn reads them; `null` when it has no front desk profile. */
 async function businessSetup(db, businessId) {
@@ -63,12 +46,13 @@ async function businessSetup(db, businessId) {
 /**
  * @param {import('mongodb').Db} db
  * @param {string} businessId
- * @param {{ admin?: boolean }} [ask] `admin`: the platform admin also gets the model order
- * @returns {Promise<{ engine: object, business: object | null, models?: string[] }>}
+ * @param {{ admin?: boolean }} [ask] `admin`: the platform admin also gets the model order, `editable` and the ranges
+ * @returns {Promise<{ engine: object, business: object | null, models?: string[], editable?: true, ranges?: object }>}
  */
 async function assistantSetup(db, businessId, { admin = false } = {}) {
-  const out = { engine: engineNumbers(), business: await businessSetup(db, businessId) };
-  if (admin) out.models = [...modelChain()];
+  const engine = await engineSettings(db);
+  const out = { engine, business: await businessSetup(db, businessId) };
+  if (admin) Object.assign(out, { models: [...modelChain()], editable: true, ranges: engineRanges(engine) });
   return out;
 }
 

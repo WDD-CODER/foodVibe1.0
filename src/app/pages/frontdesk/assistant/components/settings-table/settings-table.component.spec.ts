@@ -6,7 +6,10 @@ import { TEST_LUCIDE_ICONS } from 'src/testing/test-lucide-icons'
 import { AssistantRunDataService } from '@services/assistant-run-data.service'
 import { ModuleService } from '@services/module.service'
 import { TranslationService } from '@services/translation.service'
+import { UserMsgService } from '@services/user-msg.service'
 import type { AssistantSetup } from '@models/assistant-run.model'
+import { AssistantEngineService } from '../../assistant-engine.service'
+import type { AdminAssistantSetup } from '../../assistant-engine.util'
 import { SETTING_ROWS } from '../../assistant-settings.data'
 import { SettingsTableComponent } from './settings-table.component'
 
@@ -21,8 +24,20 @@ const DICT: Record<string, string> = {
   asr_set_go_settings: 'להגדרות העמדה',
   asr_val_filled: '{n} מתוך {total} מולאו',
   asr_val_none: '—',
-  retry: 'נסה שוב'
+  retry: 'נסה שוב',
+  asr_set_why_fixed: 'חלק מהמנוע של FoodVibe',
+  asr_who_foodvibe: 'FoodVibe',
+  asr_engine_secs: '{n} שנ׳',
+  asr_unit_seconds: 'שניות',
+  asr_unit_turns: 'תשובות',
+  asr_set_range: 'טווח:',
+  asr_set_save: 'שמירה',
+  asr_set_save_failed: 'לא הצלחנו לשמור',
+  asr_set_out_of_range: 'הערך מחוץ לטווח',
+  cancel: 'ביטול'
 }
+
+const ENGINE_ROWS = SETTING_ROWS.filter((row) => row.engineField)
 
 const setup: AssistantSetup = {
   engine: {
@@ -62,8 +77,29 @@ describe('SettingsTableComponent (plan 756)', () => {
   let tables: WritableSignal<boolean>
   let loadSetup: jasmine.Spy
   let navigate: jasmine.Spy
+  let save: jasmine.Spy
+  let errorMsg: jasmine.Spy
+
+  const adminSetup: AdminAssistantSetup = {
+    ...setup,
+    editable: true,
+    ranges: {
+      quietMs: { min: 1000, max: 15000, unit: 'ms' },
+      maxWaitMs: { min: 3000, max: 30000, unit: 'ms' },
+      dailyTurns: { min: 1, max: 2000, unit: 'turns' },
+      turnLimit: { min: 1, max: 50, unit: 'turns' },
+      followUpMax: { min: 0, max: 10, unit: 'turns' },
+      historyWindow: { min: 2, max: 40, unit: 'messages' },
+      glueMax: { min: 1, max: 15, unit: 'messages' },
+      factsMaxChars: { min: 1000, max: 20000, unit: 'chars' },
+      firstModelMs: { min: 2000, max: 15000, unit: 'ms' },
+      turnBudgetMs: { min: 10000, max: 60000, unit: 'ms' }
+    }
+  }
 
   beforeEach(() => {
+    save = jasmine.createSpy('save').and.resolveTo('saved')
+    errorMsg = jasmine.createSpy('onSetErrorMsg')
     setupSig = signal<AssistantSetup | null>(setup)
     loaded = signal(true)
     failed = signal(false)
@@ -81,6 +117,8 @@ describe('SettingsTableComponent (plan 756)', () => {
           useValue: { setup_: setupSig, setupLoaded_: loaded, setupFailed_: failed, loadSetup }
         },
         { provide: ModuleService, useValue: { has: () => tables() } },
+        { provide: AssistantEngineService, useValue: { save } },
+        { provide: UserMsgService, useValue: { onSetErrorMsg: errorMsg } },
         { provide: TranslationService, useValue: { translate: (k: string) => DICT[k] ?? k } }
       ]
     }).compileComponents()
@@ -202,5 +240,120 @@ describe('SettingsTableComponent (plan 756)', () => {
     expect(byId('set-no-profile')!.textContent).toContain('עדיין לא הוגדרה העמדה')
     byId('set-no-profile')!.querySelector('button')!.click()
     expect(navigate).toHaveBeenCalledOnceWith(['/frontdesk/settings'])
+  })
+
+  describe('plan 760: the engine numbers', () => {
+    const settle = async () => {
+      await fixture.whenStable()
+      fixture.detectChanges()
+    }
+    const press = (id: string) => {
+      byId(id)!.click()
+      fixture.detectChanges()
+    }
+    const box = (id: string) => byId(`set-input-${id}`) as HTMLInputElement
+    const type = (id: string, text: string) => {
+      box(id).value = text
+      box(id).dispatchEvent(new Event('input'))
+      fixture.detectChanges()
+    }
+    const createAdmin = () => {
+      setupSig.set(adminSetup)
+      return create(true)
+    }
+
+    it('gives the platform admin a "change" button on each engine row, in place of the lock', async () => {
+      await createAdmin()
+      expect(ENGINE_ROWS.length).toBe(10)
+      for (const row of ENGINE_ROWS) {
+        expect(byId('set-change-' + row.id)!.textContent!.trim())
+          .withContext(row.id)
+          .toBe('לשנות')
+        expect(byId('set-row-' + row.id)!.textContent)
+          .withContext(row.id)
+          .not.toContain('קבוע במערכת')
+      }
+      expect(byId('set-change-guard_words')).toBeNull()
+      expect(byId('set-row-guard_words')!.textContent).toContain('קבוע במערכת')
+      expect(el().querySelector('form')).toBeNull()
+    })
+
+    it('opens a number box in the row with its unit and range, a time in seconds', async () => {
+      await createAdmin()
+      press('set-change-quiet_wait')
+      const editor = byId('set-editor-quiet_wait')!
+      expect(byId('set-row-quiet_wait')!.contains(editor)).toBeTrue()
+      expect(box('quiet_wait').value).toBe('2.0')
+      expect(byId('set-unit')!.textContent!.trim()).toBe('שניות')
+      expect(byId('set-range')!.textContent).toContain('1.0–15.0')
+      expect(byId('set-save')!.textContent!.trim()).toBe('שמירה')
+      expect(byId('set-change-quiet_wait')!.getAttribute('aria-expanded')).toBe('true')
+      expect(navigate).not.toHaveBeenCalled()
+      press('set-change-turn_limit')
+      expect(byId('set-editor-quiet_wait')).toBeNull()
+      expect(box('turn_limit').value).toBe('8')
+    })
+
+    it('saves the number and closes the box', async () => {
+      await createAdmin()
+      press('set-change-quiet_wait')
+      type('quiet_wait', '4')
+      press('set-save')
+      await settle()
+      expect(save).toHaveBeenCalledOnceWith('quietMs', 4000)
+      expect(byId('set-editor-quiet_wait')).toBeNull()
+      expect(errorMsg).not.toHaveBeenCalled()
+    })
+
+    it('does not send a value outside the range, and says why on the button', async () => {
+      await createAdmin()
+      press('set-change-quiet_wait')
+      type('quiet_wait', '20')
+      expect(byId('set-save')!.getAttribute('aria-disabled')).toBe('true')
+      press('set-save')
+      await settle()
+      expect(save).not.toHaveBeenCalled()
+      byId('set-save')!.dispatchEvent(new Event('mouseenter'))
+      expect(document.querySelector('.c-tip')!.textContent).toContain('הערך מחוץ לטווח')
+      byId('set-save')!.dispatchEvent(new Event('mouseleave'))
+    })
+
+    it('after a failed save shows an error, keeps the box and the old value', async () => {
+      save.and.resolveTo('failed')
+      await createAdmin()
+      press('set-change-quiet_wait')
+      type('quiet_wait', '4')
+      press('set-save')
+      await settle()
+      expect(errorMsg).toHaveBeenCalledOnceWith('לא הצלחנו לשמור')
+      expect(box('quiet_wait').value).toBe('4')
+      expect(byId('set-value-quiet_wait')!.textContent!.trim()).toBe('2.0 שנ׳')
+    })
+
+    it('closes the box on cancel with nothing saved', async () => {
+      await createAdmin()
+      press('set-change-quiet_wait')
+      type('quiet_wait', '4')
+      press('set-cancel')
+      expect(byId('set-editor-quiet_wait')).toBeNull()
+      expect(save).not.toHaveBeenCalled()
+    })
+
+    it('keeps the rows locked for an owner, with the tooltip and no "change"', async () => {
+      await create()
+      for (const row of ENGINE_ROWS) {
+        expect(byId('set-change-' + row.id))
+          .withContext(row.id)
+          .toBeNull()
+        expect(byId('set-row-' + row.id)!.textContent)
+          .withContext(row.id)
+          .toContain('קבוע במערכת')
+      }
+      const lock = byId('set-row-quiet_wait')!.querySelector<HTMLElement>('.asr-set__who .c-chip')!
+      expect(byId('set-row-quiet_wait')!.textContent).not.toContain('חלק מהמנוע')
+      lock.dispatchEvent(new Event('mouseenter'))
+      expect(document.querySelector('.c-tip')!.textContent).toContain('חלק מהמנוע של FoodVibe')
+      lock.dispatchEvent(new Event('mouseleave'))
+    })
   })
 })

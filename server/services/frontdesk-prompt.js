@@ -2,15 +2,16 @@
 /**
  * Plan 679 (C-AI): the assistant's request to the model. The fixed rules (English) are the only thing in
  * `systemInstruction`; the guest's words, the facts, the date and the request kinds are data in `contents`.
- * R-16: no rolling summary; the last 12 messages are the window.
+ * R-16: no rolling summary; the newest messages are the window (plan 760: an engine setting, 12 by default).
  * Plan 753 (R-28): several unanswered guest messages are all answered; their number is data in the UNANSWERED block.
  */
 const { jerusalemDateTime } = require('../generated/schemas/front-desk/local-time');
+const { ENGINE_DEFAULTS } = require('./assistant-engine-settings');
 
 const ZONE = 'Asia/Jerusalem';
-const HISTORY_WINDOW = 12;
+const HISTORY_WINDOW = ENGINE_DEFAULTS.historyWindow;
 /** The most unanswered guest messages that are counted as waiting for one answer. */
-const GLUE_MAX = 5;
+const GLUE_MAX = ENGINE_DEFAULTS.glueMax;
 
 const TURN_SYSTEM_PROMPT = [
   'You are the front desk assistant of the business named in the FACTS block. You write short, clear messages to a guest who wrote to the business.',
@@ -78,17 +79,19 @@ function messageText(m) {
   return m.text ?? '';
 }
 
-/** The guest messages after the newest one that is not the guest's: at most `GLUE_MAX`, oldest first. */
-function unansweredTail(history) {
+/** The guest messages after the newest one that is not the guest's: at most `glueMax`, oldest first. */
+function unansweredTail(history, glueMax = GLUE_MAX) {
   const list = history ?? [];
   const lastAnswer = list.map(m => m.author !== 'guest').lastIndexOf(true);
-  return list.slice(lastAnswer + 1).slice(-GLUE_MAX);
+  return list.slice(lastAnswer + 1).slice(-glueMax);
 }
 
-/** @returns the Gemini request body of one turn. `history` is oldest first; only the last 12 are sent. */
-function buildTurnBody({ profile, facts, history, now, tablesOn = false, areas = [] }) {
+/** @returns the Gemini request body of one turn. `history` is oldest first; only the last `historyWindow` are sent. */
+function buildTurnBody({
+  profile, facts, history, now, tablesOn = false, areas = [], historyWindow = HISTORY_WINDOW, glueMax = GLUE_MAX,
+}) {
   const tone = profile?.assistant?.tone === 'formal' ? 'formal' : 'warm';
-  const unanswered = unansweredTail(history).length;
+  const unanswered = unansweredTail(history, glueMax).length;
   const lead = [
     '=== TODAY (data) ===', todayBlock(now),
     '=== FACTS (data) ===', facts?.text ?? '',
@@ -99,7 +102,7 @@ function buildTurnBody({ profile, facts, history, now, tablesOn = false, areas =
       : []),
     '=== CONVERSATION FOLLOWS ===',
   ].join('\n');
-  const recent = (history ?? []).slice(-HISTORY_WINDOW).map(m => ({
+  const recent = (history ?? []).slice(-historyWindow).map(m => ({
     role: m.author === 'guest' ? 'user' : 'model',
     parts: [{ text: messageText(m) }],
   }));

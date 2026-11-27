@@ -2,13 +2,15 @@
 /**
  * Plan 554 (C-KB): `publicFacts` is the one source of business facts the assistant may be given. Server-only; it
  * returns only the profile's own facts and the business's live, approved, public knowledge items, in a fixed order.
- * Plan 755 (R-32): when the lines do not all fit in 6,000 characters the profile's lines are always sent and the items
- * are picked by `pickFacts` for the guest's current message; `factIds` are exactly the lines that were sent.
+ * Plan 755 (R-32): when the lines do not all fit in the budget (6,000 characters by default) the profile's lines are
+ * always sent and the items are picked by `pickFacts` for the guest's current message; `factIds` are exactly the lines that were sent.
  */
 const { KNOWLEDGE_TOPICS } = require('../generated/schemas/entities')
 const { pickFacts, TITLE_MAX } = require('./fact-pick')
+const { ENGINE_DEFAULTS } = require('./assistant-engine-settings')
 
-const MAX_CHARS = 6000
+/** The default budget; the turn passes the one in force as `budget` (plan 760). */
+const MAX_CHARS = ENGINE_DEFAULTS.factsMaxChars
 
 /** A value on one line: any run of line breaks becomes a single space. */
 const oneLine = value => String(value).replace(/[\r\n]+/g, ' ').trim()

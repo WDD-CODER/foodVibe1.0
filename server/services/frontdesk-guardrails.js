@@ -3,7 +3,7 @@
  * Plans 679 + 689 (C-AI): the one place where the assistant's blocks live. Pure (no database).
  * `preCheck(ctx)` runs before the model call; `applyGuardrails(answer, ctx)` after it → `{ ok: true, answer }` or
  * `{ ok: false, reason }` (`unsupported_time` adds a `detail` of counts). `ctx` is `{ profile, factIds, factsText,
- * history, aiTurns, chain, now, mode, lastTurnLow, replyWillBeSent }`. A blocked reply is never rewritten: the caller
+ * history, aiTurns, chain, turnLimit, followUpMax, now, mode, lastTurnLow, replyWillBeSent }`. A blocked reply is never rewritten: the caller
  * turns it into a handoff. The pre-checks end with the turn limit and the follow-up limit (plan 753). The word lists are a second line (`constants/frontdesk-guard-words.js`); the structured answer is
  * checked first.
  */
@@ -11,10 +11,12 @@ const { HANDOFF, DEFERRED, COMPLETION, INTERNALS, GREETINGS, REMOVAL_WORDS } = r
 const { hoursCheck } = require('../generated/schemas/front-desk/qualify');
 const { jerusalemDateTime } = require('../generated/schemas/front-desk/local-time');
 const { norm } = require('../utils/text-norm');
+const { ENGINE_DEFAULTS } = require('./assistant-engine-settings');
 
-const TURN_LIMIT = 8;
+/** The defaults; the caller passes the numbers in force as `ctx.turnLimit` and `ctx.followUpMax` (plan 760). */
+const TURN_LIMIT = ENGINE_DEFAULTS.turnLimit;
 /** Plan 753 (R-26): how many follow-up runs in a row may call the model. */
-const FOLLOW_UP_MAX = 3;
+const FOLLOW_UP_MAX = ENGINE_DEFAULTS.followUpMax;
 const PUNCT_RE = /^[\s.,!?;:"'()\-–—…״׳]+|[\s.,!?;:"'()\-–—…״׳]+$/g;
 const LINK_RE = /(?:https?:\/\/|www\.)[^\s)<>"'،]+/gi;
 const PRICE_RES = [
@@ -47,8 +49,8 @@ function preCheck(ctx) {
     const { date, time } = jerusalemDateTime(ctx.now ?? Date.now());
     if (!hoursCheck(rows, date, time).ok) return { ok: false, reason: 'outside_hours' };
   }
-  if ((ctx.aiTurns ?? 0) >= TURN_LIMIT) return { ok: false, reason: 'turn_limit' };
-  if ((ctx.chain ?? 0) > FOLLOW_UP_MAX) return { ok: false, reason: 'follow_up_limit' };
+  if ((ctx.aiTurns ?? 0) >= (ctx.turnLimit ?? TURN_LIMIT)) return { ok: false, reason: 'turn_limit' };
+  if ((ctx.chain ?? 0) > (ctx.followUpMax ?? FOLLOW_UP_MAX)) return { ok: false, reason: 'follow_up_limit' };
   return { ok: true };
 }
 

@@ -37,13 +37,25 @@ export interface SettingRow {
 const SETTINGS = '/frontdesk/settings'
 const KNOWLEDGE = '/frontdesk/knowledge'
 
-/** A number fixed in the engine: the same for every business. */
+const ENGINE_FILE = 'server/services/assistant-engine-settings.js · ENGINE_RULES.'
+
+/**
+ * A number of the engine, the same for every business: fixed for everybody but the platform admin, who changes it in
+ * its row (plan 760). `readBy` names more code that works with it.
+ */
 const fixedNumber = (
   id: string,
   steps: readonly RunStepKey[],
   engineField: keyof AssistantEngine,
-  code: string
-): SettingRow => ({ id, steps, who: 'fixed', value: 'engine', engineField, code })
+  readBy = ''
+): SettingRow => ({
+  id,
+  steps,
+  who: 'fixed',
+  value: 'engine',
+  engineField,
+  code: ENGINE_FILE + engineField + (readBy && ' · ' + readBy)
+})
 
 export const SETTING_ROWS: readonly SettingRow[] = [
   { id: 'hours', steps: ['facts', 'guardrails'], who: 'owner', route: SETTINGS, value: 'hours' },
@@ -80,15 +92,15 @@ export const SETTING_ROWS: readonly SettingRow[] = [
     value: 'models'
   },
   { id: 'monthly_cap', steps: ['ai'], who: 'foodvibe', route: '/platform', value: 'none' },
-  fixedNumber('daily_turns', ['limit'], 'dailyTurns', 'server/services/frontdesk-turn.js · FRONTDESK_DAILY_TURNS'),
-  fixedNumber('quiet_wait', ['inbound'], 'quietMs', 'server/services/inbound.js · QUIET_MS'),
-  fixedNumber('max_wait', ['inbound'], 'maxWaitMs', 'server/services/inbound.js · MAX_WAIT_MS'),
-  fixedNumber('history_window', ['history'], 'historyWindow', 'server/services/frontdesk-prompt.js · HISTORY_WINDOW'),
-  fixedNumber('glue_max', ['prompt'], 'glueMax', 'server/services/frontdesk-prompt.js · GLUE_MAX'),
-  fixedNumber('turn_limit', ['precheck'], 'turnLimit', 'server/services/frontdesk-guardrails.js · TURN_LIMIT'),
-  fixedNumber('follow_up_max', ['precheck'], 'followUpMax', 'server/services/frontdesk-guardrails.js · FOLLOW_UP_MAX'),
-  fixedNumber('first_model_limit', ['ai'], 'firstModelMs', 'server/routes/ai/frontdesk.js · FIRST_MODEL_LIMIT_MS'),
-  fixedNumber('turn_budget', ['ai'], 'turnBudgetMs', 'server/routes/ai/frontdesk.js · TURN_BUDGET_MS'),
+  fixedNumber('daily_turns', ['limit'], 'dailyTurns'),
+  fixedNumber('quiet_wait', ['inbound'], 'quietMs'),
+  fixedNumber('max_wait', ['inbound'], 'maxWaitMs'),
+  fixedNumber('history_window', ['history'], 'historyWindow'),
+  fixedNumber('glue_max', ['prompt'], 'glueMax'),
+  fixedNumber('turn_limit', ['precheck'], 'turnLimit'),
+  fixedNumber('follow_up_max', ['precheck'], 'followUpMax'),
+  fixedNumber('first_model_limit', ['ai'], 'firstModelMs'),
+  fixedNumber('turn_budget', ['ai'], 'turnBudgetMs'),
   {
     id: 'guard_words',
     steps: ['precheck'],
@@ -96,12 +108,7 @@ export const SETTING_ROWS: readonly SettingRow[] = [
     value: 'none',
     code: 'server/constants/frontdesk-guard-words.js'
   },
-  fixedNumber(
-    'facts_budget',
-    ['facts'],
-    'factsMaxChars',
-    'server/services/knowledge.js · MAX_FACTS_CHARS · server/services/fact-pick.js · pickFacts'
-  ),
+  fixedNumber('facts_budget', ['facts'], 'factsMaxChars', 'server/services/fact-pick.js · pickFacts'),
   {
     id: 'prompt_rules',
     steps: ['prompt'],

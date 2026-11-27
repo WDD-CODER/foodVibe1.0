@@ -3,7 +3,7 @@
  * Plan 675 (C-CONV): the one way in. Every inbound message, from the simulator or a phone, goes through
  * `handleInbound`: idempotent on `providerMessageId`, finds the guest by phone (R-01), keeps one live conversation,
  * stores the message, keeps the 24-hour window, runs a registered button handler, or waits for the guest to go quiet
- * (R-29, plan 754; it was a fixed 6 s, R-03) and calls the turn handler.
+ * (R-29, plan 754; it was a fixed 6 s, R-03) and calls the turn handler. Plan 760: the two waits are engine settings.
  * Plan 753 (R-26): a message that arrives while a run holds the conversation's lease starts no run; it is noted on the
  * lease and the run answers it in a follow-up.
  * Logs carry ids and booleans only — never the text, the name or the phone.
@@ -15,11 +15,11 @@ const { checkStoredDoc } = require('../middleware/validate');
 const { channelFor, defaultActor } = require('./channels');
 const { findOrCreateConversation, loadConversation } = require('./conversations');
 const { leaseLive, noteWaiting } = require('./frontdesk-lease');
+const { engineSettings, ENGINE_DEFAULTS } = require('./assistant-engine-settings');
 
-const QUIET_MS = 2000; // a run starts when the guest has been quiet this long
-const MAX_WAIT_MS = 6000; // and never later than this after the first unanswered message of the burst
-// The old name of the longest wait; kept for its readers (`frontdesk-turn.js` passes it as the lease's grace, plan 753).
-const COALESCE_MS = MAX_WAIT_MS;
+// The defaults of the two waits; the numbers in force come from `engineSettings` (plan 760).
+const QUIET_MS = ENGINE_DEFAULTS.quietMs; // a run starts when the guest has been quiet this long
+const MAX_WAIT_MS = ENGINE_DEFAULTS.maxWaitMs; // and never later than this after the burst's first unanswered message
 const BURST_SCAN_MAX = 30;
 const DAY_MS = 86400000;
 const HUMAN_IDLE_MS = 2 * 60 * 60 * 1000;
@@ -51,21 +51,23 @@ const waitFor = ms => wait(ms);
  * Plan 753 (R-26): the one place that decides what a guest message does next — start a run, wait, or leave it to the
  * run that is working. Plan 754 changes the timing here and nowhere else.
  * `at` is the message's time, `waited` says the burst wait is over, `holder` is the run that already holds the lease
- * and is about to start a follow-up, `burstAt` is the time of the first message of the burst. Pure.
- * Plan 754 (R-29): a quiet wait — run after `QUIET_MS` without a newer guest message, at most `MAX_WAIT_MS` after the
+ * and is about to start a follow-up, `burstAt` is the time of the first message of the burst, `limits` are the engine
+ * numbers in force. Pure.
+ * Plan 754 (R-29): a quiet wait — run after `quietMs` without a newer guest message, at most `maxWaitMs` after the
  * first message of the burst.
  */
-function nextStep({ conversation, at, now, waited, holder = false, burstAt }) {
+function nextStep({ conversation, at, now, waited, holder = false, burstAt, limits = ENGINE_DEFAULTS }) {
+  const { quietMs, maxWaitMs } = limits;
   if (!conversation || conversation.status !== 'bot') return { do: 'stop', why: 'not_bot' };
   if (!holder && leaseLive(conversation, now)) return { do: 'leave', why: 'running' };
   if (!holder && waited && conversation.lastInboundAt > at) return { do: 'leave', why: 'newer' };
   if (waited) return { do: 'run' };
   // A follow-up waits what is left of the quiet time since the newest guest message.
-  if (holder) return { do: 'wait', ms: Math.max(0, QUIET_MS - Math.max(0, now - at)), capped: false };
+  if (holder) return { do: 'wait', ms: Math.max(0, quietMs - Math.max(0, now - at)), capped: false };
   // From the stored times of the messages only, never the server's clock.
   const start = typeof burstAt === 'number' && burstAt <= at ? burstAt : at;
-  const left = Math.max(0, start + MAX_WAIT_MS - at);
-  return { do: 'wait', ms: Math.min(QUIET_MS, left), capped: left < QUIET_MS };
+  const left = Math.max(0, start + maxWaitMs - at);
+  return { do: 'wait', ms: Math.min(quietMs, left), capped: left < quietMs };
 }
 
 /** The time of the first message of the burst that ends at `at`; `rows` are message rows, newest first. Pure. */
@@ -78,11 +80,11 @@ function burstAtOf(rows, at) {
   return start;
 }
 
-/** The burst: guest messages with nothing between them that began at most `MAX_WAIT_MS` before this one. */
-async function burstStart(db, conversation, at) {
+/** The burst: guest messages with nothing between them that began at most `maxWaitMs` before this one. */
+async function burstStart(db, conversation, at, maxWaitMs = MAX_WAIT_MS) {
   const rows = await db.collection('messages')
     .find(
-      { businessId: conversation.businessId, conversationId: conversation._id, at: { $gte: at - MAX_WAIT_MS, $lte: at } },
+      { businessId: conversation.businessId, conversationId: conversation._id, at: { $gte: at - maxWaitMs, $lte: at } },
       { projection: { at: 1, direction: 1, author: 1 } }
     )
     .sort({ at: -1, _id: -1 }).limit(BURST_SCAN_MAX).toArray();
@@ -148,13 +150,15 @@ async function afterStored(db, conversation, { buttonId, at, messageId }, log) {
       || (await loadConversation(db, conversation.businessId, conversation._id))?.status === 'bot';
     if (moved) conversation = { ...conversation, status: 'bot' };
   }
-  const burstAt = conversation.status === 'bot' ? await burstStart(db, conversation, at) : at;
-  let step = nextStep({ conversation, at, now: Date.now(), waited: false, burstAt });
+  const limits = await engineSettings(db);
+  const burstAt = conversation.status === 'bot' ? await burstStart(db, conversation, at, limits.maxWaitMs) : at;
+  let step = nextStep({ conversation, at, now: Date.now(), waited: false, burstAt, limits });
   if (step.do === 'stop') return;
   // A lease that ended between the read and the note takes none: this message goes on as any other.
   if (step.do === 'leave') {
     if (await leftToRun(db, conversation, messageId, log)) return;
-    step = nextStep({ conversation: { ...conversation, run: undefined }, at, now: Date.now(), waited: false, burstAt });
+    const free = { ...conversation, run: undefined };
+    step = nextStep({ conversation: free, at, now: Date.now(), waited: false, burstAt, limits });
   }
   const { ms: quietMs, capped } = step;
   const waitStarted = Date.now();
@@ -223,7 +227,7 @@ async function handleInbound(db, input, { log = logger } = {}) {
 }
 
 module.exports = {
-  handleInbound, registerButton, setTurnHandler, setWaitForTest, resetInboundForTest, COALESCE_MS, HUMAN_IDLE_MS,
+  handleInbound, registerButton, setTurnHandler, setWaitForTest, resetInboundForTest, HUMAN_IDLE_MS,
   answerWaiting, nextStep, waitFor, QUIET_MS, MAX_WAIT_MS, burstAtOf, burstStart,
 };
 

@@ -48,8 +48,8 @@
             <span class="c-list-body-cell asr-set__steps">
               <span class="asr-set__line">{{ stepNames(item.row) }}</span>
             </span>
-            <span class="c-list-body-cell asr-set__who" [class.asr-set__who--fixed]="item.row.who === 'fixed'">
-              @if (item.row.who === 'fixed') {
+            <span class="c-list-body-cell asr-set__who" [class.asr-set__who--fixed]="item.who === 'fixed'">
+              @if (item.who === 'fixed') {
                 <span
                   class="c-chip c-chip--tag c-chip--sm c-chip--glass"
                   tabindex="0"
@@ -57,18 +57,19 @@
                   >{{ 'asr_set_fixed' | translatePipe }}</span
                 >
               } @else {
-                <span class="c-chip c-chip--tag c-chip--sm" [class]="who[item.row.who].tone">{{
-                  who[item.row.who].key | translatePipe
+                <span class="c-chip c-chip--tag c-chip--sm" [class]="who[item.who].tone">{{
+                  who[item.who].key | translatePipe
                 }}</span>
               }
             </span>
             <span class="c-list-body-cell c-list-body-cell--end asr-set__action">
-              @if (item.row.route) {
+              @if (item.row.route || item.edit) {
                 <button
                   type="button"
                   class="c-btn-ghost asr-set__change"
                   [attr.data-testid]="'set-change-' + item.row.id"
                   [attr.aria-label]="changeLabel(item.row)"
+                  [attr.aria-expanded]="item.edit ? editing_() === item.edit.field : null"
                   [attr.aria-disabled]="item.block ? 'true' : null"
                   [appTip]="item.block ? (item.block | translatePipe) : null"
                   [attr.aria-describedby]="item.block ? 'set-why-' + item.row.id : null"
@@ -82,6 +83,56 @@
                 }
               }
             </span>
+            @if (item.edit; as edit) {
+              @if (editing_() === edit.field) {
+                <form
+                  class="c-list-body-cell asr-set__editor"
+                  novalidate
+                  [attr.data-testid]="'set-editor-' + item.row.id"
+                  (submit)="save($event, edit)"
+                >
+                  <span appNumberBox class="asr-set__box">
+                    <input
+                      class="c-input asr-set__input"
+                      type="number"
+                      [min]="edit.range.unit === 'ms' ? edit.range.min / 1000 : edit.range.min"
+                      [max]="edit.range.unit === 'ms' ? edit.range.max / 1000 : edit.range.max"
+                      [step]="edit.range.unit === 'ms' ? 0.1 : 1"
+                      [value]="draft_()"
+                      [attr.aria-label]="nameKey(item.row.id) | translatePipe"
+                      [attr.aria-describedby]="'set-range-' + item.row.id"
+                      [attr.data-testid]="'set-input-' + item.row.id"
+                      (input)="setDraft($event)"
+                    />
+                    <span data-testid="set-unit">{{ unitKey(edit.range.unit) | translatePipe }}</span>
+                  </span>
+                  <span class="asr-set__range" [id]="'set-range-' + item.row.id" data-testid="set-range">
+                    <span>{{ 'asr_set_range' | translatePipe }}</span>
+                    <span class="c-num" dir="ltr">{{ shownRange(edit.range) }}</span>
+                  </span>
+                  <button
+                    type="submit"
+                    class="c-btn-primary asr-set__save"
+                    data-testid="set-save"
+                    [disabled]="saving_()"
+                    [attr.aria-busy]="saving_() ? 'true' : null"
+                    [attr.aria-disabled]="cannotSave(edit) ? 'true' : null"
+                    [appTip]="cannotSave(edit) ? ('asr_set_out_of_range' | translatePipe) : null"
+                  >
+                    {{ 'asr_set_save' | translatePipe }}
+                  </button>
+                  <button
+                    type="button"
+                    class="c-btn-ghost"
+                    data-testid="set-cancel"
+                    [disabled]="saving_()"
+                    (click)="cancel()"
+                  >
+                    {{ 'cancel' | translatePipe }}
+                  </button>
+                </form>
+              }
+            }
           </li>
         }
       </ul>

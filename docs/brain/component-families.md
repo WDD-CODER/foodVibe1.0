@@ -1047,8 +1047,18 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 - Plan 755: three rows of STEP_FIELDS in assistant-run-view.util.ts show how many facts were left out, their titles and how they were picked.
 - Pieces: startRun, NO_RUN, listRuns, loadRun, markAdminView, assistantRunSchema, AssistantRunDataService, AssistantPage, RunDetailComponent, verdictOf, stepRows, STEP_FIELDS, outcomeTone, tryResultKey.
 - Plan 754: tryResultKey and the field kind tries in assistant-run-view.util.ts show each AI try with its time.
+- Plan 760: the platform admin changes an engine number in its row of `app-assistant-settings-table` (family assistant-engine-settings).
 - Classes: page-local `.asr-*` only. The step row that opens and closes is a `button.asr-step` with `aria-expanded` and `aria-controls` over `.asr-step-panel`.
 - When: any new fact about a run is a field of an existing step, registered in `STEP_FIELDS`; a second recorder, a second runs list or a log line with run content is never added. Plan 756: a new step is added to `RUN_STEP_KEYS` AND `FLOW_STEPS` (a test keeps them equal); a new setting that shapes the assistant is one more row of `SETTING_ROWS`; a number of the engine is shown only through the setup read, never typed into a text.
+- Known copies: none.
+
+### assistant-engine-settings — engineSettings, saveEngineSetting, ENGINE_RULES in server/services/assistant-engine-settings.js (plan 760)
+
+- Status: stable — plan 760
+- Origin: New registry family assistant-engine-settings in docs/brain/component-families.md (plan 760).
+- Use: `server/services/assistant-engine-settings.js` · `ENGINE_RULES` is the one table of the assistant's engine numbers with each default, min, max and unit; `engineSettings(db)` gives the numbers in force (saved values over the defaults, cached for a few seconds, dropped on save); `engineRanges` the allowed ranges; `saveEngineSetting` the admin's save with one history entry. The save route is `PUT /api/v1/assistant-runs/engine-settings`, platform admin only; the body is `engineSettingSaveSchema` (`shared/schemas/front-desk/engine-settings.schema.ts`). Browser (`src/app/pages/frontdesk/assistant/`): `AssistantEngineService.save`, `assistant-engine.util.ts` (`toShown`, `fromShown`, `shownRange`, `engineUnitKey`).
+- Pieces: ENGINE_RULES, ENGINE_DEFAULTS, engineSettings, engineRanges, saveEngineSetting, engineSettingSaveSchema, ENGINE_FIELDS, AssistantEngineService, toShown, fromShown, shownRange, engineUnitKey.
+- When: a new number of the assistant's engine is a row of `ENGINE_RULES`, a field of `ENGINE_FIELDS` and a row of `SETTING_ROWS`; code that works with it reads it from `engineSettings(db)` — never a new constant, a second settings document or an environment variable for it.
 - Known copies: none.
 
 ### assistant-run-lease — takeLease, noteWaiting, leaseCheck, endLease, clearLease in server/services/frontdesk-lease.js, nextStep in server/services/inbound.js (plan 753)

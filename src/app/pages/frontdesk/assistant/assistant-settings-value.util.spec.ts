@@ -96,9 +96,9 @@ describe('settingValue (plan 756)', () => {
     expect(settingValue(row('monthly_cap'), data, true)).toBeNull()
   })
 
-  it('shows an engine number, a time in seconds', () => {
-    expect(value('quiet_wait')).toEqual({ key: 'asr_engine_val_quietMs', params: { n: 2 } })
-    expect(value('first_model_limit')).toEqual({ key: 'asr_engine_val_firstModelMs', params: { n: 2.5 } })
+  it('shows an engine number, a time in seconds with one decimal', () => {
+    expect(value('quiet_wait')).toEqual({ key: 'asr_engine_secs', params: { n: '2.0' } })
+    expect(value('first_model_limit')).toEqual({ key: 'asr_engine_secs', params: { n: '2.5' } })
     expect(value('facts_budget')).toEqual({ key: 'asr_engine_val_factsMaxChars', params: { n: 6000 } })
     expect(value('guard_words')).toBeNull()
   })

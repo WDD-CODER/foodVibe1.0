@@ -22,7 +22,9 @@ const DICT: Record<string, string> = {
   asr_engine_quietms: 'מתחיל לענות אחרי {n} שניות',
   asr_engine_maxwaitms: 'ולכל המאוחר {n} שניות',
   asr_flow_what_inbound: 'הודעת האורח נשמרת',
-  asr_flow_stops_none: 'השלב הזה לא עוצר'
+  asr_flow_stops_none: 'השלב הזה לא עוצר',
+  asr_flow_stops: 'מה יכול לעצור כאן',
+  asr_flow_reads: 'מאיפה השלב קורא'
 }
 
 const ENGINE: AssistantEngine = {
@@ -112,9 +114,20 @@ describe('FlowMapComponent (plan 756)', () => {
     press('flow-step-inbound')
     const lines = all('flow-engine')
     expect(lines.length).toBe(2)
-    expect(lines[0].textContent).toContain('3')
-    expect(lines[1].textContent).toContain('9')
+    expect(lines[0].textContent).toContain('3.0')
+    expect(lines[1].textContent).toContain('9.0')
     expect(panel('inbound')!.textContent).toContain('השלב הזה לא עוצר')
+  })
+
+  it('plan 760: an open step says what can stop it, and has no "what this step reads" row', async () => {
+    await create()
+    for (const key of RUN_STEP_KEYS) {
+      press('flow-step-' + key)
+      const titles = Array.from(panel(key)!.querySelectorAll('dt')).map((t) => t.textContent!.trim())
+      expect(titles).withContext(key).toContain(DICT['asr_flow_stops'])
+      expect(titles).withContext(key).not.toContain(DICT['asr_flow_reads'])
+      expect(panel(key)!.textContent).withContext(key).not.toContain('asr_flow_reads')
+    }
   })
 
   it('shows every reason of the send step', async () => {

@@ -130,6 +130,7 @@ append the path to the scope block above and retry.
 - INV-2: preserves — the settings document is platform-wide, not business data; no business-scoped query changes.
 - INV-4: preserves — the save body is validated on the server by a Zod schema in `shared/schemas/front-desk/`.
 - INV-6: preserves — AI calls still go only through the server; only the numbers they read change.
+- INV-7: preserves — `server/services/frontdesk-turn.js` only reads its limits from the engine settings; the table engine still decides every table wish, and no setting reaches it.
 - INV-none: preserves — no money field, no module gate, no CSP change.
 
 ## Reuse Check
