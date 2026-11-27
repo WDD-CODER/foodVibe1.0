@@ -188,12 +188,12 @@ line or file this plan names was removed, renamed or rewritten).
 
 These are the plan's milestones: a Worker does them in order and ticks each one after it is checked.
 
-- [ ] D1: Write the server test for defaults, admin save, ranges, refusals and history — server/test/assistant-engine-settings.test.js
-- [ ] D2: Add the engine settings service with defaults (quiet wait 3 s) and history — server/services/assistant-engine-settings.js
-- [ ] D3: Read every engine number through the service — server/services/inbound.js
-- [ ] D4: Let the admin edit each number inline on the settings tab — src/app/pages/frontdesk/assistant/components/settings-table/settings-table.component.ts
-- [ ] D5: Remove the redundant «reads» field from the flow map — src/app/pages/frontdesk/assistant/components/flow-map/flow-map.component.html
-- [ ] D6: Run every automatic check and paste the outputs under Execution Notes — plans/760-assistant-admin-edits-engine-numbers.plan.md
+- [x] D1: Write the server test for defaults, admin save, ranges, refusals and history — server/test/assistant-engine-settings.test.js
+- [x] D2: Add the engine settings service with defaults (quiet wait 3 s) and history — server/services/assistant-engine-settings.js
+- [x] D3: Read every engine number through the service — server/services/inbound.js
+- [x] D4: Let the admin edit each number inline on the settings tab — src/app/pages/frontdesk/assistant/components/settings-table/settings-table.component.ts
+- [x] D5: Remove the redundant «reads» field from the flow map — src/app/pages/frontdesk/assistant/components/flow-map/flow-map.component.html
+- [x] D6: Run every automatic check and paste the outputs under Execution Notes — plans/760-assistant-admin-edits-engine-numbers.plan.md
 
 ## What happens when
 - The settings document is missing or unreadable: the defaults apply and a warning is logged once.
@@ -211,3 +211,20 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
 - none
 
 ## Execution Notes
+
+Checks on commit `991115d6` (builder, 2026-11-27):
+
+- `node scripts/orch-state.mjs prepare --missing server/generated/schemas --script build:schemas --pm pnpm` → exit 0, `PREPARE: ok`.
+- `pnpm run build` → exit 0. `pnpm run lint` → exit 0, 0 errors, 72 warnings.
+- `pnpm run test:ci` → exit 0, `TOTAL: 3352 SUCCESS`.
+- `pnpm run test:server` → exit 0, `Test Files 187 passed (187)`, `Tests 2842 passed (2842)`. An earlier run on the
+  same server code had 6 `Worker exited unexpectedly with exit code 3221225794 during starting state` errors (the
+  machine could not start the processes; 181 files and 2821 tests passed); the rerun was clean.
+- `kit-manifest-check --root .` → exit 0, 0 unclassified. `scope-check.mjs --diff=origin/orch/rs-fix` → `SCOPE: ok`
+  (the worktree's copy; the main folder's copy reads the main folder's own tree). `kit-checks.mjs` → `KIT_CHECKS: ok`.
+- `override-check`, `lint:icons`, `lint:no-native-select`, `plan-ledger-check`, `breadcrumbs-check` → exit 0.
+  `ci-scope-check --checkout-branch` → exit 0 (printed `skipped`).
+- `scope-check --arch` → `ARCH: ok INV-1, INV-2, INV-4, INV-6, INV-7, INV-none` (the INV-7 line was added to
+  `## Architecture Impact`: the check asks for it because `frontdesk-turn.js` is in the scope). `--reuse` → exit 0.
+  `inventory.mjs --check` → `INVENTORY: ok`. `log-query --since=plan-start --level=error` → `SKIP: no database configured`.
+- Not run: the `[human]` items.
