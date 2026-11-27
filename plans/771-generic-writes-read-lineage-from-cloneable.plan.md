@@ -102,10 +102,10 @@ line or file this plan names was removed, renamed or rewritten).
 
 These are the plan's milestones: a Worker does them in order and ticks each one after it is checked.
 
-- [ ] L1: Write a failing test: a non-cloneable collection added only to COLLECTIONS is refused today by its own lineage fields — server/test/generic-lineage.test.js
-- [ ] L2: Make the generic routes read clone lineage from the cloneable flag instead of a hand list — server/routes/generic.js
-- [ ] L3: Correct the New Collection Checklist so planners stop asking for the generic route — docs/agent/standards-backend.md
-- [ ] L4: Run every automatic check and paste the outputs under Execution Notes — plans/771-generic-writes-read-lineage-from-cloneable.plan.md
+- [x] L1: Write a failing test: a non-cloneable collection added only to COLLECTIONS is refused today by its own lineage fields — server/test/generic-lineage.test.js
+- [x] L2: Make the generic routes read clone lineage from the cloneable flag instead of a hand list — server/routes/generic.js
+- [x] L3: Correct the New Collection Checklist so planners stop asking for the generic route — docs/agent/standards-backend.md
+- [x] L4: Run every automatic check and paste the outputs under Execution Notes — plans/771-generic-writes-read-lineage-from-cloneable.plan.md
 
 ## What happens when
 - A cloneable collection (products, recipes, …): its docs get `_masterId` / `_userModified` as today.
@@ -122,3 +122,32 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
 - none
 
 ## Execution Notes
+
+- Step 0 (drift): `16675a4a` ok (`menuDesigns` joined the hand list; it is `cloneable: false`, so the flag covers it);
+  `d8a0e9df` ok (added the `menuDesigns` entry to `COLLECTIONS`; no symbol this plan names was removed).
+- L1 before the route change: `npx vitest run test/generic-lineage.test.js` (in `server/`) → 1 failed, 13 passed; the
+  failure was `non-cloneable lineageProbes`: `unrecognized_keys: "_masterId", "_userModified"`.
+- L2/L3 after: `npx vitest run test/generic-lineage.test.js test/generic.test.js test/collections.test.js
+  test/cross-business.test.js` → exit 0, 4 files, 109 passed.
+- `docs/agent/plan-checks.md:62-64` still tells planners to add a non-cloneable type to `NO_LINEAGE` in
+  `server/routes/generic.js`. It is outside this scope and was not edited.
+
+Checks (code commit `0290ed45`):
+
+- `node scripts/orch-state.mjs prepare --missing server/generated/schemas --script build:schemas --pm pnpm` → exit 0.
+- `pnpm run build` → exit 0 (budget and CommonJS warnings only).
+- `pnpm run lint` → exit 0, 0 errors, 69 warnings.
+- `pnpm run test:ci` → exit 0, `TOTAL: 2797 SUCCESS`.
+- `pnpm run test:server` → first run exit 1: `test/ai-invoice-read.test.js` could not start its in-memory MongoDB
+  (`Instance failed to start within 10000ms`); 152 files / 2037 tests passed. Rerun once → exit 0, 153 files, 2055
+  passed. An earlier attempt was stopped by the shell's 10-minute background limit before it reported.
+- `kit-manifest-check.mjs --root .` → exit 0, `KIT_MANIFEST: ok — 453 classified, 0 unclassified`.
+- `node scripts/scope-check.mjs --diff=origin/orch/lineage --plan=…` → exit 0, `SCOPE: ok` (the main folder's copy of
+  the same script, called from here, reads the main folder and listed its untracked files).
+- `kit-checks.mjs --base origin/orch/lineage --plan …` → exit 0, `KIT_CHECKS: ok (6 checks)`.
+- `node scripts/override-check.mjs` → exit 0; `pnpm run lint:icons` → exit 0; `pnpm run lint:no-native-select` → exit 0.
+- `node scripts/plan-ledger-check.mjs` → exit 0, `PLAN_LEDGER: OK`; `node scripts/breadcrumbs-check.mjs` → exit 0, clean.
+- `node scripts/ci-scope-check.mjs --checkout-branch` → exit 0 (printed `skipped (branch "" is not feat/NNN-*)`).
+- `node scripts/scope-check.mjs --arch --plan=…` → exit 0, `ARCH: ok INV-1, INV-2, INV-3`.
+- `node scripts/log-query.mjs --since=plan-start --level=error` → exit 0, `SKIP: no database configured`.
+- Name check: a search for `NO_LINEAGE` in `server/routes/generic.js` → 0 matches.
