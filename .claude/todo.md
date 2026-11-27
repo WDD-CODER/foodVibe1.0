@@ -1302,3 +1302,312 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
 - none
 
 ## Execution Notes
+
+# Plan 760 — The platform admin changes every assistant number; a longer quiet wait; one field less on the flow map
+
+Status: draft
+Depends-on: none
+Track: code
+Snapshot: 6b189f63
+
+## Problem Statement
+Dandan graded the rs-console cards on 2026-11-27 (plans 751–757, branch `orch/rs-console`). His words, cleaned from
+voice dictation:
+
+- **③ (two quick messages, one answer):** "it works, but the user must send the second message very fast — not
+  realistic. Add another second before the assistant starts answering." Today `QUIET_MS = 2000`
+  (`server/services/inbound.js:19`), `MAX_WAIT_MS = 6000`.
+- **flow map:** "`asr-field` — this is redundant, remove!" The open step row of `flow-map.component.html:45-…` shows a
+  `<dl class="asr-fields">` with two `asr-field` rows: «what this step reads» (`asr_flow_reads`) and «what can stop it»
+  (`asr_flow_stops`). The stops row is what plan 756's card asked for («מה יכול לעצור כאן»), so the redundant one is
+  the «reads» row, which repeats the step text above it. (behaviour decision — Dandan grades it.)
+- **⑩ (assistant settings):** "there are many values set in the system, like the time it takes to answer. The admin
+  needs to be able to change them, but right now I'm the admin and I have no option to change them. Everything that is
+  set in the system must be changeable if the admin decides." Today the engine numbers are code constants
+  (`server/services/assistant-setup.js` `engineNumbers()`: `quietMs`, `maxWaitMs`, `dailyTurns`, `turnLimit`,
+  `followUpMax`, `historyWindow`, `glueMax`, `factsMaxChars`, `firstModelMs`, `turnBudgetMs`, plus the model order
+  `modelChain()`), and the settings tab shows them locked: «רק צוות FoodVibe משנה את ההגדרה הזו» — also to the platform
+  admin, who is the FoodVibe team.
+
+## Goals & Success Criteria
+**Primary:** the platform admin edits every assistant engine number from the settings tab, the assistant uses the new
+value from its next message, and the quiet wait defaults to 3 seconds.
+
+- [auto] `pnpm run build` exits 0; `pnpm run lint` exits 0; `pnpm run test:ci` exits 0; `pnpm run test:server` exits 0.
+- [auto] `server/test/assistant-engine-settings.test.js` passes: with no saved settings every engine number equals
+  today's constant except `quietMs` = 3000; the platform admin saves `quietMs: 4000` and the next quiet wait uses 4000;
+  a value outside its allowed range (each number has a min and max in one table) is refused with 400; a business
+  owner, staff and a consultant get 403 on the save; every save writes one history entry (who, when, field, old, new)
+  and the log line carries no value from a business profile.
+- [auto] `src/app/pages/frontdesk/assistant/components/settings-table/settings-table.component.spec.ts`: for the
+  platform admin each engine row has «לשנות» that opens an inline number box with its unit and range, «שמירה» saves;
+  for an owner the rows stay locked with today's tooltip.
+- [auto] `src/app/pages/frontdesk/assistant/components/flow-map/flow-map.component.spec.ts`: an open step shows the
+  «what can stop it» row and no «what this step reads» row.
+- [auto] `node scripts/scope-check.mjs --arch --plan=plans/760-assistant-admin-edits-engine-numbers.plan.md` → `ARCH: ok`;
+  `node scripts/scope-check.mjs --reuse --plan=plans/760-assistant-admin-edits-engine-numbers.plan.md` exits 0.
+- [auto] `node scripts/breadcrumbs-check.mjs` exits 0; `node scripts/inventory.mjs --check` exits 0.
+- [auto] `node scripts/log-query.mjs --since=plan-start --level=error` → no entries (or `SKIP: no database configured`).
+- [human] As the platform admin, on `/frontdesk/assistant?tab=settings`, change «זמן המתנה להודעה נוספת» from 3 to 4
+  seconds and save; on the simulator, write one message and then another within 3 seconds: one answer covers both.
+- [human] Signed in as `demo_host` (owner, not admin), the same rows show the lock and the tooltip, with no «לשנות».
+- [human] On the simulator, write a question and a second one about 2 seconds later (default settings): one answer
+  covers both.
+- [human] a dialog with an explained control · hover the control · its explanation shows as a tooltip and no explanation text sits on the modal — here: as `demo_host` on `/frontdesk/assistant?tab=settings`, hover the lock of an engine row: the tooltip says why it is locked, and no such text sits in the row.
+- [human] the screen's page with the data request failing · open the page · a readable error with a retry appears, not a blank page — here: as the platform admin, save a new engine number while the slot's API server is stopped (the agent stops it for this check and starts it again after): a readable error toast appears and the row keeps its old value.
+- [human] On `/frontdesk/assistant?tab=flow` open any step: it shows what can stop it, and no «what this step reads»
+  line.
+
+## Execution Mode
+- Parallel: no — one plan.
+- Concurrent plans: none in this run.
+- Isolated DB: yes — the server test writes a settings document.
+
+## Read-Write Scope
+
+Always allowed regardless of the list below: this plan file itself, its own
+`.claude/sessions/**`, `.worktree-*`, and the append-only
+hotspots (`src/styles.scss`, `public/assets/data/dictionary.json`, `src/app/app.routes.ts`
+— add to them, never rewrite or remove an existing entry without escalating).
+
+```scope
+server/services/inbound.js
+server/services/assistant-setup.js
+server/services/assistant-engine-settings.js
+server/services/frontdesk-turn.js
+server/services/frontdesk-guardrails.js
+server/services/frontdesk-prompt.js
+server/services/knowledge.js
+server/services/gemini-client.js
+server/routes/ai/frontdesk.js
+server/routes/assistant-runs.js
+server/constants/collections.js
+server/test/assistant-engine-settings.test.js
+server/test/collections.test.js
+server/breadcrumbs.md
+shared/schemas/entities/index.ts
+shared/schemas/front-desk/**
+src/app/pages/frontdesk/assistant/**
+src/app/pages/frontdesk/breadcrumbs.md
+src/app/pages/breadcrumbs.md
+docs/brain/component-families.md
+docs/brain/inventory.md
+```
+
+## Read Scope
+
+Entire repo.
+
+## Escalation Protocol
+
+Thinking outside the box is expected; writing outside it requires explicit consent. If a
+Worker needs a file outside the `## Read-Write Scope` above: STOP, tell the Human the file,
+the exact change, and why it can't be done in-scope; offer `approved: <path>`; then
+append the path to the scope block above and retry.
+
+## Architecture Impact
+- INV-1: preserves — the engine settings are one shared, platform-wide document; only the platform admin writes it
+  (the same rule as shared `__master__` items), through `server/utils/permissions.js`-style checks in the route; every
+  other user reads the values only as today's read-only rows.
+- INV-2: preserves — the settings document is platform-wide, not business data; no business-scoped query changes.
+- INV-4: preserves — the save body is validated on the server by a Zod schema in `shared/schemas/front-desk/`.
+- INV-6: preserves — AI calls still go only through the server; only the numbers they read change.
+- INV-none: preserves — no money field, no module gate, no CSP change.
+
+## Reuse Check
+- assistant-engine-settings service (defaults with ranges, cached read, admin save with history) — family: none — rung: 4 — why: no platform-wide runtime settings store exists; the engine numbers are code constants today
+
+## Defaults
+
+- hints-in-tooltips — applies — how: the lock tooltip stays for non-admins (shared tooltip / plan 756's text).
+- disabled-explains-why — applies — how: a locked row keeps its «why» tooltip.
+- loading-and-error-states — applies — how: a failed save shows a readable toast and keeps the old value.
+- unsaved-changes-on-leave — exception — why: each number saves on its own «שמירה».
+- confirm-destructive-action — exception — why: nothing is deleted.
+- empty-state-on-list — exception — why: no list added.
+- row-action-icons — exception — why: «לשנות» already exists on these rows.
+- live-summary — exception — why: no summary box.
+- leave-and-return — exception — why: no navigation.
+- app-list-container — exception — why: no list added.
+- one-breakpoint-set — exception — why: no new breakpoint.
+- anchored-popup — exception — why: inline box, no popup.
+- unit-dropdown-add — exception — why: no dropdown.
+- modal-centered — exception — why: no popup.
+- modal-scrollable — exception — why: no popup.
+
+## Step 0 — Reality Check
+
+Runs only when `scope-check.mjs --drift` reports `REALITY: drift`. Check the listed commits
+by symbol (do not re-run the whole reality check from scratch) and print one line per commit:
+`ok` or `conflict: <what>`. All `ok` → continue. STOP for a go only on a `conflict` (a symbol,
+line or file this plan names was removed, renamed or rewritten).
+
+## User Stories
+- As the platform admin, I want to tune the assistant's timings and limits without a code change, so I can react to
+  how real guests write.
+
+## Functional Requirements
+- One settings document (collection registered in `server/constants/collections.js`, e.g. `platformSettings`,
+  `_id: 'assistant-engine'`) holds only the values that differ from the defaults. The defaults table lives in
+  `server/services/assistant-engine-settings.js` with each number's min, max and unit; `quietMs` default 3000 (Dandan:
+  +1 s); `maxWaitMs` stays 6000 but is at least `quietMs` + 1000.
+- Every place that reads one of these constants reads it through the service instead (with a short in-memory cache,
+  refreshed on save), so a change applies from the next guest message, no restart.
+- The model order: when the codebase already has an admin editor for the AI model chain (the AI models manager in the
+  metadata manager), the settings row links there for the admin; otherwise the order is one more editable value.
+- API: `GET` stays as today (adds `editable: true` for the admin); `PUT /…/assistant/engine-settings` admin-only.
+- Settings tab: for the admin, «לשנות» opens an inline number box in the row (seconds shown for ms values), with the
+  range as a hint; «שמירה» / «ביטול». For everyone else, unchanged.
+- Flow map: remove the «what this step reads» `asr-field` row and its now-unused dictionary key use; keep the stops row.
+
+## UI/UX Notes
+- Seconds with one decimal for every `…Ms` value («3.0 שנ׳»).
+
+## Atomic Sub-tasks
+
+These are the plan's milestones: a Worker does them in order and ticks each one after it is checked.
+
+- [ ] D1: Write the server test for defaults, admin save, ranges, refusals and history — server/test/assistant-engine-settings.test.js
+- [ ] D2: Add the engine settings service with defaults (quiet wait 3 s) and history — server/services/assistant-engine-settings.js
+- [ ] D3: Read every engine number through the service — server/services/inbound.js
+- [ ] D4: Let the admin edit each number inline on the settings tab — src/app/pages/frontdesk/assistant/components/settings-table/settings-table.component.ts
+- [ ] D5: Remove the redundant «reads» field from the flow map — src/app/pages/frontdesk/assistant/components/flow-map/flow-map.component.html
+- [ ] D6: Run every automatic check and paste the outputs under Execution Notes — plans/760-assistant-admin-edits-engine-numbers.plan.md
+
+## What happens when
+- The settings document is missing or unreadable: the defaults apply and a warning is logged once.
+- Two admins save at once: the last save wins; both are in the history.
+
+## Technical Considerations
+- Run branch: a new run cut from `orch/rs-console` (plans 751–757). Do not run browser checks; the Human checks the
+  cards. Model changes: one settings document. Backend / API: one admin route. Security: admin-only write, range
+  checks on the server.
+
+## Out of Scope
+- Per-business engine numbers (the business's own values stay where they are).
+
+## Critical Questions
+- none
+
+## Execution Notes
+
+# Plan 761 — The all-users AI budget bar shows only to the platform admin
+
+Status: draft
+Depends-on: none
+Track: code
+Snapshot: edea0010
+
+## Problem Statement
+Dandan, grading run live-ready on 2026-11-27: "the `ai-usage-label` that shows the budget for all users should show
+only to the admin. Any other user should get only his own `ai-usage-label`."
+
+In `src/app/shared/ai-recipe-modal/ai-recipe-modal.component.html` (two copies of the bar, around lines 64 and 281 on
+`orch/live-ready`) the `.ai-usage-bar` shows «תקציב AI יומי (לכל המשתמשים)» (`ai_daily_budget`), the shared count
+`used / budget`, the models line and the track, and then the user's own line «נשארו לך N מתוך M קריאות AI»
+(`callsLeftLine_()`, `data-testid="ai-calls-left"`, plan 736).
+
+## Goals & Success Criteria
+**Primary:** a regular user sees only his own calls-left line; the platform admin sees the all-users bar as today.
+
+- [auto] `pnpm run build` exits 0; `pnpm run lint` exits 0; `pnpm run test:ci` exits 0.
+- [auto] `src/app/shared/ai-recipe-modal/ai-recipe-modal.component.spec.ts`: for a non-admin user both copies of the
+  bar render no `ai_daily_budget` label, no shared count and no track, and do render `[data-testid="ai-calls-left"]`;
+  for the platform admin the shared label, count and track render as before (and the «ללא הגבלה» line of plan 736).
+- [auto] `node scripts/scope-check.mjs --arch --plan=plans/761-ai-daily-budget-bar-admin-only.plan.md` → `ARCH: ok`.
+- [auto] `node scripts/log-query.mjs --since=plan-start --level=error` → no entries (or `SKIP: no database configured`).
+- [human] Signed in as a regular user, open the AI recipe window: only «נשארו לך … מתוך … קריאות AI» shows, with no
+  «תקציב AI יומי (לכל המשתמשים)» bar.
+- [human] Signed in as the platform admin, the same window shows the all-users bar and «קריאות AI ללא הגבלה (מנהל
+  מערכת)».
+
+## Execution Mode
+- Parallel: no — one plan.
+- Concurrent plans: none in this run.
+- Isolated DB: no.
+
+## Read-Write Scope
+
+Always allowed regardless of the list below: this plan file itself, its own
+`.claude/sessions/**`, `.worktree-*`, and the append-only
+hotspots (`src/styles.scss`, `public/assets/data/dictionary.json`, `src/app/app.routes.ts`
+— add to them, never rewrite or remove an existing entry without escalating).
+
+```scope
+src/app/shared/ai-recipe-modal/ai-recipe-modal.component.html
+src/app/shared/ai-recipe-modal/ai-recipe-modal.component.ts
+src/app/shared/ai-recipe-modal/ai-recipe-modal.component.scss
+src/app/shared/ai-recipe-modal/ai-recipe-modal.component.spec.ts
+```
+
+## Read Scope
+
+Entire repo.
+
+## Escalation Protocol
+
+Thinking outside the box is expected; writing outside it requires explicit consent. If a
+Worker needs a file outside the `## Read-Write Scope` above: STOP, tell the Human the file,
+the exact change, and why it can't be done in-scope; offer `approved: <path>`; then
+append the path to the scope block above and retry.
+
+## Architecture Impact
+- INV-6: preserves — no AI call changes; only which label shows.
+- INV-none: preserves — display only.
+
+## Reuse Check
+- none — the existing platform-admin signal the component already reads for plan 736's «ללא הגבלה» line.
+
+## Defaults
+
+- hints-in-tooltips — exception — why: no new hint.
+- loading-and-error-states — exception — why: no new request.
+- unsaved-changes-on-leave — exception — why: no form change.
+- confirm-destructive-action — exception — why: nothing deleted.
+- empty-state-on-list — exception — why: no list.
+- row-action-icons — exception — why: no row.
+- live-summary — exception — why: no summary box.
+- leave-and-return — exception — why: no navigation.
+- app-list-container — exception — why: no list.
+- one-breakpoint-set — exception — why: no layout change.
+- anchored-popup — exception — why: no popup added.
+- unit-dropdown-add — exception — why: no dropdown.
+
+## Step 0 — Reality Check
+
+Runs only when `scope-check.mjs --drift` reports `REALITY: drift`. Check the listed commits
+by symbol (do not re-run the whole reality check from scratch) and print one line per commit:
+`ok` or `conflict: <what>`. All `ok` → continue. STOP for a go only on a `conflict` (a symbol,
+line or file this plan names was removed, renamed or rewritten).
+
+## User Stories
+- As a user, I want to see only my own AI allowance, not a platform figure that means nothing to me.
+
+## Functional Requirements
+- Wrap the shared label, count, models line and track of both bar copies in the platform-admin condition; the user's
+  calls-left line stays for everyone who has one.
+
+## UI/UX Notes
+- A non-admin's bar holds only the one line; no empty track.
+
+## Atomic Sub-tasks
+
+These are the plan's milestones: a Worker does them in order and ticks each one after it is checked.
+
+- [ ] E1: Write the spec for admin and non-admin bars — src/app/shared/ai-recipe-modal/ai-recipe-modal.component.spec.ts
+- [ ] E2: Show the all-users bar only to the platform admin — src/app/shared/ai-recipe-modal/ai-recipe-modal.component.html
+- [ ] E3: Run every automatic check and paste the outputs under Execution Notes — plans/761-ai-daily-budget-bar-admin-only.plan.md
+
+## What happens when
+- A user with no allowance line (none set yet): the bar is not shown at all.
+
+## Technical Considerations
+- Run branch: a new run cut from `orch/live-ready` (plans 736, 737). Do not run browser checks.
+
+## Out of Scope
+- The server's daily budget itself.
+
+## Critical Questions
+- none
+
+## Execution Notes
