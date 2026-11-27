@@ -29,7 +29,7 @@ test('765-2: an empty designs list offers a new design, and a base look opens th
     await empty.getByRole('button', { name: 'עיצוב חדש' }).click()
     await page.getByRole('button', { name: 'קלאסי' }).click()
     await expect(page).toHaveURL(/\/menu-design\/new\?base=classic/)
-    await expect(page.frameLocator('app-menu-designer iframe').locator('body')).toContainText('תפריט לדוגמה')
+    await expect(page.frameLocator('app-menu-designer iframe').locator('body')).toContainText('תפריט ערב')
     await page.screenshot({ path: 'screens/765-2.png' })
   } finally {
     await put(DEFAULTS)

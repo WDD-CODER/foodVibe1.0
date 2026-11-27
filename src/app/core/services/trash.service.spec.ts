@@ -12,6 +12,7 @@ import { VenueDataService } from './venue-data.service'
 import { MenuEventDataService } from './menu-event-data.service'
 import { SupplierDataService } from './supplier-data.service'
 import { ClientDataService } from './client-data.service'
+import { MenuDesignDataService } from './menu-design-data.service'
 import { UserMsgService } from './user-msg.service'
 import { TranslationService } from './translation.service'
 
@@ -24,10 +25,13 @@ describe('TrashService (plan 407)', () => {
   const recipes = list(true)
   const dishes = list(false)
   const clients = list(true)
+  const menuDesigns = list(true)
   const eventsOn = signal(true)
+  const menuDesignOn = signal(true)
 
   beforeEach(() => {
     eventsOn.set(true)
+    menuDesignOn.set(true)
     storage = jasmine.createSpyObj<StorageService>('StorageService', [
       'trash',
       'restore',
@@ -43,7 +47,9 @@ describe('TrashService (plan 407)', () => {
             ? [{ _id: 'r1', nameHebrew: 'מרק', deletedAt: 1 }]
             : type === 'clients'
               ? [{ _id: 'c1', name: 'דנה כהן', phone: '050-1234567', deletedAt: 3 }]
-              : []) as unknown as (T & { deletedAt: number })[]
+              : type === 'menuDesigns'
+                ? [{ _id: 'm1', name: 'ערב חתונה', deletedAt: 4 }]
+                : []) as unknown as (T & { deletedAt: number })[]
       )
     )
     storage.restore.and.resolveTo({})
@@ -53,13 +59,19 @@ describe('TrashService (plan 407)', () => {
     recipes.reloadFromStorage.calls.reset()
     dishes.reloadFromStorage.calls.reset()
     clients.reloadFromStorage.calls.reset()
+    menuDesigns.reloadFromStorage.calls.reset()
     userMsg = jasmine.createSpyObj('UserMsgService', ['onSetSuccessMsg', 'onSetErrorMsg'])
     TestBed.configureTestingModule({
       providers: [
         TrashService,
         {
           provide: ModuleService,
-          useValue: { hasType: (type: string) => eventsOn() || !['venues', 'menuEvents', 'clients'].includes(type) }
+          useValue: {
+            hasType: (type: string) =>
+              type === 'menuDesigns'
+                ? menuDesignOn()
+                : eventsOn() || !['venues', 'menuEvents', 'clients'].includes(type)
+          }
         },
         { provide: StorageService, useValue: storage },
         { provide: RecipeDataService, useValue: recipes },
@@ -70,6 +82,7 @@ describe('TrashService (plan 407)', () => {
         { provide: MenuEventDataService, useValue: list(false) },
         { provide: SupplierDataService, useValue: list(false) },
         { provide: ClientDataService, useValue: clients },
+        { provide: MenuDesignDataService, useValue: menuDesigns },
         { provide: UserMsgService, useValue: userMsg },
         { provide: TranslationService, useValue: { translate: (k: string) => k } }
       ]
@@ -139,6 +152,22 @@ describe('TrashService (plan 407)', () => {
     await service.restore('clients', 'c1')
     expect(storage.restore).toHaveBeenCalledWith('clients', 'c1')
     expect(clients.reloadFromStorage).toHaveBeenCalled()
+  })
+
+  it('plan 765: a deleted menu design is listed by name, and restore refreshes the designs list', async () => {
+    await service.loadTrash()
+    expect(service.sections_().map((s) => s.titleKey)).toContain('trash_menu_designs')
+    expect(service.items().menuDesigns).toEqual([{ _id: 'm1', name: 'ערב חתונה', deletedAt: 4 }])
+    await service.restore('menuDesigns', 'm1')
+    expect(storage.restore).toHaveBeenCalledWith('menuDesigns', 'm1')
+    expect(menuDesigns.reloadFromStorage).toHaveBeenCalled()
+  })
+
+  it('plan 765: with menu_design off Trash has no menu designs section and asks no request for them', async () => {
+    menuDesignOn.set(false)
+    await service.loadTrash()
+    expect(service.sections_().map((s) => s.type)).not.toContain('menuDesigns')
+    expect(storage.trash).not.toHaveBeenCalledWith('menuDesigns')
   })
 
   it('restoreFor maps a version-history type onto its Trash type', async () => {
