@@ -30,6 +30,8 @@ const COLLECTIONS = [
   { name: 'equipment',           userData: true,  cloneable: true,  backup: true,  searchable: false, softDelete: true },
   { name: 'venues',           userData: true,  cloneable: true,  backup: true,  searchable: false, softDelete: true },
   { name: 'menuEvents',          userData: true,  cloneable: true,  backup: true,  searchable: false, softDelete: true },
+  // Plan 764 (C-DESIGN): the stored looks of a business's menus; not cloneable (no _masterId), soft delete (Trash).
+  { name: 'menuDesigns',              userData: true,  cloneable: false, backup: true,  searchable: false, softDelete: true },
   { name: 'VERSION_HISTORY',          userData: true,  cloneable: false, backup: true,  searchable: false },
   { name: 'activity_log',             userData: true,  cloneable: false, backup: true,  searchable: false },
   // The v1 single-doc registries (KITCHEN_UNITS/PREPARATIONS/CATEGORIES/ALLERGENS/LABELS/

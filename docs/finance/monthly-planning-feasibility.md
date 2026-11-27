@@ -344,7 +344,7 @@ kept as the original question; this table is the answer the build plans follow.
 | 10 | change | The revised slice order below: labour as a total, invoice food cost and carry-forward move ahead of AI capture; per-employee lines move late and payslip capture is deferred. |
 | N-M1 | new | The owner types an employer-cost total; if only gross is known, gross × an editable factor (default 1.25), labelled "estimate". |
 | N-M2 | new | Each line is null (not entered) or a number, where 0 is a real value. The month shows a completeness badge, and profit and break-even are labelled "partial" until the key lines exist. |
-| N-M3 | new | Per-employee pay lines are owner-only. The server computes labour totals, and the consultant and every other non-owner reader receives totals only. INV-1 changed with Dandan's `approve arch change INV-1` (2026-11-24); see ADR 0034. |
+| N-M3 | new | Per-employee pay lines are owner-only. The server computes labour totals, and the consultant and every other non-owner reader receives totals only. INV-1 changed with Dandan's `approve arch change INV-1` (2026-11-24); see ADR 0035. |
 | N-M4 | new | Seed Israeli target bands: food 30–35%, labour 30–35%, fixed and overhead 20–25%, net 5–10%, prime at most 65%. All editable, shown next to the actuals. |
 | N-M5 | new | "Start next month" copies fixed lines and targets with an optional ±%. Missing prior values come across blank, not zero. |
 | N-M6 | new | The whole month is Open or Closed. Reopening needs a typed reason; the log records who, when, field, old value and new value. This replaces per-value approval. |
@@ -364,7 +364,7 @@ Revised build order (chosen; replaces the order of section 7):
 6. Month close, reopen and audit (was 5, reshaped by N-M6).
 7. Revenue sources and dish price, unchanged.
 8. Daily target and break-even progress (new).
-9. Per-employee team lines with server-side totals (moved late from 4; owner-only under N-M3 and ADR 0034).
+9. Per-employee team lines with server-side totals (moved late from 4; owner-only under N-M3 and ADR 0035).
 10. Stock correction, unchanged.
 11. Bill capture by AI (was 8).
 12. Payslip capture, deferred until an owner asks (was 9).

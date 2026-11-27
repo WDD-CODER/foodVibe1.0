@@ -301,7 +301,7 @@ router.put('/businesses/:id/front-desk', verifyToken, requirePlatformAdmin, asyn
 })
 
 // Plan 638: the entries of a history row — only the fields that were sent and differ from the stored value (strings).
-function platformChangesOf(before, { modules, aiMonthlyTokenCap, aiPrivate }) {
+function platformChangesOf(before, { modules, aiMonthlyTokenCap, aiPrivate, hidePoweredBy }) {
   const changes = []
   if (modules !== undefined) {
     const from = modulesOf(before).join(',')
@@ -317,6 +317,11 @@ function platformChangesOf(before, { modules, aiMonthlyTokenCap, aiPrivate }) {
     const from = String(before.aiPrivate === true)
     const to = String(aiPrivate)
     if (from !== to) changes.push({ field: 'aiPrivate', from, to })
+  }
+  if (hidePoweredBy !== undefined) {
+    const from = String(before.menuDesign?.hidePoweredBy === true)
+    const to = String(hidePoweredBy)
+    if (from !== to) changes.push({ field: 'hidePoweredBy', from, to })
   }
   return changes
 }
@@ -334,6 +339,7 @@ router.get('/businesses/:id/platform-history', verifyToken, requirePlatformAdmin
 })
 
 // Plan 616: the platform admin sets one business's modules, AI token cap and private flag, and the reason is kept.
+// Plan 764 (D15): also whether its menus leave out the "Powered by FoodVibe" line.
 router.put('/businesses/:id/platform', verifyToken, requirePlatformAdmin, async (req, res) => {
   const parsed = platformUpdateSchema.safeParse(req.body ?? {})
   if (!parsed.success) {
@@ -342,7 +348,7 @@ router.put('/businesses/:id/platform', verifyToken, requirePlatformAdmin, async 
       issues: parsed.error.issues.map(i => ({ path: i.path.join('.'), code: i.code, message: i.message }))
     })
   }
-  const { modules, aiMonthlyTokenCap, aiPrivate, reason } = parsed.data
+  const { modules, aiMonthlyTokenCap, aiPrivate, hidePoweredBy, reason } = parsed.data
   try {
     const before = await col('businesses').findOne({ _id: req.params.id })
     if (!before) return res.status(404).json({ error: 'Business not found' })
@@ -362,7 +368,8 @@ router.put('/businesses/:id/platform', verifyToken, requirePlatformAdmin, async 
       if (!priv.matchedCount) return res.status(404).json({ error: 'Business not found' })
       changed.push('aiPrivate')
     }
-    const row = { at: Date.now(), by: actor.userId, byName: String(actor.name).slice(0, 80), reason, changed, changes: platformChangesOf(before, { modules, aiMonthlyTokenCap, aiPrivate }) }
+    if (hidePoweredBy !== undefined) { $set['menuDesign.hidePoweredBy'] = hidePoweredBy; changed.push('hidePoweredBy') }
+    const row = { at: Date.now(), by: actor.userId, byName: String(actor.name).slice(0, 80), reason, changed, changes: platformChangesOf(before, { modules, aiMonthlyTokenCap, aiPrivate, hidePoweredBy }) }
     const update = { $push: { platformHistory: { $each: [row], $slice: -50 } } }
     if (Object.keys($set).length) update.$set = $set
     if (Object.keys($unset).length) update.$unset = $unset

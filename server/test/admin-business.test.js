@@ -108,3 +108,31 @@ describe('DELETE /api/v1/admin/users/:userId', () => {
     expect(await count('bB')).toBe(ALL_USER_ENTITY_TYPES.length)
   })
 })
+
+describe('PUT /api/v1/admin/businesses/:id/platform hidePoweredBy (plan 764)', () => {
+  const put = (body, who = ADMIN) => request(app).put('/api/v1/admin/businesses/bA/platform').set(as(who)).send(body)
+  const stored = () => testDb().collection('businesses').findOne({ _id: 'bA' })
+
+  it('the platform admin sets it, with one history change row', async () => {
+    const res = await put({ hidePoweredBy: true, reason: 'paid plan' })
+    expect(res.status).toBe(200)
+    const doc = await stored()
+    expect(doc.menuDesign).toEqual({ hidePoweredBy: true })
+    expect(doc.platformHistory).toHaveLength(1)
+    expect(doc.platformHistory[0]).toMatchObject({
+      reason: 'paid plan', changed: ['hidePoweredBy'], changes: [{ field: 'hidePoweredBy', from: 'false', to: 'true' }],
+    })
+  })
+
+  it('keeps the owner\'s default design', async () => {
+    await testDb().collection('businesses').updateOne({ _id: 'bA' }, { $set: { menuDesign: { defaultDesignId: 'd1', hidePoweredBy: true } } })
+    expect((await put({ hidePoweredBy: false, reason: 'back again' })).status).toBe(200)
+    expect((await stored()).menuDesign).toEqual({ defaultDesignId: 'd1', hidePoweredBy: false })
+  })
+
+  it('403 for the owner of the business, writing nothing', async () => {
+    const res = await put({ hidePoweredBy: true, reason: 'let me' }, { userId: 'ownerA', businessId: 'bA', businessRole: 'owner' })
+    expect(res.status).toBe(403)
+    expect((await stored()).menuDesign).toBeUndefined()
+  })
+})

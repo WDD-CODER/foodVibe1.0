@@ -99,6 +99,18 @@ export type StaffVisibleStagesInput = z.infer<typeof staffVisibleStagesInputSche
 export const logisticsHiddenInputSchema = z.strictObject({ keys: z.array(z.string().min(1).max(LOGISTICS_LABEL_MAX)).max(300) })
 export type LogisticsHiddenInput = z.infer<typeof logisticsHiddenInputSchema>
 
+/** Plan 764 (C-SETTINGS): the business's menu settings. The default design is one field, so setting it is one write. */
+export const businessMenuDesignSchema = z.strictObject({
+  defaultDesignId: z.string().min(1).optional(),
+  /** Platform admin only: leaves the "Powered by FoodVibe" line off. */
+  hidePoweredBy: z.boolean()
+})
+
+/** Plan 764: body of `PUT /api/v1/business/menu-design-default` (owner only). */
+export const menuDesignDefaultInputSchema = z.strictObject({ designId: z.string().min(1).max(64) })
+
+export type MenuDesignDefaultInput = z.infer<typeof menuDesignDefaultInputSchema>
+
 /** Plan 424: one document per business (the tenant). Lives in the `businesses` collection, not the generic data pipe. */
 export const businessSchema = z.strictObject({
   _id: z.string().min(1),
@@ -125,7 +137,9 @@ export const businessSchema = z.strictObject({
   /** Plan 615 (C-AICAP): integer >= 0; absent = no cap. */
   aiMonthlyTokenCap: z.number().int().min(0).optional(),
   /** Plan 615 (C-LEARN): platform admin only; absent = shared. */
-  aiPrivate: z.boolean().optional()
+  aiPrivate: z.boolean().optional(),
+  /** Plan 764 (C-SETTINGS): absent until the owner picks a default design or the admin sets the powered-by line. */
+  menuDesign: businessMenuDesignSchema.optional()
 })
 
 export type Business = z.infer<typeof businessSchema>

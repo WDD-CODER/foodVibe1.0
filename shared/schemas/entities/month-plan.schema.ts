@@ -31,7 +31,7 @@ export const fixedGroupSchema = z
   })
   .refine(group => new Set(group.lines.map(l => l.id)).size === group.lines.length, { message: 'line ids must be unique', path: ['lines'] })
 
-/** One total for the whole team: no names, no roles, no per-person rows (ADR 0034). */
+/** One total for the whole team: no names, no roles, no per-person rows (ADR 0035). */
 export const labourGroupSchema = z.strictObject({
   mode: z.enum(['employer', 'gross']),
   factor: z.number().min(1).max(2),

@@ -1,10 +1,10 @@
 'use strict'
-/** Plan 425: the caller's business. Plan 428: the owner's team (list, add, remove). Plan 429: owner-only settings. Plan 431: owner-only opening baseline and setup status. Plan 477: owner-only stages staff may see. */
+/** Plan 425: the caller's business. Plan 428: the owner's team (list, add, remove). Plan 429: owner-only settings. Plan 431: owner-only opening baseline and setup status. Plan 477: owner-only stages staff may see. Plan 764: owner-only default menu design. */
 const { Router } = require('express')
 const { createRateLimiter } = require('../middleware/rate-limit')
 const { verifyToken } = require('../middleware/auth')
 const { requireModule } = require('../middleware/require-module')
-const { getBusiness, setHiddenLogisticsKeys, setStaffVisibleStages, setBusinessName, setBusinessSettings, setBusinessBaseline } = require('../services/business')
+const { getBusiness, setHiddenLogisticsKeys, setStaffVisibleStages, setBusinessName, setBusinessSettings, setBusinessBaseline, setMenuDesignDefault } = require('../services/business')
 const { assertCan, can } = require('../utils/permissions')
 const { checkStoredDoc } = require('../middleware/validate')
 const { actorOf } = require('../utils/actor')
@@ -14,7 +14,7 @@ const { templateFor } = require('../generated/schemas/front-desk-templates')
 const { isValidUsername, isValidPasswordHash, releasedUsername } = require('../utils/username')
 const { newId } = require('../utils/id')
 const User = require('../models/user.model')
-const { businessSettingsSchema, businessNameInputSchema, staffVisibleStagesInputSchema, logisticsHiddenInputSchema, baselineInputSchema, BUSINESS_SETTINGS_DEFAULTS } = require('../generated/schemas/entities')
+const { businessSettingsSchema, businessNameInputSchema, staffVisibleStagesInputSchema, logisticsHiddenInputSchema, baselineInputSchema, menuDesignDefaultInputSchema,BUSINESS_SETTINGS_DEFAULTS } = require('../generated/schemas/entities')
 const mongoose = require('mongoose')
 const { lastActiveByUser } = require('../utils/usage-stats')
 const { scopeFilter } = require('../utils/business-scope')
@@ -133,7 +133,30 @@ router.put('/logistics-hidden', verifyToken, async (req, res) => {
   }
 })
 
-// PUT /api/v1/business/baseline — the owner stores how the business ran before FoodVibe. Whole replace; `filledAt` is always server-set.
+// PUT /api/v1/business/menu-design-default — the owner picks the design menus wear by default (plan 764). Only the caller's own business.
+router.put('/menu-design-default', verifyToken, async (req, res) => {
+  try {
+    if (!assertCan(req, res, 'editSettings', { type: 'businesses' })) return
+    const parsed = menuDesignDefaultInputSchema.safeParse(req.body)
+    if (!parsed.success) {
+      req.log.info({ event: 'business.menu_design_default.failed', reason: 'validation' })
+      return res.status(400).json({ error: 'Validation failed', issues: parsed.error.issues.map(i => ({ path: i.path.join('.'), code: i.code, message: i.message })) })
+    }
+    const { designId } = parsed.data
+    const design = await mongoose.connection.db.collection('menuDesigns')
+      .findOne({ _id: designId, ...scopeFilter(req), ...LIVE }, { projection: { _id: 1 } })
+    if (!design) return res.status(404).json({ error: 'Design not found' })
+    const result = await setMenuDesignDefault(req.user.businessId, designId)
+    if (!result.matchedCount) return res.status(404).json({ error: 'Business not found' })
+    req.log.info({ event: 'business.menu_design_default.saved', designId })
+    res.json({ menuDesign: result.menuDesign })
+  } catch (err) {
+    req.log.error({ err, event: 'business.menu_design_default.failed' })
+    res.status(500).json({ error: 'Server error' })
+  }
+})
+
+// PUT /api/v1/business/baseline —the owner stores how the business ran before FoodVibe. Whole replace; `filledAt` is always server-set.
 router.put('/baseline', verifyToken, async (req, res) => {
   try {
     if (!assertCan(req, res, 'editSettings', { type: 'businesses' })) return

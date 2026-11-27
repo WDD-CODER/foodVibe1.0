@@ -27,6 +27,15 @@ describe('ModuleService', () => {
     expect(service.has('consultant_diag')).toBeFalse()
   })
 
+  it('menu_design is off by default and gates menuDesigns only when it is on (plan 764)', () => {
+    business.set({ _id: 'b1', name: 'x' } as Business)
+    expect(service.has('menu_design')).toBeFalse()
+    expect(service.hasType('menuDesigns')).toBeFalse()
+    business.set({ _id: 'b1', name: 'x', modules: ['events', 'menu_design'] } as Business)
+    expect(service.has('menu_design')).toBeTrue()
+    expect(service.hasType('menuDesigns')).toBeTrue()
+  })
+
   it('modules: [frontdesk] has only frontdesk', () => {
     business.set({ _id: 'b1', name: 'x', modules: ['frontdesk'] } as Business)
     expect(service.has('frontdesk')).toBeTrue()

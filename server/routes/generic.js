@@ -142,7 +142,7 @@ function withoutServerDishFields(type, body) {
 const SLUG_TAKEN = { error: 'SLUG_TAKEN', messageKey: 'fd_slug_taken' };
 
 /** Plan 512: types whose docs carry no clone lineage (`_masterId`, `_userModified`): the strict schema rejects them. */
-const NO_LINEAGE = new Set([TAXONOMY, CLIENTS, PROFILES, 'knowledgeItems', 'menuDishes', DISH_MONTHS, DISH_ALIASES]);
+const NO_LINEAGE = new Set([TAXONOMY, CLIENTS, PROFILES, 'knowledgeItems', 'menuDishes', DISH_MONTHS, DISH_ALIASES, 'menuDesigns']);
 
 /** Plan 512: the Mongo projection that trims a staff member's read of `type`; `undefined` for everyone else. */
 const readProjection = (req, type) => {

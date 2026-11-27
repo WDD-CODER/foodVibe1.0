@@ -80,6 +80,19 @@ async function setStaffVisibleStages(id, stages) {
 }
 
 /**
+ * Plan 764 (C-SETTINGS): stores the business's default menu design (the route checked that it is a live design of this
+ * business) in one write; `hidePoweredBy` keeps its stored value and starts false.
+ */
+async function setMenuDesignDefault(id, designId) {
+  const business = await col().findOneAndUpdate(
+    { _id: String(id) },
+    [{ $set: { menuDesign: { $mergeObjects: [{ hidePoweredBy: false }, '$menuDesign', { defaultDesignId: { $literal: String(designId) } }] } } }],
+    { returnDocument: 'after', projection: { menuDesign: 1 } }
+  )
+  return { matchedCount: business ? 1 : 0, menuDesign: business?.menuDesign }
+}
+
+/**
  * Plan 618/639 (C-LEARN): the platform admin marks a business private (or shared again). Private only stops learning
  * from that moment (`mayLearnFrom`); nothing already learned is erased - `eraseLearnedData` does that, on request.
  */
@@ -136,4 +149,4 @@ async function setHiddenLogisticsKeys(id, keys, now = Date.now()) {
   return { matchedCount: result.matchedCount, hiddenLogisticsKeys }
 }
 
-module.exports = { deleteBusinessServerData, eraseLearnedData, setAiPrivate,setHiddenLogisticsKeys, setStaffVisibleStages, setBusinessName, setBusinessSettings, setBusinessBaseline, createBusinessFor, ensureBusinessForUser, defaultBusinessName, getBusiness, setBusinessSyncedVersion }
+module.exports = { setMenuDesignDefault, deleteBusinessServerData,eraseLearnedData, setAiPrivate,setHiddenLogisticsKeys, setStaffVisibleStages, setBusinessName, setBusinessSettings, setBusinessBaseline, createBusinessFor, ensureBusinessForUser, defaultBusinessName, getBusiness, setBusinessSyncedVersion }

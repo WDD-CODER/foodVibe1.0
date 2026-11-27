@@ -27,9 +27,11 @@ export const platformUpdateSchema = z
     modules: modulesFieldSchema.optional(),
     aiMonthlyTokenCap: z.number().int().min(0).nullable().optional(),
     aiPrivate: z.boolean().optional(),
+    /** Plan 764 (D15): leaves the "Powered by FoodVibe" line off the business's menus. */
+    hidePoweredBy: z.boolean().optional(),
     reason: z.string().trim().min(3).max(200)
   })
-  .refine(body => body.modules !== undefined || body.aiMonthlyTokenCap !== undefined || body.aiPrivate !== undefined, {
-    message: 'at least one of modules, aiMonthlyTokenCap, aiPrivate'
+  .refine(body => [body.modules, body.aiMonthlyTokenCap, body.aiPrivate, body.hidePoweredBy].some(value => value !== undefined), {
+    message: 'at least one of modules, aiMonthlyTokenCap, aiPrivate, hidePoweredBy'
   })
 export type PlatformUpdate = z.infer<typeof platformUpdateSchema>

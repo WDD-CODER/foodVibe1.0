@@ -57,8 +57,8 @@ describe('targets', () => {
 })
 
 describe('the monthly_plan module', () => {
-  it('is the last key, is off by default and the platform write accepts every key', () => {
-    expect(S.MODULE_KEYS[S.MODULE_KEYS.length - 1]).toBe('monthly_plan')
+  it('is the seventh key (menu_design of plan 764 follows it), is off by default and the platform write accepts every key', () => {
+    expect(S.MODULE_KEYS[6]).toBe('monthly_plan')
     expect(S.DEFAULT_MODULES).not.toContain('monthly_plan')
     expect(S.modulesOf({})).not.toContain('monthly_plan')
     expect(S.modulesOf({ modules: ['monthly_plan'] })).toEqual(['monthly_plan'])

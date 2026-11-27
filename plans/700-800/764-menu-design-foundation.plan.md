@@ -1,6 +1,6 @@
 # Plan 764 — Menu design foundation: module, design records, menu fields and the one shared template
 
-Status: draft
+Status: done
 Depends-on: none
 Snapshot: d34a01068fe2f1b28efd33b753b8a3f69aa8762b
 
@@ -100,6 +100,7 @@ docs/brain/decisions/0034-one-menu-template-and-engine-boundary.md
 docs/brain/component-families.md
 docs/brain/inventory.md
 docs/menu-design/menu-design-map.md
+server/routes/generic.js
 ```
 
 ## Read Scope
@@ -130,7 +131,7 @@ append the path to the scope block above and retry.
 ## Reuse Check
 
 - `menuDesignSchema` (`shared/schemas/entities/menu-design.schema.ts`) — family: entity-schemas — rung: 1 — why: one more strictObject entity registered in SCHEMA_BY_COLLECTION, exactly as the family says.
-- `MenuDesignDataService` — family: entity-data-service — rung: 1 — why: extends BaseEntityDataService<MenuDesign> like every entity service.
+- `MenuDesignDataService` (`src/app/core/services/menu-design-data.service.ts`) — family: entity-data-service — rung: 1 — why: extends BaseEntityDataService<MenuDesign> like every entity service.
 - `menu_design` module key and `MODULE_OF_TYPE.menuDesigns` — family: modules-registry — rung: 3 — why: extends the one module list; no second gate.
 - `shared/schemas/menu-design/` (fonts, textures, base templates, menu doc, `renderMenuDocument`, `designCssVars`) — family: none — rung: 4 — why: no piece in FoodVibe draws a menu as a standalone HTML document for both the browser and the server; the PDF, the designer preview and the editor's CSS variables all need one pure source (map guideline 1). Registered as a new `menu-template` family in `docs/brain/component-families.md`.
 
@@ -275,17 +276,17 @@ menuDesignDraftSchema = menuDesignSchema without baseDocShape and name   // what
 
 These are the plan's milestones: a Worker does them in order and ticks each one after it is checked.
 
-- [ ] A1: Decide in one shared place which design a menu wears, so the editor and the PDF never disagree — pure resolveMenuDesign(menu, designs, business): the menu's own live design, else the business default, else the first live design by createdAt, else baseDesign('classic'); unit test covers all four (the map's E1 path note is already recorded by the Planner) — shared/schemas/menu-design/menu-resolve.ts, shared/schemas/menu-design/index.ts, server/test/menu-design-template.test.js
-- [ ] A2: Add the menu design module so the platform admin can switch it on per business, off by default — MODULE_KEYS + MODULE_OF_TYPE.menuDesigns, dictionary label module_menu_design, update the module tests that list the keys — shared/schemas/modules-pure.ts, public/assets/data/dictionary.json, server/test/modules-schema.test.js, server/test/modules-registry.test.js, server/test/modules-gate.test.js, src/app/core/services/module.service.spec.ts
-- [ ] A3: Add the curated Hebrew font list, the built-in textures and the four base designs every design starts from — MENU_FONTS/MENU_FONT_IDS, MENU_TEXTURES/MENU_TEXTURE_IDS (CSS gradients or inline SVG only), MENU_BASE_TEMPLATES + baseDesign(id) — shared/schemas/menu-design/menu-fonts.ts, shared/schemas/menu-design/menu-textures.ts, shared/schemas/menu-design/menu-base-templates.ts
-- [ ] A4: Store menu designs as their own checked records, one business each — menuDesignSchema + menuDesignDraftSchema per C-DESIGN (refine: texture needs textureId, image needs imageUrl), SCHEMA_BY_COLLECTION, COLLECTIONS entry, cross-business body, schema test — shared/schemas/entities/menu-design.schema.ts, shared/schemas/entities/index.ts, server/constants/collections.js, server/test/cross-business.test.js, server/test/menu-design-schema.test.js
-- [ ] A5: Give menus a design, a subtitle, a bottom note, a menu-only section name and a server-kept latest export — C-MENU-FIELDS on menuEventSchema; latestExport added to EVENT_SERVER_FIELDS so a client PUT keeps the stored value; client model fields — shared/schemas/entities/menu-event.schema.ts, shared/schemas/entities/event-stage.ts, server/utils/event-create.js, src/app/core/models/menu-event.model.ts
-- [ ] A6: Let the owner pick the default design in one write and let the platform admin hide the powered-by line — businessSchema.menuDesign; PUT /api/v1/business/menu-design-default (editSettings, live design of the same business, else 404) with setter in services/business.js; platformUpdateSchema.hidePoweredBy + admin PUT …/platform + platformChangesOf row; business route test — shared/schemas/entities/business.schema.ts, shared/schemas/modules.ts, server/routes/business.js, server/services/business.js, server/routes/admin.js, server/test/business-menu-design.test.js, server/test/admin-business.test.js
-- [ ] A7: Build the one menu template that the designer, the editor and the PDF will all draw from — menu-doc.ts (MenuDoc, SAMPLE_MENU_DOC, menuDocFromEvent with lookups), menu-template.ts (designCssVars, renderMenuDocument: escape every text, dir=auto, A4 @page, break-inside avoid, cloudinary-only images, no script, powered-by last, fonts link|embedded), template test — shared/schemas/menu-design/menu-doc.ts, shared/schemas/menu-design/menu-template.ts, shared/schemas/menu-design/index.ts, server/test/menu-design-template.test.js
-- [ ] A8: Give the browser a data service for menu designs so the designer screen can load and save them — MenuDesign model type from the schema, MenuDesignDataService extends BaseEntityDataService<MenuDesign> with spec — src/app/core/models/menu-design.model.ts, src/app/core/services/menu-design-data.service.ts, src/app/core/services/menu-design-data.service.spec.ts
-- [ ] A9: Register the three AI feature keys the designer and the text menu will be metered under — menu_design_variants, menu_design_refine, menu_from_text — server/constants/ai-features.js
-- [ ] A10: Write sample menus to files so a person can judge the four base looks before any screen exists — node script printing the four written paths (OS temp folder) — server/scripts/menu-sample-html.js
-- [ ] A11: Record the one-template and engine-boundary decision and list the new pieces in the maps — ADR 0034 (guideline 1 and 2 of the brief, C-ENGINE, the iframe-preview vs editor-CSS-variables split); new `menu-template` family; breadcrumbs and inventory lines — docs/brain/decisions/0034-one-menu-template-and-engine-boundary.md, docs/brain/component-families.md, docs/brain/inventory.md, server/breadcrumbs.md, src/app/core/models/breadcrumbs.md, src/app/core/services/breadcrumbs.md
+- [x] A1: Decide in one shared place which design a menu wears, so the editor and the PDF never disagree — pure resolveMenuDesign(menu, designs, business): the menu's own live design, else the business default, else the first live design by createdAt, else baseDesign('classic'); unit test covers all four (the map's E1 path note is already recorded by the Planner) — shared/schemas/menu-design/menu-resolve.ts, shared/schemas/menu-design/index.ts, server/test/menu-design-template.test.js
+- [x] A2: Add the menu design module so the platform admin can switch it on per business, off by default — MODULE_KEYS + MODULE_OF_TYPE.menuDesigns, dictionary label module_menu_design, update the module tests that list the keys — shared/schemas/modules-pure.ts, public/assets/data/dictionary.json, server/test/modules-schema.test.js, server/test/modules-registry.test.js, server/test/modules-gate.test.js, src/app/core/services/module.service.spec.ts
+- [x] A3: Add the curated Hebrew font list, the built-in textures and the four base designs every design starts from — MENU_FONTS/MENU_FONT_IDS, MENU_TEXTURES/MENU_TEXTURE_IDS (CSS gradients or inline SVG only), MENU_BASE_TEMPLATES + baseDesign(id) — shared/schemas/menu-design/menu-fonts.ts, shared/schemas/menu-design/menu-textures.ts, shared/schemas/menu-design/menu-base-templates.ts
+- [x] A4: Store menu designs as their own checked records, one business each — menuDesignSchema + menuDesignDraftSchema per C-DESIGN (refine: texture needs textureId, image needs imageUrl), SCHEMA_BY_COLLECTION, COLLECTIONS entry, cross-business body, schema test — shared/schemas/entities/menu-design.schema.ts, shared/schemas/entities/index.ts, server/constants/collections.js, server/test/cross-business.test.js, server/test/menu-design-schema.test.js
+- [x] A5: Give menus a design, a subtitle, a bottom note, a menu-only section name and a server-kept latest export — C-MENU-FIELDS on menuEventSchema; latestExport added to EVENT_SERVER_FIELDS so a client PUT keeps the stored value; client model fields — shared/schemas/entities/menu-event.schema.ts, shared/schemas/entities/event-stage.ts, server/utils/event-create.js, src/app/core/models/menu-event.model.ts
+- [x] A6: Let the owner pick the default design in one write and let the platform admin hide the powered-by line — businessSchema.menuDesign; PUT /api/v1/business/menu-design-default (editSettings, live design of the same business, else 404) with setter in services/business.js; platformUpdateSchema.hidePoweredBy + admin PUT …/platform + platformChangesOf row; business route test — shared/schemas/entities/business.schema.ts, shared/schemas/modules.ts, server/routes/business.js, server/services/business.js, server/routes/admin.js, server/test/business-menu-design.test.js, server/test/admin-business.test.js
+- [x] A7: Build the one menu template that the designer, the editor and the PDF will all draw from — menu-doc.ts (MenuDoc, SAMPLE_MENU_DOC, menuDocFromEvent with lookups), menu-template.ts (designCssVars, renderMenuDocument: escape every text, dir=auto, A4 @page, break-inside avoid, cloudinary-only images, no script, powered-by last, fonts link|embedded), template test — shared/schemas/menu-design/menu-doc.ts, shared/schemas/menu-design/menu-template.ts, shared/schemas/menu-design/index.ts, server/test/menu-design-template.test.js
+- [x] A8: Give the browser a data service for menu designs so the designer screen can load and save them — MenuDesign model type from the schema, MenuDesignDataService extends BaseEntityDataService<MenuDesign> with spec — src/app/core/models/menu-design.model.ts, src/app/core/services/menu-design-data.service.ts, src/app/core/services/menu-design-data.service.spec.ts
+- [x] A9: Register the three AI feature keys the designer and the text menu will be metered under — menu_design_variants, menu_design_refine, menu_from_text — server/constants/ai-features.js
+- [x] A10: Write sample menus to files so a person can judge the four base looks before any screen exists — node script printing the four written paths (OS temp folder) — server/scripts/menu-sample-html.js
+- [x] A11: Record the one-template and engine-boundary decision and list the new pieces in the maps — ADR 0034 (guideline 1 and 2 of the brief, C-ENGINE, the iframe-preview vs editor-CSS-variables split); new `menu-template` family; breadcrumbs and inventory lines — docs/brain/decisions/0034-one-menu-template-and-engine-boundary.md, docs/brain/component-families.md, docs/brain/inventory.md, server/breadcrumbs.md, src/app/core/models/breadcrumbs.md, src/app/core/services/breadcrumbs.md
 
 ## Technical Considerations
 - Dependencies: `modules-pure.ts` (browser and server), the generic data route (`server/routes/generic.js`, untouched —
@@ -323,3 +324,32 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
 - behaviour: `latestExport` is made server-owned by adding it to `EVENT_SERVER_FIELDS`, the list the events code already strips, instead of a second strip list.
 - behaviour: the `hidePoweredBy` change is stored in the platform history like `modules` (one change row), because it is a platform admin setting.
 - behaviour: the sample script writes to the OS temp folder, never into the repo.
+- behaviour: `PUT /api/v1/business/menu-design-default` has no module gate, only `editSettings` and the live-design check (the plan names no other). Reverse: add `requireModule('menu_design')` to the route.
+- behaviour: a linked dish the catalog no longer has is left out of the menu doc, so an id is never printed. Reverse: return a placeholder name in `menuDocFromEvent`.
+- behaviour: `fonts: 'embedded'` writes no font link; the renderer supplies the faces. Reverse: have `renderMenuDocument` write the `@font-face` rules itself.
+- behaviour: the document is `dir="rtl"` and each text sits in its own `dir="auto"` span, so a start-aligned English line lines up on the right too. Reverse: set the document direction from the menu's texts.
+- behaviour: a design value outside its closed list falls back inside the template (classic colors, first font, normal size) instead of throwing. Reverse: validate with `menuDesignDraftSchema` and throw.
+- A4 stopped round 0: `server/routes/generic.js` (then outside the scope) added `_masterId` and `_userModified` to every type not in `NO_LINEAGE`, and the strict design schema (C-DESIGN, INV-2 "no `_masterId`") refused them, so `POST /api/v1/data/menuDesigns` answered 400. The plan's "generic data route untouched" did not hold.
+- scope extended: server/routes/generic.js — `'menuDesigns'` joins `NO_LINEAGE`; the Human approved it (ask 764-1, run md-0, `approved: server/routes/generic.js`). the run branch holds the scope line since 9c71235f (ask 764-2, `approved: server/routes/generic.js`).
+
+Evidence (2026-11-27, resume after ask 764-2, tree of merge commit 025327c5):
+- Trusted scope check (`scopeCheck` of the kit copy's `lib/plan-gate.mjs`, this folder, plan text from `origin/orch/md-0`) → exit 0: 44 changed files inside the scope; `node scripts/scope-check.mjs --diff=origin/orch/md-0` → `SCOPE: ok`.
+- `pnpm run build` → exit 0; `npm run build` → exit 0; `pnpm run lint` → exit 0 (0 errors, 69 warnings).
+- `pnpm run test:ci` → exit 0, TOTAL: 2797 SUCCESS.
+- `pnpm run test:server` → exit 0: Test Files 152 passed (152), Tests 2041 passed (2041).
+- orch-state prepare, kit-manifest-check, kit-checks (6 checks), override-check, lint:icons, lint:no-native-select, plan-ledger-check, breadcrumbs-check, reuse-lint `--check-registry` → exit 0; ci-scope-check → exit 0 (skipped locally: it reads the branch name from CI); log-query `--level=error` → exit 0 (SKIP: no database configured).
+
+Evidence (2026-11-27, resume, commit 16675a4a):
+- `pnpm run test:server` → exit 0: Test Files 152 passed (152), Tests 2041 passed (2041).
+- `pnpm run test:ci` → exit 0, TOTAL: 2797 SUCCESS.
+- `pnpm run build` → exit 0; `npm run build` → exit 0; `pnpm run lint` → exit 0 (0 errors, 69 warnings).
+- orch-state prepare, kit-manifest-check, scope-check (this folder's plan copy), kit-checks, override-check, lint:icons, lint:no-native-select, plan-ledger-check, breadcrumbs-check, ci-scope-check, reuse-lint `--check-registry` → exit 0; log-query `--level=error` → exit 0 (SKIP: no database configured).
+- `git show origin/orch/md-0:plans/764-menu-design-foundation.plan.md | grep -c "^server/routes/generic.js"` → 0; the same on `origin/main` → 1.
+
+Evidence (2026-11-27, round 0, commit d8a0e9df unless said):
+- `pnpm run build` → exit 0; `npm run build` → exit 0.
+- `pnpm run lint` → exit 0 (0 errors, 69 warnings).
+- `pnpm run test:ci` → exit 0, TOTAL: 2797 SUCCESS.
+- `pnpm run test:server` → exit 1: 2037 passed, 4 failed, all four `menuDesigns` writes refused 400 `Unrecognized keys: "_masterId", "_userModified"` (`cross-business.test.js` 3, `business-menu-design.test.js` 1).
+- `node server/scripts/menu-sample-html.js` → exit 0, four paths; headless Chromium prints each base design on one A4 page.
+- kit-manifest-check, scope-check, kit-checks, override-check, lint:icons, lint:no-native-select, plan-ledger-check, breadcrumbs-check, reuse-lint `--check-registry` → exit 0; log-query `--level=error` → exit 0 (no database configured).

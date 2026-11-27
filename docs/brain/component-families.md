@@ -494,6 +494,7 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 - Use: `shared/schemas/modules-pure.ts` (the helpers, no zod; the browser imports this) and `shared/schemas/modules.ts`
   (re-exports them and adds the zod schemas) — `MODULE_KEYS`, `DEFAULT_MODULES`, `modulesOf`, `hasModule`, `MODULE_OF_TYPE`,
   `platformUpdateSchema`.
+- Plan 764 added the menu_design module key and MODULE_OF_TYPE.menuDesigns: off by default, it gates the designs type.
 - When: the server gate or the browser service asks whether a business has a module. One shared file, so both use the
   same rule.
 - Known copies: none.
@@ -521,6 +522,8 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
   `AI_DEFAULT_ALLOWANCE`, `AI_ALLOWANCE_MAX`), read by the admin route and the user list.
 - plan 724 adds `menu-dish.schema.ts`, `dish-sales-month.schema.ts` and `dish-sales-alias.schema.ts` (dish analysis store).
 - plan 727 adds `month-plan.schema.ts` (`monthPlans`, server-only; `null` = not entered, 0 = a real zero) and the pure month and target rules in `shared/schemas/month/month-rules.ts` (`MONTH_KEY_PATTERN`, `monthKeyOf` in Asia/Jerusalem, `shiftMonth`, `monthLabel`, `MONTH_TARGET_KEYS`, `MONTH_TARGET_DEFAULTS`, `MONTH_TARGET_BANDS`); `src/app/core/utils/month-key.util.ts` is a thin wrapper over them, so there is one month rule. The chip flag `TabChip.money` (tab-chips) hides a chip from a role that cannot `editMoney`.
+  `SCHEMA_BY_COLLECTION` in `shared/schemas/entities/index.ts`; `shared/schemas/entities/menu-design.schema.ts`
+  (plan 764) follows the same shape.
 - When: a new stored collection needs a shape.
 - Known copies: none.
 
@@ -775,6 +778,21 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 - Use: `server/scripts/repair-supplier-refs.js` — a one-off data repair beside `dedupe-business-products.js`, with the same dry-run default, `--write` and `--confirm-remote` rules; it never touches prices.
 - Pieces: repair-supplier-refs.js, planProductRepair, repairBusiness.
 - When: product sources already point at a foreign, unknown or empty supplier; the Human runs it (dry run first), never a build step.
+- Known copies: none.
+
+### menu-template — one drawing of a designed menu for browser and server (plan 764, ADR 0034)
+
+- Status: stable — plan 764
+- Use: `shared/schemas/menu-design/menu-template.ts` · `renderMenuDocument(design, doc, { poweredBy, fonts })` (a whole
+  A4 HTML document) and `designCssVars(design)` (the `--md-*` properties); the words from
+  `shared/schemas/menu-design/menu-doc.ts` (`menuDocFromEvent`, `SAMPLE_MENU_DOC`); which design a menu wears from
+  `shared/schemas/menu-design/menu-resolve.ts` (`resolveMenuDesign`); fonts, textures and the four starting designs from
+  `shared/schemas/menu-design/menu-fonts.ts`, `shared/schemas/menu-design/menu-textures.ts`,
+  `shared/schemas/menu-design/menu-base-templates.ts`. The stored shape is
+  `shared/schemas/entities/menu-design.schema.ts`; the browser loads designs with
+  `src/app/core/services/menu-design-data.service.ts`.
+- Pieces: renderMenuDocument, designCssVars, menuDocFromEvent, SAMPLE_MENU_DOC, resolveMenuDesign, baseDesign, MENU_FONTS, MENU_TEXTURES, MenuDesignDataService.
+- When: a screen, an export or a server path shows a designed menu; never a second menu template or design fallback rule.
 - Known copies: none.
 
 ### excel-export — one house style for every Excel sheet

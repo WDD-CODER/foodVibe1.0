@@ -26,6 +26,10 @@ const AI_FEATURES = Object.freeze([
   'invoice_read',
   'menu_prices_parse',
   'stock_extract',
+  // Menu design program (plan 764, C-AI).
+  'menu_design_variants',
+  'menu_design_refine',
+  'menu_from_text',
 ]);
 
 function isAiFeature(key) {

@@ -5,7 +5,7 @@ review-by: 2027-05-24
 supersedes: 0032-one-user-more-than-one-business (the consultant bullet of Decision, only for per-employee pay lines)
 ---
 
-# 0034. Per-employee pay lines are the owner's alone; everyone else gets server-computed totals
+# 0035. Per-employee pay lines are the owner's alone; everyone else gets server-computed totals
 
 ## Context
 

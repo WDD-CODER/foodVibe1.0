@@ -94,6 +94,8 @@ Always allowed regardless of the list below: this plan file itself, its own
 hotspots (`src/styles.scss, src/app/app.routes.ts` — add to them, never rewrite or remove an existing entry without escalating).
 
 ```scope
+server/routes/business.js
+server/test/business-menu-design.test.js
 src/app/pages/menu-intelligence/menu-intelligence.page.ts
 src/app/pages/menu-intelligence/menu-intelligence.page.html
 src/app/pages/menu-intelligence/menu-intelligence.page.scss
@@ -206,6 +208,7 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
 - [ ] A6: Add the Hebrew texts and icons the new controls use — dictionary keys from UI/UX Notes, palette and file-down icons — public/assets/data/dictionary.json, src/app/app.config.ts
 - [ ] A7: Prove the module gate and the new fields in page specs and three short browser checks — page spec cases from Done-when; the three browser checks switch modules through the admin platform route the way plan 620's browser check does — src/app/pages/menu-intelligence/menu-intelligence.page.spec.ts, e2e/ui/769-1.spec.ts, e2e/ui/769-2.spec.ts, e2e/ui/769-3.spec.ts
 - [ ] A8: Update the pages folder map for the new switcher component and sheet helper — src/app/pages/breadcrumbs.md
+- [ ] A9: Only businesses with the menu design module may set a default design, like every other menu-design route — add requireModule('menu_design') to PUT /menu-design-default (left ungated by plan 764, run md-0 note) and a module-off 403 test — server/routes/business.js, server/test/business-menu-design.test.js
 
 ## Technical Considerations
 - M2 guard: `components/menu-dish-row/**` and `components/pricing-meter/**` are deliberately outside the Read-Write Scope, so the runner's scope check refuses any change to them.

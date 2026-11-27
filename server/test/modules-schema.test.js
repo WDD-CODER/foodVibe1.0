@@ -34,8 +34,8 @@ describe('modulesOf / hasModule / MODULE_OF_TYPE', () => {
     expect(S.hasModule({ modules: ['consultant_diag'] }, 'consultant_diag')).toBe(true)
   })
 
-  it('MODULE_OF_TYPE has exactly the ten types of the C-MODULES table', () => {
-    expect(Object.keys(S.MODULE_OF_TYPE).sort()).toEqual(['bookings', 'clients', 'dishSalesAliases', 'dishSalesMonths', 'frontDeskProfiles', 'knowledgeItems', 'menuDishes', 'menuEvents', 'requests', 'venues'])
+  it('MODULE_OF_TYPE has exactly the eleven types of the C-MODULES table', () => {
+    expect(Object.keys(S.MODULE_OF_TYPE).sort()).toEqual(['bookings', 'clients', 'dishSalesAliases', 'dishSalesMonths', 'frontDeskProfiles', 'knowledgeItems', 'menuDesigns', 'menuDishes', 'menuEvents', 'requests', 'venues'])
     expect(S.MODULE_OF_TYPE.clients).toEqual(['events', 'frontdesk'])
   })
 
@@ -48,11 +48,20 @@ describe('modulesOf / hasModule / MODULE_OF_TYPE', () => {
 
   it('plan 727: monthly_plan is the seventh key, off by default, gates no generic type and the max follows the key count', () => {
     expect(S.MODULE_KEYS[6]).toBe('monthly_plan')
-    expect(S.MODULE_KEYS).toHaveLength(7)
+    expect(S.MODULE_KEYS).toHaveLength(8)
     expect(S.DEFAULT_MODULES).not.toContain('monthly_plan')
     expect(S.MODULE_OF_TYPE.monthPlans).toBeUndefined()
     expect(S.modulesFieldSchema.safeParse(S.MODULE_KEYS).success).toBe(true)
     expect(S.modulesFieldSchema.safeParse([...S.MODULE_KEYS, 'events']).success).toBe(false)
+  })
+
+  it('menu_design is a module, not a default one, and gates menuDesigns (plan 764)', () => {
+    expect([...S.MODULE_KEYS]).toContain('menu_design')
+    expect(S.modulesOf({})).not.toContain('menu_design')
+    expect(S.hasModule({}, 'menu_design')).toBe(false)
+    expect(S.hasModule({ modules: ['menu_design'] }, 'menu_design')).toBe(true)
+    expect(S.MODULE_OF_TYPE.menuDesigns).toEqual(['menu_design'])
+    expect(S.businessSchema.safeParse({ ...biz, modules: [...S.MODULE_KEYS] }).success).toBe(true)
   })
 
   it('platformUpdateSchema needs a reason and at least one change', () => {
@@ -60,6 +69,7 @@ describe('modulesOf / hasModule / MODULE_OF_TYPE', () => {
     expect(S.platformUpdateSchema.safeParse({ reason: 'pilot' }).success).toBe(false)
     expect(S.platformUpdateSchema.safeParse({ aiPrivate: true, reason: 'x' }).success).toBe(false)
     expect(S.platformUpdateSchema.safeParse({ aiMonthlyTokenCap: null, reason: 'reset' }).success).toBe(true)
+    expect(S.platformUpdateSchema.safeParse({ hidePoweredBy: false, reason: 'pilot' }).success).toBe(true)
   })
 })
 
@@ -74,7 +84,7 @@ describe('businessSchema new optional fields', () => {
   })
 
   it.each([
-    ['an eighth module', { modules: ['events', 'event_logistics', 'frontdesk', 'ai_create', 'consultant_diag', 'dish_analysis', 'monthly_plan', 'events'] }],
+    ['a ninth module', { modules: ['events', 'event_logistics', 'frontdesk', 'ai_create', 'consultant_diag', 'dish_analysis', 'monthly_plan', 'menu_design', 'events'] }],
     ['a repeated module', { modules: ['events', 'events'] }],
     ['a 51st history row', { platformHistory: Array.from({ length: 51 }, (_, i) => row(i)) }],
     ['a cap of -1', { aiMonthlyTokenCap: -1 }],

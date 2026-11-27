@@ -58,6 +58,9 @@ manages.
 - New persisted data uses the generic entity contract (`/api/v1/data/:type`, `docs/agent/standards-backend.md`
   §3 "New Collection Checklist"); a dedicated endpoint is named and justified.
 - Entity shapes are Zod schemas in `shared/schemas/`.
+- A plan that adds a new collection lists `server/routes/generic.js` in its Read-Write Scope from the start. A
+  non-cloneable type joins `NO_LINEAGE` there, and the run's advisor never approves that file because it is
+  sensitive, so leaving it out stops the run on a question (Dandan, 2026-11-27: plan 764 waited 87 min on ask 764-1).
 
 ## HLD
 - Data Flow: describe the Signal flow — source → `computed()` → template binding.

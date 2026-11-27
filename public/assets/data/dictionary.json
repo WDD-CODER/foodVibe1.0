@@ -2475,6 +2475,7 @@
     "dish_month_closed": "החודש נסגר ולא ניתן לשנות אותו",
     "dish_month_exists": "כבר קיים רישום לחודש הזה",
     "dish_alias_exists": "השם הזה כבר מקושר",
+    "module_menu_design": "עיצוב תפריטים",
     "platform_biz_dialog_title": "מודולים ו-AI לעסק",
     "platform_biz_edit": "מודולים ו-AI",
     "platform_biz_modules": "מודולים פעילים",

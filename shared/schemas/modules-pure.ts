@@ -1,7 +1,10 @@
 /** Plan 620: the module helpers without zod, so the browser's first bundle does not pull the validation library. */
 
-/** Plan 615 (C-MODULES): the seven modules a business may have switched on. */
-export const MODULE_KEYS = ['events', 'event_logistics', 'frontdesk', 'ai_create', 'consultant_diag', 'dish_analysis', 'monthly_plan'] as const
+/**
+ * Plan 615 (C-MODULES): the modules a business may have switched on. Plans 724 and 727 added `dish_analysis` and
+ * `monthly_plan`, plan 764 added `menu_design` (all three off by default).
+ */
+export const MODULE_KEYS = ['events', 'event_logistics', 'frontdesk', 'ai_create', 'consultant_diag', 'dish_analysis', 'monthly_plan', 'menu_design'] as const
 export type ModuleKey = (typeof MODULE_KEYS)[number]
 
 /** What a business that has no stored `modules` list gets. */
@@ -25,6 +28,7 @@ export function hasModule(business: { modules?: readonly string[] | null } | nul
 /** The generic API gates a type by this table (any one key of a list is enough). */
 export const MODULE_OF_TYPE: Record<string, readonly ModuleKey[]> = {
   menuEvents: ['events'],
+  menuDesigns: ['menu_design'],
   venues: ['events'],
   requests: ['frontdesk'],
   bookings: ['frontdesk'],

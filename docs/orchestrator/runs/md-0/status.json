@@ -1,0 +1,687 @@
+{
+  "run": "md-0",
+  "branch": "orch/md-0",
+  "base": "main",
+  "startedAt": "2026-11-27T14:38:18.274Z",
+  "mainShaAtStart": "27be07f9c11007e4c2318e95f69db967c3f8513c",
+  "plans": {
+    "764": {
+      "nnn": "764",
+      "title": "Menu design foundation: module, design records, menu fields and the one shared template",
+      "branch": "feat/764-menu-design-foundation",
+      "state": "merged",
+      "round": 0,
+      "tier": "build",
+      "models": {
+        "builder": {
+          "model": "sonnet",
+          "tier": "build",
+          "at": "2026-11-27T17:39:01.064Z"
+        },
+        "reviewer": {
+          "model": "sonnet",
+          "at": "2026-11-27T18:15:59.110Z"
+        }
+      },
+      "humanItems": [
+        "Open the four files `node server/scripts/menu-sample-html.js` writes (it prints their paths) in a browser: each"
+      ],
+      "history": [
+        {
+          "at": "2026-11-27T14:40:53.094Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-27T14:40:53.318Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-27T15:29:30.707Z",
+          "state": "parked",
+          "round": 0
+        },
+        {
+          "at": "2026-11-27T15:30:50.560Z",
+          "state": "asking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-27T16:58:53.814Z",
+          "state": "parked",
+          "round": 0
+        },
+        {
+          "at": "2026-11-27T17:07:17.578Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-27T17:07:17.757Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-27T17:32:30.552Z",
+          "state": "parked",
+          "round": 0
+        },
+        {
+          "at": "2026-11-27T17:33:34.028Z",
+          "state": "asking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-27T17:39:00.889Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-27T17:39:01.065Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-27T18:04:39.611Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-27T18:15:47.582Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-27T18:15:59.113Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-27T18:17:56.550Z",
+          "state": "merging",
+          "round": 0
+        },
+        {
+          "at": "2026-11-27T18:19:12.489Z",
+          "state": "merged",
+          "round": 0
+        }
+      ],
+      "earlier": [
+        {
+          "nnn": "764",
+          "title": "Menu design foundation: module, design records, menu fields and the one shared template",
+          "branch": "feat/764-menu-design-foundation",
+          "state": "parked",
+          "round": 0,
+          "tier": "build",
+          "models": {
+            "builder": {
+              "model": "sonnet",
+              "tier": "build",
+              "at": "2026-11-27T14:40:53.316Z"
+            }
+          },
+          "tiers": [
+            "build"
+          ],
+          "freeDiskGb": 10.2,
+          "reason": "ESCALATE scope: ESCALATE: scope server/routes/generic.js: `pnpm run test:server` exits 1 (4 failed, 2037 passed) because the generic POST adds _masterId and _userModified to every type not in NO_LINEAGE (line 124), and the strict menuDesigns schema refuses them with 400. — ask 764-1 answered, but the scope could not be extended: the merge folder does not fast-forward to origin/",
+          "calls": [
+            {
+              "stage": "builder",
+              "model": "sonnet",
+              "seconds": 2917.1,
+              "tokens": {
+                "input": 15021512,
+                "output": 107700
+              },
+              "exit": 0
+            }
+          ],
+          "park": {
+            "at": "2026-11-27T15:30:40.732Z",
+            "reason": "ESCALATE scope: ESCALATE: scope server/routes/generic.js: `pnpm run test:server` exits 1 (4 failed, 2037 passed) because the generic POST adds _masterId and _userModified to every type not in NO_LINEAGE (line 124), and the strict menuDesigns schema refuses them with 400."
+          },
+          "parkBranch": "park/md-0-764"
+        },
+        {
+          "nnn": "764",
+          "title": "Menu design foundation: module, design records, menu fields and the one shared template",
+          "branch": "feat/764-menu-design-foundation",
+          "state": "asking",
+          "round": 0,
+          "tier": "build",
+          "models": {
+            "builder": {
+              "model": "sonnet",
+              "tier": "build",
+              "at": "2026-11-27T17:07:17.755Z"
+            }
+          },
+          "escalations": [
+            {
+              "step": "resumed after: ESCALATE scope: ESCALATE: scope server/routes/generic.js: `pnpm run test:server` exits 1 (4 failed, 2037 passed) because the generic POST adds _master",
+              "check": "(not given)"
+            }
+          ],
+          "replan": "no — (not given)",
+          "tiers": [
+            "build"
+          ],
+          "freeDiskGb": 9.5,
+          "reason": "asking 764-2: ESCALATE scope: ESCALATE: scope server/routes/generic.js: the work is finished and pushed, but the gate's scope check will refuse this file because origin/orch/md-0 still lacks the scope line you approved in ask 764-1 (`git show origin/orch/md-0:<plan> | grep -c '^server/routes/generic.js'` gives 0, on origin/main ",
+          "calls": [
+            {
+              "stage": "builder",
+              "model": "sonnet",
+              "seconds": 1512.4,
+              "tokens": {
+                "input": 2633023,
+                "output": 26808
+              },
+              "exit": 0
+            }
+          ],
+          "park": {
+            "at": "2026-11-27T17:33:24.592Z",
+            "reason": "ESCALATE scope: ESCALATE: scope server/routes/generic.js: the work is finished and pushed, but the gate's scope check will refuse this file because origin/orch/md-0 still lacks the scope line you approved in ask 764-1 (`git show origin/orch/md-0:<plan> | grep -c '^server/routes/generic.js'` gives 0, on origin/main"
+          },
+          "parkBranch": "park/md-0-764"
+        }
+      ],
+      "tiers": [
+        "build"
+      ],
+      "freeDiskGb": 8.7,
+      "sha": "4bf1ab079f9ee50c867219326e880d557ec78d66",
+      "calls": [
+        {
+          "stage": "builder",
+          "model": "sonnet",
+          "seconds": 1535.9,
+          "tokens": {
+            "input": 1332917,
+            "output": 15670
+          },
+          "exit": 0
+        },
+        {
+          "stage": "reviewer",
+          "model": "sonnet",
+          "seconds": 116.1,
+          "tokens": {
+            "input": 1396818,
+            "output": 13543
+          },
+          "exit": 0
+        }
+      ],
+      "checkedHead": "3482ef7a4141244b4ac162a7c4d12c1a65589beb"
+    }
+  },
+  "notes": [
+    {
+      "at": "2026-11-27T14:40:52.886Z",
+      "plan": "764",
+      "text": "the folder foodVibe1.0-orch-md-0-764 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-27T15:29:30.521Z",
+      "plan": "764",
+      "text": "builder left undone (round 0): A4: schema, registration, COLLECTIONS entry, cross-business body and schema test are written, but creating or editing a design answers 400 until 'menuDesigns' is added to NO_LINEAGE in server/routes/generic.js (not ticked); Done-when `pnpm run test:server` exits 0: fails on those 4 tests; [human] op"
+    },
+    {
+      "at": "2026-11-27T15:30:50.384Z",
+      "plan": "764",
+      "text": "parked: nothing to save (nothing uncommitted)"
+    },
+    {
+      "at": "2026-11-27T15:30:50.726Z",
+      "plan": "764",
+      "text": "ask 764-1 (scope, the Human or the advisor answers): May the builder add 'menuDesigns' to the NO_LINEAGE set in server/routes/generic.js (line 124), so a menu design can be created and edited without clone-lineage fields, as the plan's INV-2 line requires?"
+    },
+    {
+      "at": "2026-11-27T16:58:53.357Z",
+      "plan": "764",
+      "text": "ask 764-1 answered by the human: approved: server/routes/generic.js"
+    },
+    {
+      "at": "2026-11-27T16:58:54.274Z",
+      "plan": "764",
+      "text": "ask 764-1 answered, but the scope could not be extended: the merge folder does not fast-forward to origin/orch/md-0:  (no commit of its own beyond origin/orch/md-0) — plan 764 parked; the question was: May the builder add 'menuDesigns' to the NO_LINEAGE set in server/routes/generic.js (line 124), so a menu design can be created and edited without clone-lineage fields, as the plan's INV-2 line requ"
+    },
+    {
+      "at": "2026-11-27T16:58:55.654Z",
+      "text": "make this a default? PUT /api/v1/business/menu-design-default has no module gate, only editSettings and the live-design check (the plan names no other) — reverse: add requireModule('menu_design') to the route (trigger: screen) — reply: default yes run-screen"
+    },
+    {
+      "at": "2026-11-27T17:07:01.543Z",
+      "plan": "764",
+      "text": "resumed from park/md-0-764: round 0, tier build, after: ESCALATE scope: ESCALATE: scope server/routes/generic.js: `pnpm run test:server` exits 1 (4 failed, 2037 passed) because the generic POST adds _masterId and _us"
+    },
+    {
+      "at": "2026-11-27T17:07:17.287Z",
+      "plan": "764",
+      "text": "the folder foodVibe1.0-orch-md-0-764 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-27T17:32:30.270Z",
+      "plan": "764",
+      "text": "builder left undone (round 0): Run branch scope line for server/routes/generic.js: a builder may not write the run branch; [human] open the four sample menu files in a browser: the Human's check"
+    },
+    {
+      "at": "2026-11-27T17:33:33.889Z",
+      "plan": "764",
+      "text": "parked: nothing to save (nothing uncommitted)"
+    },
+    {
+      "at": "2026-11-27T17:33:34.162Z",
+      "plan": "764",
+      "text": "ask 764-2 (scope, the Human or the advisor answers): May plan 764 add server/routes/generic.js to its scope on orch/md-0 (already approved in ask 764-1 and committed on the plan branch), so the gate accepts the finished change?"
+    },
+    {
+      "at": "2026-11-27T17:37:04.918Z",
+      "plan": "764",
+      "text": "ask 764-2 answered by the human: approved: server/routes/generic.js"
+    },
+    {
+      "at": "2026-11-27T17:37:17.765Z",
+      "plan": "764",
+      "text": "scope of plan 764 extended on orch/md-0 by the answer to 764-2: server/routes/generic.js"
+    },
+    {
+      "at": "2026-11-27T17:38:53.949Z",
+      "plan": "764",
+      "text": "resumed from park/md-0-764: round 0, tier build, after: asking 764-2: ESCALATE scope: ESCALATE: scope server/routes/generic.js: the work is finished and pushed, but the gate's scope check will refuse this file becaus"
+    },
+    {
+      "at": "2026-11-27T17:39:00.735Z",
+      "plan": "764",
+      "text": "the folder foodVibe1.0-orch-md-0-764 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-27T18:18:07.415Z",
+      "plan": "764",
+      "text": "the folder foodVibe1.0-orch-merge-md-0 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-27T18:20:01.980Z",
+      "text": "FINAL: same tree as plan 764's gate — node scripts/orch-state.mjs prepare --missing server/generated/schemas --script build:schemas --pm pnpm, pnpm run build, pnpm run lint, pnpm run test:ci, node scripts/override-check.mjs, pnpm run lint:icons, pnpm run lint:no-native-select, node scripts/plan-ledger-check.mjs, node scripts/breadcrumbs-check.mjs, node scripts/ci-scope-check.mjs --checkout-branch"
+    },
+    {
+      "at": "2026-11-27T18:20:02.666Z",
+      "text": "make this a default? made the approved server/routes/generic.js change and added its scope line at the end of this branch's plan scope block, although the run branch does not hold the line yet — reverse: git revert 16675a (trigger: screen) — reply: default yes run-screen"
+    },
+    {
+      "at": "2026-11-27T18:20:02.802Z",
+      "text": "make this a default? latestExport is server-owned through the existing EVENT_SERVER_FIELDS list, not a second strip list — reverse: give it its own strip list (trigger: list) — reply: default yes run-list"
+    }
+  ],
+  "attempts": 2,
+  "phase": "finished",
+  "freeDiskGb": 8.7,
+  "updatedAt": "2026-11-27T18:20:04.594Z",
+  "decisions": [
+    {
+      "id": "D1",
+      "plan": "764",
+      "type": "behaviour",
+      "text": "behaviour: PUT /api/v1/business/menu-design-default has no module gate, only editSettings and the live-design check (the plan names no other) — reverse: add requireModule('menu_design') to the route",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D2",
+      "plan": "764",
+      "type": "behaviour",
+      "text": "behaviour: a linked dish the catalog no longer has is left out of the menu doc, so an id is never printed — reverse: return a placeholder name in menuDocFromEvent",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D3",
+      "plan": "764",
+      "type": "behaviour",
+      "text": "behaviour: fonts 'embedded' writes no font link, so the renderer must supply the faces — reverse: have renderMenuDocument write the @font-face rules itself",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D4",
+      "plan": "764",
+      "type": "behaviour",
+      "text": "behaviour: the menu document is right-to-left and each text sits in its own dir=\"auto\" span, so a start-aligned English line also lines up on the right — reverse: set the document direction from the menu's texts",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D5",
+      "plan": "764",
+      "type": "behaviour",
+      "text": "behaviour: a design value outside its allowed list falls back inside the template (classic colors, first font, normal size) instead of throwing — reverse: validate with menuDesignDraftSchema and throw",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D6",
+      "plan": "764",
+      "type": "behaviour",
+      "text": "behaviour: MenuDesignDataService loads only on ensureLoaded(), never when it is created — reverse: drop the false argument to super()",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D7",
+      "plan": "764",
+      "type": "behaviour",
+      "text": "behaviour: the admin platform PUT accepts hidePoweredBy but its response is unchanged and does not return it — reverse: add hidePoweredBy to the response in server/routes/admin.js",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D8",
+      "plan": "764",
+      "type": "seen",
+      "text": "seen: src/app/pages/platform-dashboard/components/platform-business-dialog/platform-business-dialog.component.ts:59 — a hidePoweredBy history row would show the raw field name; the plan that adds the admin checkbox needs a Hebrew line for it",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D9",
+      "plan": "764",
+      "type": "seen",
+      "text": "seen: C:/coding projects/Cursor/foodVibe1.0-menu-design/scripts/scope-check.mjs:71 — run from a builder worktree, the kit copy diffs its own checkout instead of the worktree",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D10",
+      "plan": "764",
+      "type": "behaviour",
+      "text": "behaviour: made the approved server/routes/generic.js change and added its scope line at the end of this branch's plan scope block, although the run branch does not hold the line yet — reverse: git revert 16675a4a",
+      "alsoFrom": [],
+      "attempt": 2,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D11",
+      "plan": "764",
+      "type": "behaviour",
+      "text": "behaviour: latestExport is server-owned through the existing EVENT_SERVER_FIELDS list, not a second strip list — reverse: give it its own strip list",
+      "alsoFrom": [],
+      "attempt": 2,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D12",
+      "plan": "764",
+      "type": "behaviour",
+      "text": "behaviour: a hidePoweredBy change is stored in the platform history like modules (one change row) — reverse: drop its row from platformChangesOf",
+      "alsoFrom": [],
+      "attempt": 2,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D13",
+      "plan": "764",
+      "type": "behaviour",
+      "text": "behaviour: the sample script writes to the OS temp folder, never into the repo — reverse: change its output folder",
+      "alsoFrom": [],
+      "attempt": 2,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D14",
+      "plan": "764",
+      "type": "behaviour",
+      "text": "behaviour: PUT /api/v1/business/menu-design-default has no module gate, only editSettings and the live-design check — reverse: add requireModule('menu_design') to the route",
+      "alsoFrom": [],
+      "attempt": 2,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D15",
+      "plan": "764",
+      "type": "behaviour",
+      "text": "behaviour: a linked dish the catalog no longer has is left out of the menu doc, so an id is never printed — reverse: return a placeholder name in menuDocFromEvent",
+      "alsoFrom": [],
+      "attempt": 2,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D16",
+      "plan": "764",
+      "type": "behaviour",
+      "text": "behaviour: fonts 'embedded' writes no font link; the renderer supplies the faces — reverse: have renderMenuDocument write the @font-face rules",
+      "alsoFrom": [],
+      "attempt": 2,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D17",
+      "plan": "764",
+      "type": "behaviour",
+      "text": "behaviour: the menu document is dir=rtl with each text in its own dir=auto span, so a start-aligned English line also lines up on the right — reverse: set the document direction from the menu's texts",
+      "alsoFrom": [],
+      "attempt": 2,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D18",
+      "plan": "764",
+      "type": "behaviour",
+      "text": "behaviour: a design value outside its closed list falls back inside the template instead of throwing — reverse: validate with menuDesignDraftSchema and throw",
+      "alsoFrom": [],
+      "attempt": 2,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D19",
+      "plan": "764",
+      "type": "seen",
+      "text": "seen: scripts/run-plans.mjs:1777 — the answer to ask 764-1 could not extend the scope (\"the merge folder does not fast-forward to origin/orch/md-0\" with an empty git error), and the relaunch at 2026-11-27T17:03Z did not retry it",
+      "alsoFrom": [],
+      "attempt": 2,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D20",
+      "plan": "764",
+      "type": "behaviour",
+      "text": "behaviour: latestExport is server-owned by joining EVENT_SERVER_FIELDS, the list the events code already strips — reverse: remove it from that list and strip it separately",
+      "alsoFrom": [],
+      "attempt": 2,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D21",
+      "plan": "764",
+      "type": "behaviour",
+      "text": "behaviour: a hidePoweredBy change is stored in the platform history like modules (one change row) — reverse: drop its row in platformChangesOf",
+      "alsoFrom": [],
+      "attempt": 2,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D22",
+      "plan": "764",
+      "type": "behaviour",
+      "text": "behaviour: the sample script writes to the OS temp folder, never into the repo — reverse: change the output folder in server/scripts/menu-sample-html.js",
+      "alsoFrom": [],
+      "attempt": 2,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D23",
+      "plan": "764",
+      "type": "behaviour",
+      "text": "behaviour: PUT /api/v1/business/menu-design-default has no module gate, only editSettings and the live-design check — reverse: add requireModule('menu_design') to the route",
+      "alsoFrom": [],
+      "attempt": 2,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D24",
+      "plan": "764",
+      "type": "behaviour",
+      "text": "behaviour: a linked dish the catalog no longer has is left out of the menu doc, so an id is never printed — reverse: return a placeholder name in menuDocFromEvent",
+      "alsoFrom": [],
+      "attempt": 2,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D25",
+      "plan": "764",
+      "type": "behaviour",
+      "text": "behaviour: fonts 'embedded' writes no font link; the renderer supplies the faces — reverse: have renderMenuDocument write the @font-face rules itself",
+      "alsoFrom": [],
+      "attempt": 2,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D26",
+      "plan": "764",
+      "type": "behaviour",
+      "text": "behaviour: the document is dir=rtl and each text sits in its own dir=auto span, so a start-aligned English line also lines up on the right — reverse: set the document direction from the menu's texts",
+      "alsoFrom": [],
+      "attempt": 2,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D27",
+      "plan": "764",
+      "type": "behaviour",
+      "text": "behaviour: a design value outside its closed list falls back inside the template instead of throwing — reverse: validate with menuDesignDraftSchema and throw",
+      "alsoFrom": [],
+      "attempt": 2,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    }
+  ],
+  "finishedAt": "2026-11-27T18:20:04.592Z",
+  "finalGate": {
+    "ok": true,
+    "command": null,
+    "at": "2026-11-27T18:20:04.594Z",
+    "attempt": 1,
+    "blamed": []
+  }
+}

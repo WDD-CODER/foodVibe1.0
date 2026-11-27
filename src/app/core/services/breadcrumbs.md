@@ -28,6 +28,7 @@ Singleton services for data, state, modals, HTTP concerns, logging, export, and 
 | `scaling.service.ts` | Scale by yield | ScalingService, ScaledIngredientRow, ScaledPrepRow |
 | `cook-view-state.service.ts` | Cook-view workflow state | CookViewStateService |
 | `menu-event-data.service.ts` | Menu events CRUD (on BaseEntityDataService) | MenuEventDataService |
+| `menu-design-data.service.ts` | Menu designs CRUD (on BaseEntityDataService; loads on `ensureLoaded()` only, plan 764) | MenuDesignDataService |
 | `access.service.ts` | The businesses the user may enter, and the consultant grants of a business: load, create, remove (plan 632; `canSwitch_` drives the header switcher) | AccessService |
 | `client-data.service.ts` | Clients CRUD (on BaseEntityDataService; owner writes, staff read name + phone) | ClientDataService |
 | `menu-dish-data.service.ts` | Standing-menu dishes (`menuDishes`) load / add / update; leaving the menu is `active: false` (plan 725) | MenuDishDataService |
