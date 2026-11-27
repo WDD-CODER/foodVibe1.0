@@ -772,6 +772,7 @@ Every batch's plans depend only on plans in earlier batches, so the batches are 
 - [ ] A6: Add the Hebrew texts and icons the new controls use — dictionary keys from UI/UX Notes, palette and file-down icons — public/assets/data/dictionary.json, src/app/app.config.ts
 - [ ] A7: Prove the module gate and the new fields in page specs and three short browser checks — page spec cases from Done-when; the three browser checks switch modules through the admin platform route the way plan 620's browser check does — src/app/pages/menu-intelligence/menu-intelligence.page.spec.ts, e2e/ui/769-1.spec.ts, e2e/ui/769-2.spec.ts, e2e/ui/769-3.spec.ts
 - [ ] A8: Update the pages folder map for the new switcher component and sheet helper — src/app/pages/breadcrumbs.md
+- [ ] A9: Only businesses with the menu design module may set a default design, like every other menu-design route — add requireModule('menu_design') to PUT /menu-design-default (left ungated by plan 764, run md-0 note) and a module-off 403 test — server/routes/business.js, server/test/business-menu-design.test.js
 
 ### Plan 770 — Menu from text or voice inside the app: sure matches only, menu-only sections until confirmed
 - [ ] A1: Move the dish-name matcher into the shared package so the server scores dishes exactly like the browser — code moved as is, browser util re-exports, existing spec green — shared/schemas/menu-match/dish-match.ts, src/app/core/utils/recipe-match.util.ts
