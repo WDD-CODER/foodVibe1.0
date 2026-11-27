@@ -36,7 +36,7 @@ export function normalizedScrollStart(scrollLeft: number, rtl: boolean): number 
  * One reusable horizontal strip (plans 350, 743): projects its content into a snap-scroller with a
  * hidden scrollbar inside one visible container (`frame="box"`), shows RTL-correct prev/next arrows
  * only on the side(s) with more to see (`arrows="auto"`); where the arrow buttons are not rendered (a phone,
- * or `arrows="never"`) a small chevron inside the container is the sign of more (plan 747). The row
+ * or `arrows="never"`) a solid round chevron inside the container is the sign of more (plans 747, 762). The row
  * can be grabbed and dragged with a mouse or pen. Content stays centered while it fits
  * (`justify-content: safe center`, overridable with `--rail-justify`).
  */
@@ -88,7 +88,7 @@ export class ScrollRailComponent {
   protected readonly arrowsRendered = computed(() => this.arrows() !== 'never' && !this.phone_())
 
   /**
-   * Plan 747 round two: the sign of more inside the container (a fade and a small chevron at the edge). Shown only
+   * Plan 747 round two: the sign of more inside the container (a fade and a round chevron at the edge). Shown only
    * on the side that has more, and only when the outside arrow buttons are not there to say it.
    */
   protected readonly morePrev = computed(() => !this.arrowsRendered() && this.canPrev_())

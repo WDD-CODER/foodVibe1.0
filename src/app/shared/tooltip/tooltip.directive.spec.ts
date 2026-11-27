@@ -1,6 +1,7 @@
 import { Component, signal } from '@angular/core'
 import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing'
-import { TooltipDirective, TOOLTIP_HOVER_DELAY_MS } from './tooltip.directive'
+import { PHONE_QUERY } from '@utils/breakpoints'
+import { TooltipDirective, TOOLTIP_HOVER_DELAY_MS, TOOLTIP_TAP_QUERY } from './tooltip.directive'
 
 @Component({
   standalone: true,
@@ -36,6 +37,8 @@ class HostComponent {
 describe('TooltipDirective (plan 744)', () => {
   let fixture: ComponentFixture<HostComponent>
   let host: HostComponent
+  /** Plan 762: true = a phone width (or no hover), where the tooltip works by tap. */
+  let byTap = false
 
   const el = (id: string): HTMLElement => fixture.nativeElement.querySelector(`#${id}`)
   const box = (): HTMLElement | null => document.body.querySelector('.c-tooltip')
@@ -45,7 +48,19 @@ describe('TooltipDirective (plan 744)', () => {
     )
   }
 
+  /** What a finger or a mouse button does on a control: press, release, click. */
+  const tap = (target: HTMLElement, pointerType = 'touch'): void => {
+    pointer(target, 'pointerdown', pointerType)
+    pointer(target, 'pointerup', pointerType)
+    target.click()
+  }
+
   beforeEach(() => {
+    byTap = false
+    const real = window.matchMedia.bind(window)
+    spyOn(window, 'matchMedia').and.callFake((query: string) =>
+      query === TOOLTIP_TAP_QUERY ? ({ matches: byTap } as MediaQueryList) : real(query)
+    )
     TestBed.configureTestingModule({ imports: [HostComponent] })
     fixture = TestBed.createComponent(HostComponent)
     host = fixture.componentInstance
@@ -101,41 +116,143 @@ describe('TooltipDirective (plan 744)', () => {
     expect(prevented).toBeFalse()
   })
 
-  it('tooltipOnClick toggles and survives pointerleave; an outside press closes it', fakeAsync(() => {
-    host.onClick.set(true)
-    fixture.detectChanges()
-    el('a').click()
-    expect(box()).not.toBeNull()
-    pointer(el('a'), 'pointerleave')
-    expect(box()).not.toBeNull()
-    pointer(document.body, 'pointerdown')
-    expect(box()).toBeNull()
-    el('a').click()
-    el('a').click()
-    expect(box()).toBeNull()
-  }))
-
-  it('a click without tooltipOnClick opens nothing', () => {
-    el('a').click()
-    expect(box()).toBeNull()
+  it('the tap rule is the app phone breakpoint, or a pointer that cannot hover', () => {
+    expect(TOOLTIP_TAP_QUERY).toBe(`${PHONE_QUERY}, (hover: none)`)
   })
 
-  it('touch: hover does nothing, a tap toggles it (even without tooltipOnClick), a tap elsewhere closes it', fakeAsync(() => {
-    pointer(el('a'), 'pointerenter', 'touch')
-    tick(TOOLTIP_HOVER_DELAY_MS + 10)
-    expect(box()).toBeNull()
-    pointer(el('a'), 'pointerdown', 'touch')
-    el('a').click()
-    expect(box()).not.toBeNull()
-    pointer(el('a'), 'pointerleave', 'touch')
-    expect(box()).not.toBeNull()
-    pointer(document.body, 'pointerdown', 'touch')
-    expect(box()).toBeNull()
-    pointer(el('a'), 'pointerdown', 'touch')
-    el('a').click()
-    el('a').click()
-    expect(box()).toBeNull()
-  }))
+  describe('above a phone (plan 762)', () => {
+    it('a click opens nothing, with or without tooltipOnClick', fakeAsync(() => {
+      for (const onClick of [false, true]) {
+        host.onClick.set(onClick)
+        fixture.detectChanges()
+        tap(el('a'), 'mouse')
+        tick(1000)
+        expect(box()).toBeNull()
+      }
+    }))
+
+    it('a tap on a touch screen opens nothing, also through the focus it brings', fakeAsync(() => {
+      pointer(el('a'), 'pointerenter', 'touch')
+      pointer(el('a'), 'pointerdown', 'touch')
+      el('a').focus()
+      el('a').click()
+      tick(1000)
+      expect(box()).toBeNull()
+    }))
+
+    it('keyboard focus still opens after an earlier press', () => {
+      pointer(el('a'), 'pointerdown')
+      document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Tab' }))
+      el('a').focus()
+      expect(box()).not.toBeNull()
+    })
+
+    it('a click on a hovered control does not pin: leaving closes it', fakeAsync(() => {
+      pointer(el('a'), 'pointerenter')
+      tick(TOOLTIP_HOVER_DELAY_MS)
+      tap(el('a'), 'mouse')
+      expect(box()).not.toBeNull()
+      pointer(el('a'), 'pointerleave')
+      expect(box()).toBeNull()
+    }))
+
+    it('a press elsewhere and a scroll close it', () => {
+      el('a').focus()
+      pointer(document.body, 'pointerdown')
+      expect(box()).toBeNull()
+      el('b').focus()
+      document.dispatchEvent(new Event('scroll'))
+      expect(box()).toBeNull()
+    })
+  })
+
+  describe('at a phone width (plan 762)', () => {
+    beforeEach(() => (byTap = true))
+
+    it('a finger does not hover; a mouse in a narrow window still does', fakeAsync(() => {
+      pointer(el('a'), 'pointerenter', 'touch')
+      tick(TOOLTIP_HOVER_DELAY_MS + 10)
+      expect(box()).toBeNull()
+      pointer(el('a'), 'pointerenter')
+      tick(TOOLTIP_HOVER_DELAY_MS)
+      expect(box()).not.toBeNull()
+      pointer(el('a'), 'pointerleave')
+      expect(box()).toBeNull()
+    }))
+
+    it('a tap on an already focused or hovered box keeps it open and takes it over', fakeAsync(() => {
+      pointer(el('a'), 'pointerenter')
+      tick(TOOLTIP_HOVER_DELAY_MS)
+      tap(el('a'), 'mouse')
+      pointer(el('a'), 'pointerleave')
+      expect(box()).not.toBeNull()
+      tap(el('a'), 'mouse')
+      expect(box()).toBeNull()
+    }))
+
+    it('a click with no press before it (the keyboard) toggles it', () => {
+      el('a').click()
+      expect(box()).not.toBeNull()
+      el('a').click()
+      expect(box()).toBeNull()
+    })
+
+    it('a tap opens it and it stays when the finger lifts', () => {
+      tap(el('a'))
+      expect(box()?.textContent?.trim()).toBe('first')
+      pointer(el('a'), 'pointerleave', 'touch')
+      expect(box()).not.toBeNull()
+    })
+
+    it('a later tap elsewhere closes it', () => {
+      tap(el('a'))
+      pointer(document.body, 'pointerdown', 'touch')
+      expect(box()).toBeNull()
+    })
+
+    it('a later tap on the same control closes it, and the one after opens it again', () => {
+      tap(el('a'))
+      tap(el('a'))
+      expect(box()).toBeNull()
+      tap(el('a'))
+      expect(box()).not.toBeNull()
+    })
+
+    it('the press itself closes it, and a press that made no click does not eat the next tap', () => {
+      tap(el('a'))
+      pointer(el('a'), 'pointerdown', 'touch')
+      expect(box()).toBeNull()
+      pointer(el('a'), 'pointercancel', 'touch')
+      tap(el('a'))
+      expect(box()).not.toBeNull()
+      // A press that closes it and then ends in nothing at all: the next full tap still opens.
+      pointer(el('a'), 'pointerdown', 'touch')
+      tap(el('a'))
+      expect(box()).not.toBeNull()
+    })
+
+    it('a scroll of the page or of any scroll container closes it', () => {
+      tap(el('a'))
+      document.dispatchEvent(new Event('scroll'))
+      expect(box()).toBeNull()
+      tap(el('a'))
+      el('a').parentElement!.dispatchEvent(new Event('scroll'))
+      expect(box()).toBeNull()
+    })
+
+    it('a tap on another control closes the first and opens the second', () => {
+      tap(el('a'))
+      tap(el('b'))
+      expect(document.body.querySelectorAll('.c-tooltip').length).toBe(1)
+      expect(box()?.textContent?.trim()).toBe('second')
+    })
+
+    it('Escape closes it', () => {
+      tap(el('a'))
+      document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }))
+      expect(box()).toBeNull()
+    })
+  })
 
   it('the box stays inside the viewport on both sides', () => {
     const wrap = el('a').parentElement!

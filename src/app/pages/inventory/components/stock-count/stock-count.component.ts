@@ -229,13 +229,14 @@ export class StockCountComponent implements OnInit {
     if (this.view_() !== 'sheet') return '1fr'
     return this.baseColumn_() ? '2fr 1.2fr 1.2fr 0.9fr 1fr' : '2fr 1.2fr 1.2fr 0.9fr'
   })
-  protected readonly mobileGridTemplate_ = computed(() => {
-    if (this.view_() !== 'sheet') return '1fr'
-    // The unit column keeps room for the unit and the fixed slot beside it (plan 747): never under 6rem, which
-    // leaves the unit select the width it had before the slot.
-    const cols = 'minmax(0, 1.5fr) auto minmax(6rem, 1fr) auto'
-    return this.baseColumn_() ? cols + ' minmax(3.5rem, auto)' : cols
-  })
+  /**
+   * The phone's columns: the controls only — amount, unit, counted. The name has a line of its own above them
+   * (plan 762), and the base column does not exist below desktop. The unit column keeps room for the unit and the
+   * fixed slot beside it (plan 747): never under 6rem.
+   */
+  protected readonly mobileGridTemplate_ = computed(() =>
+    this.view_() !== 'sheet' ? '1fr' : 'auto minmax(6rem, 1fr) auto'
+  )
 
   /** Plan 645: built once per product list, not per row per check. */
   private readonly searchNames_ = computed(

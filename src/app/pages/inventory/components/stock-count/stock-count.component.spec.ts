@@ -19,6 +19,8 @@ import { StockCountComponent } from './stock-count.component'
 import { PastCountsService } from './past-counts.service'
 import { CounterComponent } from 'src/app/shared/counter/counter.component'
 import { ReturnToService } from '@services/return-to.service'
+import { TOOLTIP_TAP_QUERY } from 'src/app/shared/tooltip/tooltip.directive'
+import { PHONE_QUERY } from '@utils/breakpoints'
 
 const product = (id: string, name: string, min = 0): Product =>
   ({ _id: id, nameHebrew: name, baseUnit: 'kg', purchaseOptions: [], minStockLevel: min }) as unknown as Product
@@ -102,6 +104,14 @@ describe('StockCountComponent', () => {
     jasmine.clock().uninstall()
     returnTo = new ReturnToService()
   })
+
+  /** Plan 762: from here on the tooltips work by tap, as on a phone or a device with no hover. */
+  const useTapTooltips = (): void => {
+    const real = window.matchMedia.bind(window)
+    spyOn(window, 'matchMedia').and.callFake((q: string) =>
+      q === TOOLTIP_TAP_QUERY ? ({ matches: true } as MediaQueryList) : real(q)
+    )
+  }
 
   const el = () => fixture.nativeElement as HTMLElement
   const rows = () => Array.from(el().querySelectorAll<HTMLElement>('[data-testid="stk-row"]'))
@@ -764,6 +774,67 @@ describe('StockCountComponent', () => {
     })
   })
 
+  describe('plan 762 — the name in its own container, the controls in another', () => {
+    const children = (parent: Element): Element[] => Array.from(parent.children)
+
+    for (const width of ['narrow', 'desktop'] as const) {
+      it(`each ${width} row has one name container and one controls container with every control`, async () => {
+        narrowMode = width === 'narrow'
+        await setup([{ ...product('a', 'אורז'), baseUnit: 'gram' } as Product, product('b', 'קמח')])
+        ;(fixture.componentInstance as unknown as { setUnit(p: Product, u: string): void }).setUnit(
+          product('a', 'אורז'),
+          'kg'
+        )
+        await settle()
+        expect(rows().length).toBe(2)
+        for (const row of rows()) {
+          const names = row.querySelectorAll(':scope > .stock-count__name-box')
+          const boxes = row.querySelectorAll(':scope > .stock-count__controls')
+          expect(names.length).toBe(1)
+          expect(boxes.length).toBe(1)
+          expect(children(names[0]).length).toBe(1)
+          expect(names[0].firstElementChild!.classList).toContain('stock-count__name')
+          const controls = boxes[0]
+          // The amount, the unit cell and the counted cell, then the base column where it is drawn.
+          const cells = children(controls)
+          expect(cells[0].querySelector('app-counter')).not.toBeNull()
+          expect(cells[1].querySelector('app-custom-select')).not.toBeNull()
+          expect(cells[1].classList.contains('stock-count__unit-cell')).toBe(width === 'narrow')
+          expect(cells[2].classList).toContain('stock-count__counted')
+          expect(cells.length).toBe(width === 'narrow' ? 3 : 4)
+          if (width === 'desktop') expect(cells[3].tagName.toLowerCase()).toBe('app-column-carousel-cell')
+          expect(controls.querySelector('.stock-count__name')).toBeNull()
+          // No cell is left outside the two containers.
+          expect(row.querySelector(':scope > .c-list-body-cell, :scope > app-column-carousel-cell')).toBeNull()
+        }
+      })
+    }
+
+    it('in a phone-width test window each row is two lines: the name on top, the controls together under it', async () => {
+      // The layout is a media query, so it can be measured only when the test browser's window is a phone's.
+      if (!window.matchMedia(PHONE_QUERY).matches) {
+        pending('the test window is wider than a phone')
+        return
+      }
+      narrowMode = true
+      await setup()
+      for (const row of rows()) {
+        const name = row.querySelector<HTMLElement>('.stock-count__name')!.getBoundingClientRect()
+        const cells = children(row.querySelector('.stock-count__controls')!).map((c) => c.getBoundingClientRect())
+        expect(cells.every((c) => c.top >= name.bottom - 1)).toBeTrue()
+        expect(new Set(cells.map((c) => Math.round(c.top))).size).toBe(1)
+        expect(name.width).toBeGreaterThan(Math.max(...cells.map((c) => c.width)))
+      }
+    })
+
+    it('the phone grid has columns for the controls only: the name takes a line of its own', async () => {
+      await setup()
+      const grid = (fixture.componentInstance as unknown as { mobileGridTemplate_(): string }).mobileGridTemplate_()
+      expect(grid).toBe('auto minmax(6rem, 1fr) auto')
+      expect(el().querySelector('.c-grid-header-cell.stock-count__head-name')).not.toBeNull()
+    })
+  })
+
   describe('plan 657 — the counted mark sizes per width', () => {
     const instance = () => fixture.componentInstance as unknown as { phone_: { set(v: boolean): void } }
     const markSize = (): number => {
@@ -809,7 +880,7 @@ describe('StockCountComponent', () => {
     }
     const tip = (): HTMLElement | null => document.body.querySelector<HTMLElement>('.c-tooltip')
     afterEach(() => document.body.querySelectorAll('.c-tooltip').forEach((n) => n.remove()))
-    /** Plan 747: the base hint is the shared tooltip; a click on its control pins it open. */
+    /** Plan 747: the base hint is the shared tooltip; a tap on its control opens it (plan 762). */
     const openBase = async (width: 'phone' | 'tablet' | 'desktop'): Promise<HTMLElement> => {
       narrowMode = width !== 'desktop'
       await setup([withCrates('a', 'עגבניות'), product('b', 'קמח')])
@@ -820,6 +891,7 @@ describe('StockCountComponent', () => {
       await settle()
       await pendingScrollSent()
       const control = rows()[0].querySelector<HTMLButtonElement>('[data-testid="stk-base-btn"]')!
+      useTapTooltips()
       control.click()
       await settle()
       return control
@@ -958,7 +1030,7 @@ describe('StockCountComponent', () => {
       expect(chipOf(rows()[0]).checked).toBeTrue()
     })
 
-    it('(c) below 1200px the base amount is not printed; its control has the label and no title, and a click opens the tooltip', async () => {
+    it('(c) below 1200px the base amount is not printed; its control has the label and no title, and a tap opens the tooltip', async () => {
       narrowMode = true
       await setup([withCrates('a', 'עגבניות'), product('b', 'קמח')])
       instance().setAmount(withCrates('a', 'עגבניות'), 2)
@@ -972,6 +1044,7 @@ describe('StockCountComponent', () => {
       expect(control.getAttribute('aria-label')).toContain('20')
       expect(document.body.querySelector('.c-tooltip')).toBeNull()
       await pendingScrollSent()
+      useTapTooltips()
       control.click()
       await settle()
       const box = document.body.querySelector<HTMLElement>('.c-tooltip')!
