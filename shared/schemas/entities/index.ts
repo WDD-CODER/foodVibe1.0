@@ -27,6 +27,7 @@ import { tableHoldSchema } from './table-hold.schema'
 import { waitlistEntrySchema } from './waitlist-entry.schema'
 import { conversationSchema } from './conversation.schema'
 import { messageSchema } from './message.schema'
+import { assistantRunSchema } from './assistant-run.schema'
 
 export * from './invoice.schema'
 export * from './price-history.schema'
@@ -55,6 +56,7 @@ export * from './table-hold.schema'
 export * from './waitlist-entry.schema'
 export * from './conversation.schema'
 export * from './message.schema'
+export * from './assistant-run.schema'
 export { clientSchema, equipmentSchema, menuEventSchema, productSchema, recipeSchema, supplierSchema, venueSchema }
 
 /** v2 collection name -> schema (Plan 321 G2 names). Trash/logs follow in later phases. */
@@ -88,7 +90,9 @@ export const SCHEMA_BY_COLLECTION = {
   tableHolds: tableHoldSchema,
   waitlistEntries: waitlistEntrySchema,
   conversations: conversationSchema,
-  messages: messageSchema
+  messages: messageSchema,
+  // Plan 752 (C-RUNS)
+  assistantRuns: assistantRunSchema
 } as const
 
 export type SchemaCollection = keyof typeof SCHEMA_BY_COLLECTION

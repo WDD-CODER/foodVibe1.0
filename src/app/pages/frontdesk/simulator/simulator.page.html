@@ -1,5 +1,18 @@
 <section class="sim" dir="rtl" data-testid="simulator-page">
-  <app-page-header titleKey="sim_title" />
+  <app-page-header titleKey="sim_title">
+    @if (allowed_()) {
+    <a
+      header-actions
+      class="c-btn-ghost"
+      routerLink="/frontdesk/assistant"
+      [queryParams]="{ scope: 'test' }"
+      data-testid="sim-asr-link"
+    >
+      <lucide-icon name="activity" [size]="18"></lucide-icon>
+      <span class="btn-label">{{ 'asr_link' | translatePipe }}</span>
+    </a>
+    }
+  </app-page-header>
 
   @if (!allowed_()) {
   <app-empty-state messageKey="sim_owner_only" icon="smartphone" />

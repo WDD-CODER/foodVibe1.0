@@ -88,13 +88,15 @@ async function afterStored(db, conversation, { buttonId, at }, log) {
     if (moved) conversation = { ...conversation, status: 'bot' };
   }
   if (conversation.status !== 'bot') return;
+  const waitStarted = Date.now();
   await wait(COALESCE_MS);
   const fresh = await loadConversation(db, conversation.businessId, conversation._id);
   if (!fresh || fresh.status !== 'bot' || fresh.lastInboundAt > at) {
     log.info({ event: 'inbound.coalesced', conversationId: conversation._id });
     return;
   }
-  await turnHandler(db, fresh, { log });
+  // Plan 752: the turn's run record shows how long this message waited for a second one.
+  await turnHandler(db, fresh, { log, inbound: { at, waitedMs: Date.now() - waitStarted } });
 }
 
 async function handleInbound(db, input, { log = logger } = {}) {

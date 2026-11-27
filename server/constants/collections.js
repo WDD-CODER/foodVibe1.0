@@ -78,6 +78,7 @@ const COLLECTIONS = [
   { name: 'conversations',            userData: false, cloneable: false, backup: false, searchable: false, softDelete: false }, // C-CONV, plan 675
   { name: 'messages',                 userData: false, cloneable: false, backup: false, searchable: false, softDelete: false }, // C-CONV, plan 675
   { name: 'tableHolds',               userData: false, cloneable: false, backup: false, searchable: false, softDelete: false }, // C-HOLD, INV-7, plan 667
+  { name: 'assistantRuns',            userData: false, cloneable: false, backup: false, searchable: false, softDelete: false }, // C-RUNS, plan 752: server-only; read through routes/assistant-runs.js
 ]
 
 const ALL_USER_ENTITY_TYPES = COLLECTIONS.filter(c => c.userData).map(c => c.name)

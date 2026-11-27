@@ -5,6 +5,12 @@
       <lucide-icon name="smartphone" [size]="18"></lucide-icon>
       <span class="btn-label">{{ 'sim_link' | translatePipe }}</span>
     </a>
+    } @if (canSimulate_()) {
+    <!-- One link per block: a block with two root elements is not projected into the header's actions slot. -->
+    <a header-actions class="c-btn-ghost" routerLink="/frontdesk/assistant" data-testid="asr-link">
+      <lucide-icon name="activity" [size]="18"></lucide-icon>
+      <span class="btn-label">{{ 'asr_link' | translatePipe }}</span>
+    </a>
     }
   </app-page-header>
 

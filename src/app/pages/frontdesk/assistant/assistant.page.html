@@ -1,0 +1,130 @@
+<section class="c-page asr" dir="rtl" [class.asr--open]="id_()" data-testid="assistant-page">
+  <app-page-header titleKey="asr_title">
+    @if (allowed_()) {
+    <button header-actions type="button" class="c-btn-ghost" data-testid="asr-refresh" (click)="refresh()">
+      <lucide-icon name="refresh-cw" [size]="18" aria-hidden="true"></lucide-icon>
+      <span class="btn-label">{{ 'asr_refresh' | translatePipe }}</span>
+    </button>
+    }
+  </app-page-header>
+
+  @if (!allowed_()) {
+  <app-empty-state messageKey="asr_owner_only" icon="lock" />
+  } @else {
+  <div class="asr-tabs" role="tablist">
+    <app-scroll-rail>
+      @for (tab of tabs; track tab.key) {
+      <button
+        type="button"
+        role="tab"
+        class="c-chip c-chip--tab"
+        [class.active]="activeTab_() === tab.key"
+        [attr.aria-selected]="activeTab_() === tab.key"
+        [attr.data-testid]="'asr-tab-' + tab.key"
+        (click)="activeTab_.set(tab.key)"
+      >
+        <lucide-icon [name]="tab.icon" [size]="16" />
+        {{ tab.labelKey | translatePipe }}
+      </button>
+      }
+    </app-scroll-rail>
+  </div>
+
+  <div class="asr-body" role="tabpanel">
+    <aside class="asr-list" data-testid="asr-list">
+      <div class="c-chip-group" role="radiogroup">
+        @for (f of filters; track f) {
+        <label class="c-chip c-chip--toggle">
+          <input
+            type="radio"
+            name="asr-filter"
+            [checked]="filter_() === f"
+            [attr.data-testid]="'asr-filter-' + f"
+            (change)="setFilter(f)"
+          />
+          <span>{{ 'asr_filter_' + f | translatePipe }}</span>
+        </label>
+        }
+      </div>
+      <div>
+        <label class="c-chip c-chip--toggle">
+          <input type="checkbox" [checked]="testScope_()" data-testid="asr-scope-test" (change)="toggleTest()" />
+          <span>{{ 'asr_scope_test' | translatePipe }}</span>
+        </label>
+      </div>
+
+      @if (!listLoaded_()) {
+      <app-loader size="medium" />
+      } @else if (listFailed_() && rows_().length === 0) {
+      <app-empty-state messageKey="asr_load_failed" icon="activity" ctaLabelKey="retry" (ctaClick)="refresh()" />
+      } @else if (rows_().length === 0) {
+      <app-empty-state [messageKey]="filter_() === 'all' ? 'asr_empty' : 'asr_empty_filter'" icon="activity" />
+      } @else {
+      <ul class="c-list asr-rows" role="list">
+        @for (row of rows_(); track row._id) {
+        <li
+          class="c-list-row c-list-row--link"
+          role="listitem"
+          [class.is-selected]="row._id === id_()"
+          data-testid="asr-row"
+        >
+          <span class="c-list-body-cell">
+            <a
+              class="c-row-link asr-text"
+              [routerLink]="['/frontdesk/assistant/runs', row._id]"
+              queryParamsHandling="preserve"
+              [attr.aria-current]="row._id === id_() ? 'true' : null"
+              >{{ row.textKey ? (row.textKey | translatePipe) : row.text }}</a
+            >
+          </span>
+          <span class="c-list-body-cell c-list-body-cell--end asr-meta">
+            <span class="asr-when">{{ row.time }}</span>
+            <span class="asr-when">{{ row.seconds }} {{ 'asr_seconds' | translatePipe }}</span>
+            <span class="c-chip c-chip--tag c-chip--sm" [class]="row.tone" data-testid="asr-outcome"
+              >{{ 'asr_outcome_' + row.outcome | translatePipe }}</span
+            >
+            @if (row.fallbackUsed) {
+            <span class="c-chip c-chip--tag c-chip--sm c-chip--amber" data-testid="asr-fallback"
+              >{{ 'asr_fallback_mark' | translatePipe }}</span
+            >
+            } @if (row.test) {
+            <span class="c-chip c-chip--tag c-chip--sm" data-testid="asr-test-tag"
+              >{{ 'rq_test_tag' | translatePipe }}</span
+            >
+            }
+          </span>
+        </li>
+        }
+      </ul>
+      @if (more_()) {
+      <button
+        type="button"
+        class="c-btn-ghost asr-more"
+        data-testid="asr-more"
+        [disabled]="loadingMore_()"
+        (click)="loadMore()"
+      >
+        @if (loadingMore_()) {
+        <app-loader size="small" [inline]="true" />
+        }
+        <span>{{ 'asr_load_more' | translatePipe }}</span>
+      </button>
+      } }
+    </aside>
+
+    <div class="c-glass-panel asr-detail" data-testid="asr-detail">
+      @if (!id_()) {
+      <app-empty-state messageKey="asr_pick" icon="activity" />
+      } @else if (runFailed_() === 'not_found') {
+      <app-empty-state messageKey="asr_not_found" icon="activity" />
+      } @else if (runFailed_() === 'failed') {
+      <app-empty-state messageKey="asr_run_load_failed" icon="activity" ctaLabelKey="retry" (ctaClick)="reopen()" />
+      } @else { @if (current_(); as run) {
+      <app-run-detail [run]="run" [isAdmin]="isAdmin_()" />
+      } @else {
+      <app-loader size="medium" />
+      } }
+    </div>
+  </div>
+  }
+</section>

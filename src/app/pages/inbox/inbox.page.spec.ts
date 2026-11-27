@@ -165,11 +165,15 @@ describe('InboxPage (plan 677)', () => {
   it('shows the simulator link to an owner and hides it from staff', async () => {
     await create()
     expect(el().querySelector('[data-testid="sim-link"]')).toBeNull()
+    expect(el().querySelector('[data-testid="asr-link"]')).toBeNull()
     owner.set(true)
     fixture.detectChanges()
     const link = el().querySelector('[data-testid="sim-link"]')
     expect(link?.getAttribute('href')).toBe('/frontdesk/simulator')
     expect(text(link)).toBe('sim_link')
+    const runs = el().querySelector('[data-testid="asr-link"]')
+    expect(runs?.getAttribute('href')).toBe('/frontdesk/assistant')
+    expect(text(runs)).toBe('asr_link')
   })
 
   it('orders rows unread first, then newest first, with the holder tag of each', async () => {

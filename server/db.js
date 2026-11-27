@@ -212,6 +212,14 @@ async function connectDb() {
   // C-CONV: a provider's retry of one message is stored once.
   await db.collection('messages').createIndex({ businessId: 1, providerMessageId: 1 }, { unique: true, name: 'messages_provider_unique' })
   await db.collection('messages').createIndex({ businessId: 1, conversationId: 1, at: 1 }, { name: 'messages_conversation_at' })
+  // C-RUNS (plan 752): the runs list, newest first, and one conversation's runs.
+  await db.collection('assistantRuns').createIndex({ businessId: 1, startedAt: -1 }, { name: 'assistant_runs_business_started' })
+  await db.collection('assistantRuns').createIndex(
+    { businessId: 1, conversationId: 1, startedAt: -1 }, { name: 'assistant_runs_conversation' }
+  )
+  // Plan 752 (C-RUNS): MongoDB deletes a run when its `expiresAt` (a Date, 30 days after it started) has passed — the
+  // same mechanism as `app_logs` (`server/services/log-sink.js`, `ttl_createdAt`).
+  await db.collection('assistantRuns').createIndex({ expiresAt: 1 }, { expireAfterSeconds: 0, name: 'assistant_runs_ttl' })
   logger.debug({ event: 'mongo.index.ensured', index: 'restaurant' })
 
   // Plan 382: app_logs — 90-day TTL + level/event/userId lookups (server/services/log-sink.js).

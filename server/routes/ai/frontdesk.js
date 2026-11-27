@@ -11,7 +11,9 @@ const mongoose = require('mongoose');
 const { verifyToken } = require('../../middleware/auth');
 const { requireModule } = require('../../middleware/require-module');
 const { createRateLimiter } = require('../../middleware/rate-limit');
-const { callGemini, responseText } = require('../../services/gemini-client');
+const { callGemini, responseText, modelChain } = require('../../services/gemini-client');
+const { RAW_MAX } = require('../../services/frontdesk-runs');
+const { performance } = require('node:perf_hooks');
 const { extractJsonPayload } = require('../../services/ai-recipe-helpers');
 const { scopeFilter } = require('../../utils/business-scope');
 const { assertCan } = require('../../utils/permissions');
@@ -33,16 +35,29 @@ const issueCodes = issues => issues.slice(0, 10).map(i => i.code);
 /**
  * One model call, and one retry on a malformed answer, inside the same 35 s budget. `{ ok: true, answer }` or
  * `{ ok: false, reason }`; `reason` is the failure kind of `callGemini`, `bad_json` or `bad_shape`. Never throws.
+ * `trace` (plan 752) tells the run record which model answered, each try and the raw text; it never goes to a log.
  */
 async function askTurnModel({ body, usage, log }) {
   const startedAt = Date.now();
+  const trace = { attempts: [], model: null, raw: '', rawChars: 0, shapeTries: 1 };
   const attempt = async (reqBody, deadlineMs, n) => {
+    trace.shapeTries = n;
+    const calledAt = performance.now();
     // Plan 701: no user is there to pick another model, so an overloaded model moves on to the next free one.
     const call = await callGemini({
       body: reqBody, timeoutMs: 15000, deadlineMs, fallback: true, log, eventPrefix: 'frontdesk.turn', usage,
     });
+    trace.attempts.push({
+      model: call.model ?? null,
+      ms: Math.round(performance.now() - calledAt),
+      ok: call.kind === 'ok',
+      ...(call.kind !== 'ok' && { reason: call.kind }),
+      ...(call.status && { status: call.status }),
+    });
     if (call.kind !== 'ok') return { ok: false, reason: call.kind, status: call.status, retry: false };
-    const payload = extractJsonPayload(responseText(call.data));
+    const text = String(responseText(call.data));
+    Object.assign(trace, { model: call.model ?? null, raw: text.slice(0, RAW_MAX), rawChars: text.length });
+    const payload = extractJsonPayload(text);
     if (payload.error) {
       log.warn({ event: 'frontdesk.turn.bad_answer', reason: 'bad_json', attempt: n, paths: [], codes: [] });
       return { ok: false, reason: 'bad_json', retry: true };
@@ -57,7 +72,7 @@ async function askTurnModel({ body, usage, log }) {
     }
     return { ok: true, answer: parsed.data };
   };
-  const strip = ({ retry: _retry, ...rest }) => rest;
+  const strip = ({ retry: _retry, ...rest }) => ({ ...rest, trace: { ...trace, firstModel: modelChain()[0] ?? null } });
   const first = await attempt(body, TURN_BUDGET_MS, 1);
   if (!first.retry) return strip(first);
   const left = TURN_BUDGET_MS - (Date.now() - startedAt);

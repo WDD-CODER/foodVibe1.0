@@ -54,7 +54,7 @@ const requests = () => col('requests').find({}).toArray();
 beforeEach(async () => {
   resetForTests(); clearCapCache(); resetInboundForTest(); registerTableButtons();
   for (const c of ['messages', 'conversations', 'clients', 'aiUsage', 'GEMINI_USAGE', 'requests', 'businesses', 'frontDeskProfiles',
-    'knowledgeItems', 'floorPlans', 'bookings', 'tableHolds']) await col(c).deleteMany({});
+    'knowledgeItems', 'floorPlans', 'bookings', 'tableHolds', 'assistantRuns']) await col(c).deleteMany({});
   logs.records.length = 0;
   fetchMock = vi.fn();
   vi.stubGlobal('fetch', fetchMock);
@@ -129,6 +129,35 @@ describe('book, auto', () => {
     const confirmed = await lastOut();
     expect(confirmed).toMatchObject({ kind: 'template', author: 'server', template: { name: 'booking_confirmed', params: ['Guest', TOMORROW, '20:00', '4'] } });
     expect((await col('clients').findOne({ _id: clientId })).counters.bookings).toBe(1);
+  });
+});
+
+describe('plan 752: the run record of a table turn', () => {
+  const stepOf = (run, key) => run.steps.find(s => s.key === key);
+
+  it('an offer is asked, decided by the table engine and sent', async () => {
+    const { conversation } = await setup({ level: 1 });
+    await say(conversation, BOOK(FULL_ASK));
+    const runs = await col('assistantRuns').find({}).toArray();
+    expect(runs).toHaveLength(1);
+    const [run] = runs;
+    expect(run.outcome).toBe('asked');
+    expect(stepOf(run, 'tables')).toMatchObject({
+      status: 'ok', in: { intent: 'book', date: TOMORROW, time: '20:00', partySize: 4 },
+      out: { result: 'offer', outboundKind: 'button', pending: true },
+    });
+    expect(stepOf(run, 'decide').out).toEqual({ why: 'table_engine' });
+    const sent = await lastOut();
+    expect(stepOf(run, 'send').out).toMatchObject({ action: 'sent', author: 'server', messageId: sent._id });
+  });
+
+  it('an engine handoff stops at the tables step', async () => {
+    const { conversation } = await setup({ level: 1 });
+    await say(conversation, BOOK({ ...FULL_ASK, partySize: 30 }));
+    const [run] = await col('assistantRuns').find({}).toArray();
+    expect(run).toMatchObject({ outcome: 'handover', reason: 'table_engine' });
+    expect(stepOf(run, 'tables')).toMatchObject({ status: 'stopped', out: { result: 'handoff' } });
+    expect(stepOf(run, 'send').out).toMatchObject({ action: 'sent', author: 'ai' });
   });
 });
 

@@ -104,7 +104,7 @@ router.delete('/test-data', async (req, res) => {
     deleted.tableHolds = (await d.collection('tableHolds').deleteMany({
       businessId, $or: [{ test: true }, { bookingId: { $in: ids } }],
     })).deletedCount;
-    for (const col of ['messages', 'conversations', 'requests', 'bookings', 'waitlistEntries']) {
+    for (const col of ['messages', 'conversations', 'requests', 'bookings', 'waitlistEntries', 'assistantRuns']) {
       deleted[col] = (await d.collection(col).deleteMany({ businessId, test: true })).deletedCount;
     }
     deleted.clients = (await d.collection('clients').deleteMany({ businessId, tags: 'test' })).deletedCount;

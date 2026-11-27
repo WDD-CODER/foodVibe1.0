@@ -1,0 +1,117 @@
+<header class="asr-head">
+  <a
+    class="c-btn-ghost--sm asr-back"
+    routerLink="/frontdesk/assistant"
+    queryParamsHandling="preserve"
+    data-testid="asr-back"
+  >
+    <lucide-icon name="arrow-right" [size]="16" aria-hidden="true"></lucide-icon>
+    <span>{{ 'back' | translatePipe }}</span>
+  </a>
+  <p class="asr-verdict" role="status" data-testid="asr-verdict">{{ verdict_() }}</p>
+  <p class="c-chip-group asr-facts">
+    <span class="c-chip c-chip--tag c-chip--sm" [class]="head_().tone">{{
+      'asr_outcome_' + run().outcome | translatePipe
+    }}</span>
+    @if (run().fallbackUsed) {
+      <span class="c-chip c-chip--tag c-chip--sm c-chip--amber">{{ 'asr_fallback_mark' | translatePipe }}</span>
+    }
+    @if (run().test) {
+      <span class="c-chip c-chip--tag c-chip--sm">{{ 'rq_test_tag' | translatePipe }}</span>
+    }
+    <span class="asr-muted">{{ head_().time }}</span>
+    <span class="asr-muted">{{ head_().seconds }} {{ 'asr_seconds' | translatePipe }}</span>
+    @if (run().model) {
+      <span class="asr-muted"
+        >{{ 'asr_model' | translatePipe }} <bdi dir="ltr">{{ run().model }}</bdi></span
+      >
+    }
+  </p>
+  <a class="c-row-link asr-conversation" [routerLink]="['/inbox', run().conversationId]">{{
+    'asr_open_conversation' | translatePipe
+  }}</a>
+  <p class="asr-muted" data-testid="asr-expires">{{ expires_() }}</p>
+  @if (adminViewed_(); as viewed) {
+    <p class="asr-muted" data-testid="asr-admin-viewed">{{ viewed }}</p>
+  }
+</header>
+
+<ol class="asr-steps">
+  @for (step of steps_(); track step.key) {
+    <li>
+      <button
+        type="button"
+        class="asr-step"
+        [attr.aria-expanded]="open_().has(step.key)"
+        [attr.aria-controls]="'asr-step-' + step.key"
+        [attr.data-testid]="'asr-step-' + step.key"
+        (click)="toggle(step.key)"
+      >
+        <span class="asr-step-number">{{ $index + 1 }}</span>
+        <span class="asr-step-name">{{ 'asr_step_' + step.key | translatePipe }}</span>
+        <span class="c-chip c-chip--tag c-chip--sm" [class]="step.tone">{{
+          'asr_status_' + step.status | translatePipe
+        }}</span>
+        @if (step.status !== 'skipped') {
+          <span class="asr-step-time">{{ step.seconds }} {{ 'asr_seconds' | translatePipe }}</span>
+        }
+        <lucide-icon class="asr-step-chevron" name="chevron-down" [size]="16" aria-hidden="true"></lucide-icon>
+      </button>
+      <div class="asr-step-panel" [id]="'asr-step-' + step.key" [hidden]="!open_().has(step.key)">
+        @if (open_().has(step.key)) {
+          @for (group of step.groups; track group.titleKey) {
+            <h3 class="asr-group-title">{{ group.titleKey | translatePipe }}</h3>
+            <dl class="asr-fields">
+              @for (row of group.rows; track row.labelKey) {
+                <div class="asr-field" [class.asr-field--raw]="row.kind === 'raw'">
+                  <dt>{{ row.labelKey | translatePipe }}</dt>
+                  <dd>
+                    @if (row.kind === 'raw') {
+                      <pre class="asr-raw" dir="ltr">{{ row.value }}</pre>
+                    } @else if (row.valueKey) {
+                      {{ row.valueKey | translatePipe }}
+                    } @else {
+                      {{ row.value }}
+                      @if (row.kind === 'ms') {
+                        {{ 'asr_seconds' | translatePipe }}
+                      }
+                    }
+                  </dd>
+                </div>
+              }
+            </dl>
+          } @empty {
+            <p class="asr-muted">{{ 'asr_step_nothing' | translatePipe }}</p>
+          }
+        }
+      </div>
+    </li>
+  }
+</ol>
+
+@if (isAdmin()) {
+  @if (run().prompt; as prompt) {
+    <div class="asr-prompt">
+      <button
+        type="button"
+        class="c-btn-ghost"
+        data-testid="asr-prompt-toggle"
+        [attr.aria-expanded]="promptOpen_()"
+        (click)="togglePrompt()"
+      >
+        {{ 'asr_prompt_open' | translatePipe }}
+      </button>
+      @if (promptOpen_()) {
+        <h3 class="asr-group-title">{{ 'asr_prompt_rules' | translatePipe }}</h3>
+        <pre class="asr-raw" dir="ltr" data-testid="asr-prompt-rules">{{ run().promptRules }}</pre>
+        <h3 class="asr-group-title">{{ 'asr_prompt_data' | translatePipe }}</h3>
+        <pre class="asr-raw" dir="ltr" data-testid="asr-prompt-data">{{ prompt.lead }}</pre>
+        @if (prompt.truncated) {
+          <p class="asr-muted">{{ 'asr_prompt_cut' | translatePipe }}</p>
+        }
+      }
+    </div>
+  } @else {
+    <p class="asr-muted" data-testid="asr-prompt-not-kept">{{ 'asr_prompt_not_kept' | translatePipe }}</p>
+  }
+}

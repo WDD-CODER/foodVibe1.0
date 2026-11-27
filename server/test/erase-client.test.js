@@ -128,7 +128,7 @@ describe('runErase', () => {
 
   it('dry run changes nothing and the output lists counts only', async () => {
     const result = await runErase(db, { businessId: 'b1', phone: '+972 52 123 4567', write: false });
-    expect(result.counts).toEqual({ clients: 4, requests: 2, bookings: 2, conversations: 0, messages: 0, events: 2 });
+    expect(result.counts).toEqual({ clients: 4, requests: 2, bookings: 2, conversations: 0, messages: 0, runs: 0, events: 2 });
     expect(await db.collection('clients').countDocuments()).toBe(6);
     expect(await db.collection('menuEvents').countDocuments({ clientPhone: { $exists: true } })).toBe(4);
     const out = formatResult(result, false).join('\n');
@@ -147,6 +147,26 @@ describe('runErase', () => {
     expect(await db.collection('menuEvents').findOne({ _id: 'x_e' })).toMatchObject({ clientPhone: '0521234567' });
     expect(await db.collection('decisionLog').countDocuments()).toBe(1);
     expect(formatResult(result, true).join('\n')).not.toMatch(/521234567/);
+  });
+
+  it("plan 752: the assistant runs of the erased client's conversation go with --write; others stay", async () => {
+    await db.collection('conversations').deleteMany({});
+    await db.collection('assistantRuns').deleteMany({});
+    await db.collection('conversations').insertMany([
+      { _id: 'v1', businessId: 'b1', clientId: 'c_live' }, { _id: 'v2', businessId: 'b1', clientId: 'c_other' },
+    ]);
+    await db.collection('assistantRuns').insertMany([
+      { _id: 'run1', businessId: 'b1', conversationId: 'v1' }, { _id: 'run2', businessId: 'b1', conversationId: 'v1' },
+      { _id: 'run3', businessId: 'b1', conversationId: 'v2' }, { _id: 'run4', businessId: 'b2', conversationId: 'v1' },
+    ]);
+    const dry = await runErase(db, { businessId: 'b1', phone: '0521234567', write: false });
+    expect(dry.counts.runs).toBe(2);
+    expect(await db.collection('assistantRuns').countDocuments()).toBe(4);
+    expect(formatResult(dry, false)).toContain('assistant runs: would delete 2');
+    const done = await runErase(db, { businessId: 'b1', phone: '0521234567', write: true });
+    expect(done.counts.runs).toBe(2);
+    expect((await db.collection('assistantRuns').find({}).toArray()).map((r) => r._id).sort()).toEqual(['run3', 'run4']);
+    expect(formatResult(done, true)).toContain('assistant runs: deleted 2');
   });
 
   it('a phone without digits is refused', async () => {

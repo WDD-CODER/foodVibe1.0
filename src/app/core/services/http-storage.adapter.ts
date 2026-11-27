@@ -26,6 +26,7 @@ export const API = {
   floorPlan: (path?: string) => (path ? `${API_ROOT}/floor-plan/${path}` : `${API_ROOT}/floor-plan`),
   waitlist: (path?: string) => (path ? `${API_ROOT}/waitlist/${path}` : `${API_ROOT}/waitlist`),
   conversations: `${API_ROOT}/conversations`,
+  assistantRuns: `${API_ROOT}/assistant-runs`,
   sim: (path: string) => `${API_ROOT}/sim/${path}`,
   public: (path: string) => `${API_ROOT}/public/${path}`,
   log: `${API_ROOT}/log`,
