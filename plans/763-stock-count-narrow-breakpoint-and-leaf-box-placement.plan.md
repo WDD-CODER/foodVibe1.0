@@ -64,6 +64,9 @@ src/app/core/engine/plan-snapshot.spec.ts
 src/app/core/services/export.service.spec.ts
 src/app/core/services/user.service.spec.ts
 src/app/pages/recipe-builder/services/recipe-builder-export.service.spec.ts
+scripts/test/breakpoints-no-literals.test.mjs
+src/app/pages/metadata-manager/components/user-management/user-management.component.html
+src/app/pages/metadata-manager/components/user-management/user-management.component.ts
 ```
 
 ## Read Scope
