@@ -437,3 +437,9 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
 - The 765-2 criterion change («תפריט ערב») is committed in `plans/765-menu-designer-screen.plan.md` on this branch
   (`743a05d4`); it reaches `orch/md-1` when the run merges this branch. A builder never writes the run branch itself, so
   the review of this branch is rerun by the run. No code changed.
+
+### Resume (mode resume, round 1, 2026-11-27)
+- No new commits on `orch/md-1`; A1-A8 already ticked. All CHECKS rerun on `b51ed6cd`: build -> 0; lint -> 0 (69 older
+  warnings); `test:ci` -> 0, `TOTAL: 2883 SUCCESS`; kit-manifest-check -> `KIT_MANIFEST: ok`; scope-check -> `SCOPE: ok`;
+  kit-checks -> `KIT_CHECKS: ok (6 checks)`; override-check, lint:icons, lint:no-native-select, plan-ledger-check,
+  breadcrumbs-check, ci-scope-check -> 0; `--arch` -> `ARCH: ok`; log-query -> `SKIP: no database configured`.
