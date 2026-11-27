@@ -1,7 +1,7 @@
-# Plan 769 — Menu from text or voice inside the app: sure matches only, menu-only sections until confirmed
+# Plan 770 — Menu from text or voice inside the app: sure matches only, menu-only sections until confirmed
 
 Status: draft
-Depends-on: 763, 767, 768
+Depends-on: 764, 768, 769
 Track: code
 Snapshot: d34a01068fe2f1b28efd33b753b8a3f69aa8762b
 
@@ -53,19 +53,19 @@ Verified on `d34a0106` (2026-11-27):
 
 ### C-ENGINE — the boundary
 `server/services/menu-engine/` is the only code WhatsApp and the outside API will call later:
-- `exportMenuPdf({ businessId, eventId, actor }) → { fileId, url }` (plan 767).
-- `menuFromText({ businessId, text, actor }) → { eventId, linked: string[], plain: string[] }` (plan 769).
+- `exportMenuPdf({ businessId, eventId, actor }) → { fileId, url }` (plan 768).
+- `menuFromText({ businessId, text, actor }) → { eventId, linked: string[], plain: string[] }` (plan 770).
 It reaches the rest of FoodVibe only through `server/services/menu-engine/host.js`: resolve business + modules,
 read dishes/categories, `callGemini` (which records AI usage, D28), `putPrivateFile` / delete file, create a menu
 the way a hand-made one is created. Routes are thin callers.
 
 ### C-AI — feature keys and routes
-- New keys in `server/constants/ai-features.js` (added in 763): `menu_design_variants`, `menu_design_refine`, `menu_from_text`.
-- Routes live under `server/routes/ai/` (INV-6): `menu-design.js` (variants, refine — plan 765),
-  `menu-from-text.js` (plan 769). Prompts are written in English. AI output is parsed with `menuDesignDraftSchema`;
+- New keys in `server/constants/ai-features.js` (added in 764): `menu_design_variants`, `menu_design_refine`, `menu_from_text`.
+- Routes live under `server/routes/ai/` (INV-6): `menu-design.js` (variants, refine — plan 766),
+  `menu-from-text.js` (plan 770). Prompts are written in English. AI output is parsed with `menuDesignDraftSchema`;
   an invalid answer falls back to the base template, never a broken render (guideline 4).
 
-### C-MATCH — dish and section matching for text menus (plan 769)
+### C-MATCH — dish and section matching for text menus (plan 770)
 - The pure matcher (`scoreDishName`, Hebrew normalising) moves from `src/app/core/utils/recipe-match.util.ts` to
   `shared/schemas/menu-match/dish-match.ts` (map extension E1); the browser util re-exports it so every caller keeps working.
 - Rule: the strongest name score ≥ 0.95 → link to that dish; otherwise `unlinkedName` = the text exactly as written.
@@ -82,7 +82,7 @@ only until confirmed, and the PDF one tap away.
 - [auto] `pnpm run test:ci` passes, including `src/app/core/utils/recipe-match.util.spec.ts` unchanged and green through the re-export, and new cases in `src/app/pages/menu-intelligence/menu-intelligence.page.spec.ts` (an unlinked section shows its `unlinkedName` and `[data-testid="section-confirm-category"]`; confirming calls `MenuSectionCategoriesService.addCategory` with that name, then the section's `name` is the new key and `unlinkedName` is empty; a section is never added to the category list without that click; saving keeps an unconfirmed section as `unlinkedName`) and `src/app/shared/ai-menu-modal/ai-menu-modal.component.spec.ts` (quick mode sends the text to `GeminiService.menuFromText`, shows the linked / plain line, "open menu" navigates to `/menu-intelligence/<eventId>`; `no_dishes` shows the example text).
 - [auto] `pnpm run build` passes; `pnpm run lint` exits 0; `pnpm run lint:icons` exits 0; `pnpm run lint:reuse` exits 0.
 - [auto] `node scripts/log-query.mjs --since=plan-start --level=error` → no entries.
-- [ui] `e2e/ui/769-1.spec.ts`: a QA business with `menu_design`, `events` and `ai_create` on · open `/menu-library`, choose the hero action "menu from text", paste `קרפצ'יו דג עם זרעי עגבניות, פוקאצ'ה עם ממרחים, בורגיניון בקר` and send (AI route stubbed with `page.route`) · the window shows the linked / plain line and `[data-testid="quick-menu-open"]`; pressing it opens `/menu-intelligence/<id>` with three dishes on the sheet. Screenshot saved.
+- [ui] `e2e/ui/770-1.spec.ts`: a QA business with `menu_design`, `events` and `ai_create` on · open `/menu-library`, choose the hero action "menu from text", paste `קרפצ'יו דג עם זרעי עגבניות, פוקאצ'ה עם ממרחים, בורגיניון בקר` and send (AI route stubbed with `page.route`) · the window shows the linked / plain line and `[data-testid="quick-menu-open"]`; pressing it opens `/menu-intelligence/<id>` with three dishes on the sheet. Screenshot saved.
 - [human] with real AI: type a list mixing two dishes that exist in the catalog (one spelled exactly, one with a small change) and one new dish · only the exact one is linked, the other two stay as written · the sections are the business's own categories where they fit.
 - [human] record the same list as a voice note · the same menu comes out.
 - [human] the screen's page with the data request failing · open the page · a readable error with a retry appears, not a blank page (here: the quick window when the AI route fails keeps the typed text and offers "try again")
@@ -91,7 +91,7 @@ only until confirmed, and the PDF one tap away.
 - [human] a list with a section name the business doesn't have ("wedding starters") · the menu shows it, the category list doesn't have it, and after "add as category" it is in the list.
 
 ## Execution Mode
-- Parallel: no — runs alone in wave 4 (`md-text`), after 763, 767 and 768 are merged.
+- Parallel: no — runs alone in wave 4 (`md-text`), after 764, 768 and 769 are merged.
 - Concurrent plans: none
 - Isolated DB: no
 
@@ -133,7 +133,7 @@ src/app/pages/menu-intelligence/_paper-ui.scss
 src/app/pages/menu-intelligence/menu-intelligence.page.spec.ts
 public/assets/data/dictionary.json
 src/app/app.config.ts
-e2e/ui/769-1.spec.ts
+e2e/ui/770-1.spec.ts
 ```
 
 ## Read Scope
@@ -193,8 +193,8 @@ by symbol (do not re-run the whole reality check from scratch) and print one lin
 line or file this plan names was removed, renamed or rewritten).
 
 Also check by symbol that the pieces from earlier plans exist on `main`: the `menu_from_text` feature key and
-`MenuSection.unlinkedName` (763), `server/services/menu-engine/` with `exportMenuPdf` and `host.js` (767),
-`MenuPdfService` and the designed sheet (768). A different name → use it and note it; a missing piece → STOP and escalate.
+`MenuSection.unlinkedName` (764), `server/services/menu-engine/` with `exportMenuPdf` and `host.js` (768),
+`MenuPdfService` and the designed sheet (769). A different name → use it and note it; a missing piece → STOP and escalate.
 
 ## User Stories
 - As a chef, I want to type or say a list of dishes and get a finished menu in my design so that I can send an offer in seconds.
@@ -217,7 +217,7 @@ Also check by symbol that the pieces from earlier plans exist on `main`: the `me
   6. The menu: `name` = `uniqueMenuName(title, liveMenuNames)` or `dateMenuName(liveMenuNames)`; `eventType ''`, `eventDate` today (business time zone as the editor uses), `servingType 'plated_course'`, `guestCount 50` (the editor's empty form), no `designId` (it wears the default), no client. Stored through `createMenu`. Returns `{ eventId, linked, plain }`.
 - [ ] Route `POST /api/v1/ai/menu-from-text` (`server/routes/ai/menu-from-text.js`, mounted in `ai.js` beside `/voice`): `verifyToken`, `requireModule('events')`, `requireModule('menu_design')`, the AI limiter; body `{ text: string }` checked (trimmed, 1–2000 characters: `empty` / `too_long`); AI failures through `respondFromGeminiFailure`; logs carry codes and counts only, never the text.
 - [ ] Browser: `GeminiService.menuFromText(text)` → `API.ai('menu-from-text')`.
-- [ ] Quick mode in `app-ai-menu-modal` (`AiMenuModalService.open('quick')`, allowed when `menu_design` and `events` are on; the `ai_create` check stays for `create` / `edit`): a title "menu from text", `app-voice-note` (typed or recorded; its `send` posts the text), a sending state, then the result: "קושרו לקטלוג: … · נשארו כפי שנכתבו: …" and the button `[data-testid="quick-menu-open"]` that navigates to `/menu-intelligence/<eventId>` (where 768's export button is). `no_dishes` → the window shows `menu_from_text_example`, the text kept for editing.
+- [ ] Quick mode in `app-ai-menu-modal` (`AiMenuModalService.open('quick')`, allowed when `menu_design` and `events` are on; the `ai_create` check stays for `create` / `edit`): a title "menu from text", `app-voice-note` (typed or recorded; its `send` posts the text), a sending state, then the result: "קושרו לקטלוג: … · נשארו כפי שנכתבו: …" and the button `[data-testid="quick-menu-open"]` that navigates to `/menu-intelligence/<eventId>` (where 769's export button is). `no_dishes` → the window shows `menu_from_text_example`, the text kept for editing.
 - [ ] Entry point: a hero-FAB action "menu from text" on `/menu-library` (`module: 'menu_design'`, icon `file-text`).
 - [ ] Editor — unlinked sections (M4): the section form group gets `unlinkedName`; `name` is required unless `unlinkedName` is set (`sectionNameValidators(unlinkedName)` in `menu-form.util.ts`, like `recipeIdValidators`); `loadEvent`, `addSection` and `buildEventFromForm` carry it (`name: ''` + `unlinkedName` when unconfirmed). The section title shows `unlinkedName` with the amber "this menu only" mark (tooltip: `menu_section_unlinked_hint`) and a button `[data-testid="section-confirm-category"]` "add as category" that opens the existing `openAddCategoryModal(sectionIndex, unlinkedName)`; on success the picked key is set and `unlinkedName` cleared. Picking any existing category from the section search also clears it. Nothing is added to the category list without that click.
 
@@ -248,24 +248,24 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
 - [ ] A7: Let the chef type or record the dish list in the AI menu window and open the new menu — GeminiService.menuFromText, quick mode with app-voice-note, result line, open button, hero action on the menu library — src/app/core/services/gemini.service.ts, src/app/shared/ai-menu-modal/, src/app/pages/menu-library/menu-library.page.ts
 - [ ] A8: Show menu-only sections on the sheet and let the chef turn one into a real category with one click — unlinkedName in the section form, validator, mark + tooltip, confirm through the existing add path — src/app/pages/menu-intelligence/menu-form.util.ts, src/app/pages/menu-intelligence/menu-intelligence.page.ts, src/app/pages/menu-intelligence/menu-intelligence.page.html, src/app/pages/menu-intelligence/_paper-ui.scss
 - [ ] A9: Add the Hebrew texts and the icon — dictionary keys from UI/UX Notes, file-text icon — public/assets/data/dictionary.json, src/app/app.config.ts
-- [ ] A10: Prove the window and the section confirm in specs and one browser check — modal spec, page spec, e2e with the AI route stubbed — src/app/shared/ai-menu-modal/ai-menu-modal.component.spec.ts, src/app/pages/menu-intelligence/menu-intelligence.page.spec.ts, e2e/ui/769-1.spec.ts
+- [ ] A10: Prove the window and the section confirm in specs and one browser check — modal spec, page spec, e2e with the AI route stubbed — src/app/shared/ai-menu-modal/ai-menu-modal.component.spec.ts, src/app/pages/menu-intelligence/menu-intelligence.page.spec.ts, e2e/ui/770-1.spec.ts
 - [ ] A11: Update the folder maps for the moved matcher, the engine files, the route and the quick mode — server/breadcrumbs.md, src/app/core/services/breadcrumbs.md, src/app/shared/breadcrumbs.md
 
 ## Technical Considerations
-- Dependencies: plan 763 (`menu_from_text` key, `unlinkedName` on sections, `menu_design` module, `shared/schemas/menu-design/`), plan 767 (`server/services/menu-engine/` and its `host.js` — this plan adds functions to the same host), plan 768 (the designed sheet and the export button the new menu opens on).
-- New files needed: `shared/schemas/menu-match/dish-match.ts`, `shared/schemas/menu-design/menu-name.ts`, `server/services/dish-book.js`, `server/services/menu-engine/menu-from-text.js`, `server/routes/ai/menu-from-text.js`, `server/test/ai-menu-from-text.test.js`, `e2e/ui/769-1.spec.ts`.
-- Model changes: none new (`unlinkedName` on `MenuSection` comes from 763); `AiMenuModalMode` gains `'quick'`.
+- Dependencies: plan 764 (`menu_from_text` key, `unlinkedName` on sections, `menu_design` module, `shared/schemas/menu-design/`), plan 768 (`server/services/menu-engine/` and its `host.js` — this plan adds functions to the same host), plan 769 (the designed sheet and the export button the new menu opens on).
+- New files needed: `shared/schemas/menu-match/dish-match.ts`, `shared/schemas/menu-design/menu-name.ts`, `server/services/dish-book.js`, `server/services/menu-engine/menu-from-text.js`, `server/routes/ai/menu-from-text.js`, `server/test/ai-menu-from-text.test.js`, `e2e/ui/770-1.spec.ts`.
+- Model changes: none new (`unlinkedName` on `MenuSection` comes from 764); `AiMenuModalMode` gains `'quick'`.
 - Backend / API: `POST /api/v1/ai/menu-from-text` → `{ eventId, linked: string[], plain: string[] }` | `400 { code: 'empty' | 'too_long' | 'no_dishes' }` | `403 MODULE_OFF` | `502 { code: 'invalid_answer' }` | the existing AI failure codes. Document it in `server/breadcrumbs.md`.
 - Auth and validation: signed-in member (owner or staff: staff may create menus today); `events` and `menu_design` modules; the body is one string; the business comes from the token only.
 - Security surface: user text goes into a prompt — it is passed as data inside a clearly marked block and the answer is schema-checked; names are stored as text and the template HTML-escapes them (C-TEMPLATE). The text is never logged.
 - Data / migration: none — new menus only; existing menus have no `unlinkedName` on sections and behave as today.
-- Project checks: log-query item present; `[ui]` spec `e2e/ui/769-1.spec.ts` with `signInQa`; Hebrew through `translatePipe`; Add-option rule and Hebrew canonical values (confirm path); breadcrumbs listed; `dictionary.json` append-only.
+- Project checks: log-query item present; `[ui]` spec `e2e/ui/770-1.spec.ts` with `signInQa`; Hebrew through `translatePipe`; Add-option rule and Hebrew canonical values (confirm path); breadcrumbs listed; `dictionary.json` append-only.
 
 ## Out of Scope
 - WhatsApp: sender phones, routing, voice notes from WhatsApp, reply corrections (last stage, M7).
 - The outside API and setup page (B5, last stage).
 - Changing the existing AI add-menu `create` / `edit` modes and their 0.70 / 0.95 suggestion rules.
-- Choosing a design by name in the text (D20) — in the app the chef switches the design on the sheet (plan 768); the WhatsApp stage adds it.
+- Choosing a design by name in the text (D20) — in the app the chef switches the design on the sheet (plan 769); the WhatsApp stage adds it.
 - Prices, descriptions, guests or dates from the text.
 
 ## Critical Questions

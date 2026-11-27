@@ -1,7 +1,7 @@
-# Plan 766 — PDF proof on the real Render server: headless browser, memory and start-up measured
+# Plan 767 — PDF proof on the real Render server: headless browser, memory and start-up measured
 
 Status: draft
-Depends-on: 763
+Depends-on: 764
 Snapshot: d34a01068fe2f1b28efd33b753b8a3f69aa8762b
 
 ## Problem Statement
@@ -9,11 +9,11 @@ Snapshot: d34a01068fe2f1b28efd33b753b8a3f69aa8762b
 The menu design program (`docs/menu-design/menu-design-map.md`) sends the customer one complete designed menu as a
 PDF (D13). Hebrew and mixed Hebrew/English text must render exactly as on screen, which rules out the light
 renderers (Satori has no RTL) and points to a headless Chromium printing the shared HTML template
-(`renderMenuDocument`, plan 763). The server runs on Render's **free** plan (512 MB RAM, 0.1 shared CPU, sleeps
+(`renderMenuDocument`, plan 764). The server runs on Render's **free** plan (512 MB RAM, 0.1 shared CPU, sleeps
 after 15 minutes) and Dandan will not pay for a bigger tier. Nobody knows yet whether a Chromium fits next to the
 Node server there, how long the first PDF takes after a sleep, or whether Google Fonts load in time. This plan
 builds the one render service the program uses, measures it on a real Render instance, and records the decision
-before plans 765 and 767 build on it.
+before plans 766 and 768 build on it.
 
 ## Goals & Success Criteria
 
@@ -43,7 +43,7 @@ the plan's Execution Notes carry the measured cold start, render time and peak m
 
 ## Execution Mode
 - Parallel: yes
-- Concurrent plans: 764 (wave 1, run `md-designer`; no shared files)
+- Concurrent plans: 765 (wave 1, run `md-designer`; no shared files)
 - Isolated DB: no
 
 ## Read-Write Scope
@@ -85,7 +85,7 @@ append the path to the scope block above and retry.
 
 - INV-2: preserves — `server/services/menu-pdf.js` reads and writes no business data; it turns an HTML string into
   bytes. The smoke route renders the fixed `SAMPLE_MENU_DOC` and touches no collection.
-- INV-6: preserves — no AI call in this plan (`screenshotUrl` only fetches a page; plan 765 sends the picture to
+- INV-6: preserves — no AI call in this plan (`screenshotUrl` only fetches a page; plan 766 sends the picture to
   Gemini through `server/routes/ai/`).
 
 ## Reuse Check
@@ -126,7 +126,7 @@ line or file this plan names was removed, renamed or rewritten).
 ### Must Have (P0)
 - [ ] C-PDF, copied from the map (frozen 2026-11-27):
   - `renderPdf(html): Promise<Buffer>` and `screenshotUrl(url, { width }): Promise<Buffer>` (the second feeds the
-    designer's URL reference, plan 765).
+    designer's URL reference, plan 766).
   - One browser at a time, launched on first use, closed after 60 s idle; a second request waits (queue of 3, then
     `503 PDF_BUSY`). Page navigation is blocked except `data:`, Google Fonts and `res.cloudinary.com` (the menu HTML
     can't reach the network otherwise). `screenshotUrl` accepts only `https:` public hosts (no localhost, no private ranges).
@@ -175,18 +175,18 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
 - [ ] A8: Measure on a real free Render instance and write the numbers and the decision — the human step in Done-when; the builder writes the decision line template in Execution Notes — this plan file
 
 ## Technical Considerations
-- Dependencies: `renderMenuDocument`, `baseDesign`, `SAMPLE_MENU_DOC` from plan 763, at
+- Dependencies: `renderMenuDocument`, `baseDesign`, `SAMPLE_MENU_DOC` from plan 764, at
   `shared/schemas/menu-design/` (map extension E1); the server requires them from
   `server/generated/schemas/menu-design/` after `pnpm build:schemas`.
 - New files needed: `server/services/menu-pdf.js`, `server/routes/menu-design.js`, `server/scripts/menu-fonts-fetch.js`,
   `server/assets/menu-fonts/*.woff2`, three test files.
 - Model changes: none.
-- Backend / API: `GET /api/v1/menu-design/pdf-smoke` (platform admin). Plan 767 adds the export routes to the same router.
+- Backend / API: `GET /api/v1/menu-design/pdf-smoke` (platform admin). Plan 768 adds the export routes to the same router.
 - Auth and validation: `verifyToken` + `requirePlatformAdmin`; `fonts` query must be `link` or `embedded`.
 - Security surface: a headless browser on the server is a new attack surface. (1) The PDF page runs with JavaScript
   off and may load only `data:`, `fonts.googleapis.com`, `fonts.gstatic.com` and `res.cloudinary.com`; the HTML
-  comes only from `renderMenuDocument`, which escapes every text (plan 763). (2) `screenshotUrl` is an SSRF risk
-  (it fetches a URL a user typed, plan 765): https and port 443 only, the host and every sub-request refused when
+  comes only from `renderMenuDocument`, which escapes every text (plan 764). (2) `screenshotUrl` is an SSRF risk
+  (it fetches a URL a user typed, plan 766): https and port 443 only, the host and every sub-request refused when
   they resolve to a loopback, private, link-local (cloud metadata `169.254.169.254`), CGNAT or multicast address;
   DNS rebinding between the check and Chromium's own lookup is the remaining gap, narrowed by checking each request
   in interception. (3) No HTML, URL or PDF content in logs. (4) The queue caps memory use: a fourth waiting request
@@ -199,8 +199,8 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
   The free fallback if the numbers fail (peak total over ~450 MB, or a crash): see Critical Questions Q2.
 
 ## Out of Scope
-- The export route, storing the PDF, the powered-by line logic, paging tests of real menus (plan 767).
-- The designer's URL reference and its AI call (plan 765).
+- The export route, storing the PDF, the powered-by line logic, paging tests of real menus (plan 768).
+- The designer's URL reference and its AI call (plan 766).
 - Any paid Render tier or paid PDF service.
 
 ## Critical Questions
@@ -215,6 +215,6 @@ Decision line to fill after the human measurement (the Planner copies it into th
 `C-PDF decision 2026-MM-DD: <puppeteer-core + @sparticuz/chromium | fallback (a|b)> — cold start <n> ms, render <n> ms, peak total <n> MB, fonts <link|embedded>.`
 
 - behaviour: the smoke route lives in the program's own router (`server/routes/menu-design.js`), not in `admin.js`,
-  so plan 767 extends one file; it is platform-admin only.
+  so plan 768 extends one file; it is platform-admin only.
 - behaviour: the browser is closed after 60 s idle rather than kept warm, trading a slower next PDF for memory on
   the 512 MB host.

@@ -1,12 +1,12 @@
-# Plan 765 — AI in the designer: three variants from a picture, link or description, then refine in words
+# Plan 766 — AI in the designer: three variants from a picture, link or description, then refine in words
 
 Status: draft
-Depends-on: 763, 764, 766
+Depends-on: 764, 765, 767
 Track: code
 Snapshot: d34a01068fe2f1b28efd33b753b8a3f69aa8762b
 
 ## Problem Statement
-Plan 764 lets the chef build a menu design by hand. Most chefs know the look they want from something they have seen:
+Plan 765 lets the chef build a menu design by hand. Most chefs know the look they want from something they have seen:
 a menu photo, a restaurant's website or a few words ("elegant, dark, gold"). Brief decision D7: the chef gives a
 reference (a picture, a link or a description) and gets **three variants** to choose from, then refines the chosen
 one in plain words ("darker", "more elegant", "bigger dish names"). D8: the AI never writes HTML or CSS. It only fills
@@ -14,7 +14,7 @@ the fixed design schema (`menuDesignDraftSchema`) and picks fonts from the curat
 falls back to a base template, never to a broken render (guideline 4). A reference gives style (palette, font
 character, mood, layout type), not a copy of the reference, and the screen says so.
 
-Verified on `origin/main` d34a0106 (plans 763, 764 and 766 are taken as their contracts):
+Verified on `origin/main` d34a0106 (plans 764, 765 and 767 are taken as their contracts):
 - AI sub-routers: `server/routes/ai.js:113-117` mounts `./ai/voice`, `./ai/logistics`, `./ai/invoices`, `./ai/diag`,
   `./ai/stock`; a sub-router reads `respondFromGeminiFailure`, `usageOf`, `requestedModel` with `require('../ai')`
   inside the handler (`server/routes/ai.js:1887-1894`, comment at `:111`). `trackAiOutcome` runs on every AI route (`:107`).
@@ -48,17 +48,17 @@ menuDesignDraftSchema = menuDesignSchema without baseDocShape and name   // what
 `MENU_FONT_IDS`, `MENU_TEXTURES` / `MENU_TEXTURE_IDS`, `MENU_BASE_TEMPLATES`, `baseDesign(id): MenuDesignDraft`,
 `SAMPLE_MENU_DOC`, `renderMenuDocument(design, doc, opts)`.
 
-**C-PDF — the render service** (`server/services/menu-pdf.js`, decided by plan 766)
+**C-PDF — the render service** (`server/services/menu-pdf.js`, decided by plan 767)
 - `renderPdf(html): Promise<Buffer>` and `screenshotUrl(url, { width }): Promise<Buffer>` (the second feeds the
-  designer's URL reference, plan 765).
+  designer's URL reference, plan 766).
 - One browser at a time, launched on first use, closed after 60 s idle; a second request waits (queue of 3, then
   `503 PDF_BUSY`). Page navigation is blocked except `data:`, Google Fonts and `res.cloudinary.com` (the menu HTML
   can't reach the network otherwise). `screenshotUrl` accepts only `https:` public hosts (no localhost, no private ranges).
 
 **C-AI — feature keys and routes**
-- New keys in `server/constants/ai-features.js` (added in 763): `menu_design_variants`, `menu_design_refine`, `menu_from_text`.
-- Routes live under `server/routes/ai/` (INV-6): `menu-design.js` (variants, refine — plan 765),
-  `menu-from-text.js` (plan 769). Prompts are written in English. AI output is parsed with `menuDesignDraftSchema`;
+- New keys in `server/constants/ai-features.js` (added in 764): `menu_design_variants`, `menu_design_refine`, `menu_from_text`.
+- Routes live under `server/routes/ai/` (INV-6): `menu-design.js` (variants, refine — plan 766),
+  `menu-from-text.js` (plan 770). Prompts are written in English. AI output is parsed with `menuDesignDraftSchema`;
   an invalid answer falls back to the base template, never a broken render (guideline 4).
 
 ## Goals & Success Criteria
@@ -69,7 +69,7 @@ is a valid design that the hand controls can still change, and every call shows 
 - [auto] `pnpm run build` exits 0; `pnpm run lint` exits 0; `pnpm run lint:icons` exits 0.
 - [auto] `pnpm run test:server` exits 0, including `server/test/ai-menu-design.test.js` and `server/test/menu-design-ai-clean.test.js`.
 - [auto] `server/test/ai-menu-design.test.js` (model faked by stubbing `fetch`, screenshot faked through
-  `setMenuPdfForTests` from plan 766 or a module mock):
+  `setMenuPdfForTests` from plan 767 or a module mock):
   - `POST /api/v1/ai/menu-design/variants` with `{ reference: { kind: 'text', text: 'elegant dark wedding' } }` and a
     model answer of three valid drafts → 200 with three `variants`, each passing `menuDesignDraftSchema`, `origin: 'ai'`,
     `fallback: false`; one `aiUsage` row with feature `menu_design_variants`.
@@ -86,16 +86,16 @@ is a valid design that the hand controls can still change, and every call shows 
   - a business without `menu_design` → 403 `MODULE_OFF`; a request over the business's monthly cap → the cap refusal, no model call.
 - [auto] `pnpm run test:ci` exits 0, including `src/app/core/services/menu-design-ai.service.spec.ts` and
   `src/app/shared/menu-designer/ai-panel/menu-design-ai-panel.component.spec.ts`.
-- [auto] `node scripts/scope-check.mjs --arch --plan=plans/765-menu-designer-ai-variants.plan.md` → `ARCH: ok`;
-  `node scripts/scope-check.mjs --reuse --plan=plans/765-menu-designer-ai-variants.plan.md` exits 0.
+- [auto] `node scripts/scope-check.mjs --arch --plan=plans/766-menu-designer-ai-variants.plan.md` → `ARCH: ok`;
+  `node scripts/scope-check.mjs --reuse --plan=plans/766-menu-designer-ai-variants.plan.md` exits 0.
 - [auto] `node scripts/breadcrumbs-check.mjs` exits 0.
 - [auto] `node scripts/log-query.mjs --since=plan-start --level=error` → no entries (or `SKIP: no database configured`).
-- [ui] `e2e/ui/765-1.spec.ts`: with `menu_design` on and `**/api/v1/ai/menu-design/variants` answered by `page.route`
+- [ui] `e2e/ui/766-1.spec.ts`: with `menu_design` on and `**/api/v1/ai/menu-design/variants` answered by `page.route`
   with three fixed drafts, the designer's «עיצוב בעזרת AI» → «תיאור» → typing «כהה ואלגנטי» → «הצעת עיצובים» shows three
   sample menus; «בחירה» on the second closes the popup and the editor's preview frame shows that draft's title color.
-  Screenshot `screens/765-1.png`.
-- [ui] `e2e/ui/765-2.spec.ts`: with `**/api/v1/ai/menu-design/refine` answered by `page.route`, typing «שמות מנות גדולים
-  יותר» in «שינוי במילים» and «החלה» updates the preview; «ביטול השינוי» brings the previous design back. Screenshot `screens/765-2.png`.
+  Screenshot `screens/766-1.png`.
+- [ui] `e2e/ui/766-2.spec.ts`: with `**/api/v1/ai/menu-design/refine` answered by `page.route`, typing «שמות מנות גדולים
+  יותר» in «שינוי במילים» and «החלה» updates the preview; «ביטול השינוי» brings the previous design back. Screenshot `screens/766-2.png`.
 - [human] With the real model, a photo of a printed menu, a restaurant website link and the words «כפרי, חם, עץ» each give
   three variants that differ from each other and fit the reference's mood; Hebrew sample dishes read well in all of them.
 - [human] Refining in words («יותר כהה», «יותר אלגנטי», «שמות מנות גדולים יותר») changes what was asked and little else;
@@ -106,8 +106,8 @@ is a valid design that the hand controls can still change, and every call shows 
 - [human] a dialog with an explained control · hover the control · its explanation shows as a tooltip and no explanation text sits on the modal — here: the three reference choices (תמונה, קישור, תיאור).
 
 ## Execution Mode
-- Parallel: yes — with 767 (wave 2, run `md-export`); no shared files (767 uses `renderPdf`, this plan `screenshotUrl`; neither edits `server/services/menu-pdf.js`).
-- Concurrent plans: 767.
+- Parallel: yes — with 768 (wave 2, run `md-export`); no shared files (768 uses `renderPdf`, this plan `screenshotUrl`; neither edits `server/services/menu-pdf.js`).
+- Concurrent plans: 768.
 - Isolated DB: no — writes nothing but `aiUsage` rows through `callGemini`.
 
 ## Read-Write Scope
@@ -130,8 +130,8 @@ src/app/core/services/menu-design-ai.service.spec.ts
 src/app/shared/menu-designer/**
 src/app/core/services/http-storage.adapter.ts
 src/app/app.config.ts
-e2e/ui/765-1.spec.ts
-e2e/ui/765-2.spec.ts
+e2e/ui/766-1.spec.ts
+e2e/ui/766-2.spec.ts
 server/breadcrumbs.md
 src/app/shared/breadcrumbs.md
 src/app/core/services/breadcrumbs.md
@@ -157,20 +157,20 @@ append the path to the scope block above and retry.
   (`menu_design_variants`, `menu_design_refine`) and counts against the business's monthly cap.
 - INV-4: preserves — the request shape is one shared schema (`shared/schemas/ai-menu-design.schema.ts`); the AI's answer
   is checked with the shared `menuDesignDraftSchema` before it leaves the server; the AI writes nothing to the database
-  (the chef saves through plan 764's generic write, which the server validates).
+  (the chef saves through plan 765's generic write, which the server validates).
 - INV-1: preserves — the route stores nothing and reads no other document; the business comes from the signed token
   (`usageOf(req)`), gated by `requireModule('menu_design')`.
 
 ## Reuse Check
 - `server/routes/ai/menu-design.js` (variants, refine) — family: ai-cap — rung: 2 — why: a sub-router on the existing AI mount; `callGemini` with `usage.feature` meters and caps it like the invoice and stock routes
 - image reference to the model — family: model-media — rung: 1 — why: `needsMedia: 'image'` with one `inlineData` part, as `server/routes/ai/invoices.js`
-- link reference — family: helpers — rung: 2 — why: `isSafeUrl` from `server/routes/ai.js` (exported here, one line) then `screenshotUrl` from plan 766's C-PDF service
+- link reference — family: helpers — rung: 2 — why: `isSafeUrl` from `server/routes/ai.js` (exported here, one line) then `screenshotUrl` from plan 767's C-PDF service
 - `menuDesignPrompt`, `cleanDesignVariant`, `cleanRefinedDesign` (`server/utils/menu-design-ai.js`) — family: helpers — rung: 3 — why: pure prompt text and answer cleaning, beside the other `server/utils/*` AI cleaners, tested alone
 - `menuDesignVariantsRequestSchema`, `menuDesignRefineRequestSchema` (`shared/schemas/ai-menu-design.schema.ts`) — family: entity-schemas — rung: 3 — why: one request schema file per AI route, as `ai-receipt-photo.schema.ts`
 - `MenuDesignAiService` (`src/app/core/services/menu-design-ai.service.ts`) — family: http — rung: 3 — why: two POSTs through `API.ai('menu-design/…')` with the image encode pattern of `GeminiService`; kept out of the 469-line `GeminiService`
-- `MenuDesignAiPanelComponent` (`src/app/shared/menu-designer/ai-panel/`) — family: none — rung: 4 — why: no piece takes a style reference and offers designs; it is part of the self-contained designer (plan 764), so every host of the designer gets it
+- `MenuDesignAiPanelComponent` (`src/app/shared/menu-designer/ai-panel/`) — family: none — rung: 4 — why: no piece takes a style reference and offers designs; it is part of the self-contained designer (plan 765), so every host of the designer gets it
 - reference kind choice — family: chip — rung: 2 — why: `.c-chip-group` with `role="radiogroup"`
-- variants popup — family: modal-shell — rung: 2 — why: `app-modal-shell` with three `app-menu-preview` cards (plan 764)
+- variants popup — family: modal-shell — rung: 2 — why: `app-modal-shell` with three `app-menu-preview` cards (plan 765)
 - description and refine boxes — family: form-field — rung: 1 — why: `app-form-field` + `textarea` (auto-grow)
 
 ## Adopt Check
@@ -181,7 +181,7 @@ append the path to the scope block above and retry.
 - loading-and-error-states — applies — how: «הצעת עיצובים» and «החלה» show an inline `app-loader` and are disabled while the call runs; a failure is a toast «לא הצלחנו ליצור עיצובים» / «לא הצלחנו להחיל את השינוי» with «נסו שוב», and the current design stays.
 - hints-in-tooltips — applies — how: each reference choice (תמונה, קישור, תיאור) carries its explanation as `[attr.title]` + `aria-describedby`; the variants popup holds no hint text.
 - confirm-destructive-action — exception — why: picking a variant or applying words replaces the unsaved draft, which «ביטול השינוי» restores at once; nothing stored is deleted.
-- unsaved-changes-on-leave — exception — why: the panel lives inside plan 764's edit page, whose guard already covers the draft the AI changes.
+- unsaved-changes-on-leave — exception — why: the panel lives inside plan 765's edit page, whose guard already covers the draft the AI changes.
 - anchored-popup — exception — why: the variants choice is a centred `app-modal-shell`, not a small floating box.
 - app-list-container — exception — why: no list page; the three variants are cards inside a popup, not a list of records.
 - one-breakpoint-set — applies — how: the variants popup goes from three cards in a row to one column only at the shared breakpoint names (`src/app/core/styles/_breakpoints.scss`); no new `@media` width.
@@ -243,14 +243,14 @@ line or file this plan names was removed, renamed or rewritten).
   - A cap refusal shows the `aiCapErrorKey` message.
 
 ### Should Have (P1)
-- [ ] When plan 766 recorded in C-PDF that `screenshotUrl` is not available on the server, `POST /variants` with a link
+- [ ] When plan 767 recorded in C-PDF that `screenshotUrl` is not available on the server, `POST /variants` with a link
   answers 501 `URL_REFERENCE_UNAVAILABLE` and the panel hides «קישור»; the decision is written in Execution Notes.
 
 ### Nice to Have (P2)
 - [ ] none
 
 ## UI/UX Notes
-- Page recipe: none — no new page; the panel is part of plan 764's designer (`recipe-form` page `/menu-design/:id`).
+- Page recipe: none — no new page; the panel is part of plan 765's designer (`recipe-form` page `/menu-design/:id`).
 - RTL: the panel is Hebrew; the URL field is `dir="ltr"`.
 - Dictionary keys (append): `menu_design_ai_title`, `menu_design_ai_ref_image`, `menu_design_ai_ref_url`,
   `menu_design_ai_ref_text`, `menu_design_ai_ref_image_hint`, `menu_design_ai_ref_url_hint`, `menu_design_ai_ref_text_hint`,
@@ -269,14 +269,14 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
 - [ ] A3: Add the two AI routes that turn a picture, link or description into designs and refine one in words — sub-router with module gate, limiter, size checks, isSafeUrl (export it from ai.js) and screenshotUrl, metered callGemini, mount line — server/routes/ai/menu-design.js, server/routes/ai.js, server/test/ai-menu-design.test.js
 - [ ] A4: Let the browser call the two routes with a shrunk image — MenuDesignAiService with the two-step downscale — src/app/core/services/menu-design-ai.service.ts (+ spec), src/app/core/services/http-storage.adapter.ts (only if API.ai needs nothing new, leave it)
 - [ ] A5: Put the AI panel into the designer with the three-variant choice, refine in words and one-step undo — panel component, popup of three previews, style-not-copy line, cap message, dictionary keys, icons — src/app/shared/menu-designer/**, public/assets/data/dictionary.json, src/app/app.config.ts
-- [ ] A6: Prove the panel in the running app with the model answers faked — e2e/ui/765-1.spec.ts, e2e/ui/765-2.spec.ts with page.route answers and module restore
+- [ ] A6: Prove the panel in the running app with the model answers faked — e2e/ui/766-1.spec.ts, e2e/ui/766-2.spec.ts with page.route answers and module restore
 - [ ] A7: Record the new route, helpers and panel in the folder maps and the family registry — server/breadcrumbs.md, src/app/shared/breadcrumbs.md, src/app/core/services/breadcrumbs.md, docs/brain/component-families.md, docs/brain/inventory.md
 
 ## Technical Considerations
-- Dependencies: plan 763 (`menuDesignDraftSchema`, `MENU_FONTS`, `baseDesign`, the two AI feature keys), plan 764
-  (`app-menu-designer`, `app-menu-preview`), plan 766 (`screenshotUrl`).
+- Dependencies: plan 764 (`menuDesignDraftSchema`, `MENU_FONTS`, `baseDesign`, the two AI feature keys), plan 765
+  (`app-menu-designer`, `app-menu-preview`), plan 767 (`screenshotUrl`).
 - New files needed: listed in the scope.
-- Model changes: none (the draft schema is 763's).
+- Model changes: none (the draft schema is 764's).
 - Backend / API: `POST /api/v1/ai/menu-design/variants`, `POST /api/v1/ai/menu-design/refine` — both dedicated
   because they call the model, which only `server/routes/ai/**` may do (INV-6).
 - Auth and validation: signed token, `requireModule('menu_design')`, own limiter, monthly cap through `callGemini`;
