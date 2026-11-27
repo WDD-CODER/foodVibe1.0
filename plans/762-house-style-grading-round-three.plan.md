@@ -86,8 +86,11 @@ append the path to the scope block above and retry.
 - INV-6: preserves — the scope glob `src/app/**/breadcrumbs.md` matches `*ai*` paths only by name; no AI call is touched.
 
 ## Reuse Check
-- none — changes inside the existing shared tooltip, `scroll-rail` and the stock count; the phone breakpoint comes from
-  the app's one breakpoint set.
+Changes inside the existing shared tooltip, `scroll-rail` and the stock count; the phone breakpoint comes from the
+app's one breakpoint set. The new classes:
+
+- `.stock-count__name-box`, `.stock-count__controls`, `.stock-count__head-name` — family: list-page — rung: 3 — why: page-local layout containers of the stock count row on the list shell.
+- `.sr-more__badge` — family: sideways-row — rung: 3 — why: the stronger look of the rail's sign of more.
 
 ## Defaults
 
