@@ -5,13 +5,15 @@ import { z } from 'zod'
  * `server/services/frontdesk-runs.js`, deleted by a TTL index 30 days after it started.
  */
 export const RUN_MODES = ['turn', 'suggest'] as const
-export const RUN_OUTCOMES = ['answered', 'asked', 'draft', 'handover', 'failed', 'removed'] as const
+export const RUN_OUTCOMES = ['answered', 'asked', 'draft', 'handover', 'failed', 'removed', 'dropped',
+  'superseded'] as const
 export const RUN_STEP_KEYS = ['inbound', 'setup', 'limit', 'history', 'precheck', 'facts', 'prompt', 'ai', 'shape',
   'guardrails', 'tables', 'decide', 'send'] as const
 export const RUN_STEP_STATUSES = ['ok', 'note', 'stopped', 'skipped'] as const
 export const RUN_REASONS = ['quota', 'busy', 'timeout', 'other', 'error', 'send_refused', 'removal', 'keyword',
   'outside_hours', 'turn_limit', 'model', 'low_content', 'internals', 'invented_link', 'deferred', 'completion_claim',
-  'unsupported_time', 'table_number', 'unsupported_price', 'table_engine', 'open_request'] as const
+  'unsupported_time', 'table_number', 'unsupported_price', 'table_engine', 'open_request', 'taken_over', 'closed',
+  'lease_lost', 'overtaken', 'follow_up_limit'] as const
 
 export const runStepSchema = z.strictObject({
   key: z.enum(RUN_STEP_KEYS),

@@ -111,6 +111,14 @@ describe('RunDetailComponent (plan 752)', () => {
     expect(el().querySelectorAll('pre.asr-raw').length).toBe(1)
   })
 
+  it('plan 753: links to the run it continues only when there is one', async () => {
+    await create()
+    expect(byId('asr-follows')).toBeNull()
+    fixture.componentRef.setInput('run', run({ followsRunId: 'r0' }))
+    fixture.detectChanges()
+    expect(byId('asr-follows')!.getAttribute('href')).toBe('/frontdesk/assistant/runs/r0')
+  })
+
   it('shows no prompt button to an owner', async () => {
     await create(run({ prompt: { lead: 'LEAD', tone: 'warm', tablesOn: false } }))
     expect(byId('asr-prompt-toggle')).toBeNull()

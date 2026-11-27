@@ -26,8 +26,25 @@ describe('assistant-run-view.util (plan 752)', () => {
     expect(reasonKey('open_request')).toBe('asr_reason_open_request')
   })
 
-  it('outcomeTone() colours all six outcomes', () => {
-    expect(RUN_OUTCOMES.map(outcomeTone)).toEqual(['green', 'green', 'amber', 'red', 'red', 'red'])
+  it('outcomeTone() colours all eight outcomes', () => {
+    expect(RUN_OUTCOMES.map(outcomeTone)).toEqual(['green', 'green', 'amber', 'red', 'red', 'red', 'amber', 'amber'])
+  })
+
+  it('plan 753: a dropped and a superseded run are amber', () => {
+    expect(outcomeTone('dropped')).toBe('amber')
+    expect(outcomeTone('superseded')).toBe('amber')
+  })
+
+  it('plan 753: a dropped run says who stepped in', () => {
+    const verdict = verdictOf({ outcome: 'dropped', reason: 'taken_over', steps: steps('send') })
+    expect(verdict.key).toBe('asr_verdict_dropped')
+    expect(verdict.params.reason).toBe('asr_reason_taken_over')
+  })
+
+  it('plan 753: the send step shows how many messages arrived meanwhile', () => {
+    expect(stepRows({ key: 'send', out: { overtaken: 2 } }, 'out')).toEqual([
+      { labelKey: 'asr_f_overtaken', kind: 'number', value: '2' }
+    ])
   })
 
   it('STEP_FIELDS covers the 13 steps', () => {

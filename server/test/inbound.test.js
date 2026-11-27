@@ -150,6 +150,68 @@ describe('handleInbound', () => {
   })
 })
 
+describe('plan 753: what a message does next', () => {
+  const { nextStep, COALESCE_MS } = require('../services/inbound')
+  const at = 90000
+  const now = 100000
+  const bot = (over = {}) => ({ status: 'bot', lastInboundAt: at, ...over })
+  const leased = () => bot({ run: { id: 'r', since: at, until: now + 1, chain: 0, waiting: [] } })
+  const step = (conversation, over = {}) => nextStep({ conversation, at, now, waited: false, ...over })
+
+  it('a conversation a person holds, or none, stops', () => {
+    expect(COALESCE_MS).toBe(6000)
+    expect(step(bot({ status: 'human' }))).toEqual({ do: 'stop', why: 'not_bot' })
+    expect(step(null)).toEqual({ do: 'stop', why: 'not_bot' })
+  })
+
+  it('a live lease takes the message; the run that holds it goes on', () => {
+    expect(step(leased())).toEqual({ do: 'leave', why: 'running' })
+    expect(step(leased(), { waited: true })).toEqual({ do: 'leave', why: 'running' })
+    expect(step(leased(), { holder: true, waited: true })).toEqual({ do: 'run' })
+  })
+
+  it('a free conversation waits, then runs unless a newer message came', () => {
+    expect(step(bot())).toEqual({ do: 'wait', ms: 6000 })
+    expect(step(bot({ lastInboundAt: at + 1 }), { waited: true })).toEqual({ do: 'leave', why: 'newer' })
+    expect(step(bot(), { waited: true })).toEqual({ do: 'run' })
+  })
+
+  it('a follow-up waits what is left of the burst wait', () => {
+    expect(step(bot(), { holder: true, at: now - 2000 })).toEqual({ do: 'wait', ms: 4000 })
+    expect(step(bot(), { holder: true, at: now - 9000 })).toEqual({ do: 'wait', ms: 0 })
+  })
+
+  it('the turn is told the id of the stored message, on a hand back too', async () => {
+    const { answerWaiting } = require('../services/inbound')
+    const turn = vi.fn(async () => {})
+    setTurnHandler(turn)
+    const r = await inbound()
+    await r.settled
+    expect(turn.mock.calls[0][2].messageId).toBe(r.messageId)
+    await answerWaiting(db(), (await conv())[0])
+    expect(turn.mock.calls[1][2].messageId).toBe(r.messageId)
+  })
+
+  it('a message during a live lease starts no wait and is noted', async () => {
+    const turn = vi.fn(async () => {})
+    setTurnHandler(turn)
+    await (await inbound()).settled
+    await db().collection('conversations').updateOne(
+      { businessId: 'b1' },
+      { $set: { status: 'bot', run: { id: 'r', since: Date.now(), until: Date.now() + 60000, chain: 0, waiting: [] } } }
+    )
+    turn.mockClear()
+    const w = controllableWait()
+    setWaitForTest(w.wait)
+    const r = await inbound({ at: NOW + 1000 })
+    await r.settled
+    expect(w.calls).toHaveLength(0)
+    expect(turn).not.toHaveBeenCalled()
+    expect((await conv())[0].run.waiting).toEqual([r.messageId])
+    expect(logs.byEvent('inbound.left_to_run').length).toBeGreaterThan(0)
+  })
+})
+
 describe('back to the assistant (plan 719)', () => {
   const { HUMAN_IDLE_MS } = require('../services/inbound')
   const { conversationSchema } = require('../generated/schemas/entities/conversation.schema')

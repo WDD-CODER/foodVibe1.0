@@ -74,6 +74,17 @@ describe('the stored run', () => {
     expect(suggestion.steps[0]).toMatchObject({ status: 'skipped', out: { via: 'suggest' } });
   });
 
+  it('plan 753: writes the run a follow-up continues and keeps how it started', async () => {
+    const doc = await record('answered', run => {
+      run.set({ followsRunId: 'first-run' });
+      run.step('inbound', { out: { via: 'follow_up' } });
+    }, CONVERSATION, { now: NOW, inbound: { at: 5, waitedMs: 10 } });
+    expect(doc.followsRunId).toBe('first-run');
+    expect(doc.steps[0]).toMatchObject({ key: 'inbound', ms: 10, out: { waitedMs: 10, answers: 0, via: 'follow_up' } });
+    expect(assistantRunSchema.safeParse(doc).success).toBe(true);
+    expect((await record()).followsRunId).toBeUndefined();
+  });
+
   it('marks a backup model', async () => {
     const doc = await record('answered', run => run.set({ model: 'second', firstModel: 'first' }));
     expect(doc).toMatchObject({ model: 'second', fallbackUsed: true });
@@ -203,6 +214,16 @@ describe('reading runs', () => {
       _id: 'handover', conversationId: 'cv1', mode: 'turn', startedAt: 4, ms: 5, outcome: 'handover', reason: 'keyword',
       fallbackUsed: false, text: 'text handover',
     });
+  });
+
+  it('plan 753: a dropped run is listed with the handovers, a superseded one under all only', async () => {
+    await db().collection('assistantRuns').insertMany([
+      seeded('dropped', 10, 'dropped', { reason: 'taken_over' }),
+      seeded('superseded', 11, 'superseded', { reason: 'overtaken' }),
+    ]);
+    expect(await ids({ filter: 'handover' })).toEqual(['dropped', 'removed', 'failed', 'handover']);
+    expect(await ids({ filter: 'answered' })).toEqual(['asked', 'answered']);
+    expect((await ids()).slice(0, 2)).toEqual(['superseded', 'dropped']);
   });
 
   it('(h) a run is read only inside its own business', async () => {

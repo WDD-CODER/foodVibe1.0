@@ -94,6 +94,18 @@ describe('level 1', () => {
   });
 });
 
+describe('plan 753: the lease of a turn', () => {
+  it('after a turn the stored conversation has no run field and passes its schema', async () => {
+    const { conversationSchema } = require('../generated/schemas/entities/conversation.schema');
+    const { conversation } = await setup();
+    fetchMock.mockResolvedValue(modelAnswer(SMALL));
+    await turn(conversation);
+    const stored = await conv(conversation._id);
+    expect(stored.run).toBeUndefined();
+    expect(conversationSchema.safeParse(stored).success).toBe(true);
+  });
+});
+
 describe('level 0 and 2', () => {
   it('level 0 stores the suggestion, sends nothing and stays bot', async () => {
     const { conversation } = await setup({ level: 0 });

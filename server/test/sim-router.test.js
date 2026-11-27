@@ -65,6 +65,30 @@ describe('POST /sim/inbound', () => {
   })
 })
 
+describe('POST /sim/inbound during a working assistant run (plan 753)', () => {
+  const { setTurnHandler } = require('../services/inbound')
+
+  it('stores the message, starts no turn and notes it on the lease', async () => {
+    const turn = vi.fn(async () => {})
+    setTurnHandler(turn)
+    setWaitForTest(async () => {})
+    const first = await post({ phone: '0521234567', text: 'one' })
+    const { conversationId } = first.body
+    await vi.waitFor(() => expect(turn).toHaveBeenCalledTimes(1))
+    await db('conversations').updateOne(
+      { _id: conversationId },
+      { $set: { status: 'bot', run: { id: 'r1', since: Date.now(), until: Date.now() + 60000, chain: 0, waiting: [] } } }
+    )
+    turn.mockClear()
+    const res = await post({ phone: '0521234567', text: 'two' })
+    expect(res.status).toBe(200)
+    await vi.waitFor(async () => {
+      expect((await db('conversations').findOne({ _id: conversationId })).run.waiting).toEqual([res.body.messageId])
+    })
+    expect(turn).not.toHaveBeenCalled()
+  })
+})
+
 describe('DELETE /sim/test-data', () => {
   it('removes this business\'s test rows only and answers the counts', async () => {
     const t = { businessId: 'b1', test: true }

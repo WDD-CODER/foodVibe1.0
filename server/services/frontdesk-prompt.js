@@ -3,17 +3,21 @@
  * Plan 679 (C-AI): the assistant's request to the model. The fixed rules (English) are the only thing in
  * `systemInstruction`; the guest's words, the facts, the date and the request kinds are data in `contents`.
  * R-16: no rolling summary; the last 12 messages are the window.
+ * Plan 753 (R-28): several unanswered guest messages are all answered; their number is data in the UNANSWERED block.
  */
 const { jerusalemDateTime } = require('../generated/schemas/front-desk/local-time');
 
 const ZONE = 'Asia/Jerusalem';
 const HISTORY_WINDOW = 12;
+/** The most unanswered guest messages that are counted as waiting for one answer. */
+const GLUE_MAX = 5;
 
 const TURN_SYSTEM_PROMPT = [
   'You are the front desk assistant of the business named in the FACTS block. You write short, clear messages to a guest who wrote to the business.',
   'Tone: {{TONE}}.',
   'Answer in the language the guest writes in; Hebrew by default.',
   'Address the guest in the gender their own words show; when it is unknown, phrase the sentence neutrally.',
+  'When the conversation ends with several guest messages that have no assistant message after them, answer every one of them in a single reply, in the order they were written; the UNANSWERED block, when present, says how many there are. When they ask for different things, intent and collected describe the request or the table booking and reply also answers the questions.',
   'Use only three sources: these rules, the FACTS block and this conversation. When a fact and an earlier assistant message disagree, the fact wins.',
   'Quote facts exactly: hours, prices, addresses and phone numbers are copied, never rounded or guessed. If the answer is not in the facts, set handoff to true.',
   'List in usedFacts the id of every fact you used (the id is in square brackets at the start of each fact line).',
@@ -74,14 +78,25 @@ function messageText(m) {
   return m.text ?? '';
 }
 
+/** The guest messages after the newest one that is not the guest's: at most `GLUE_MAX`, oldest first. */
+function unansweredTail(history) {
+  const list = history ?? [];
+  const lastAnswer = list.map(m => m.author !== 'guest').lastIndexOf(true);
+  return list.slice(lastAnswer + 1).slice(-GLUE_MAX);
+}
+
 /** @returns the Gemini request body of one turn. `history` is oldest first; only the last 12 are sent. */
 function buildTurnBody({ profile, facts, history, now, tablesOn = false, areas = [] }) {
   const tone = profile?.assistant?.tone === 'formal' ? 'formal' : 'warm';
+  const unanswered = unansweredTail(history).length;
   const lead = [
     '=== TODAY (data) ===', todayBlock(now),
     '=== FACTS (data) ===', facts?.text ?? '',
     '=== REQUEST KINDS (data, JSON) ===', kindsBlock(profile),
     ...(tablesOn ? ['=== AREAS (data, JSON) ===', JSON.stringify(areas.map(a => ({ key: a.key, name: a.name })))] : []),
+    ...(unanswered >= 2
+      ? ['=== UNANSWERED (data) ===', `Guest messages at the end of the conversation with no answer yet: ${unanswered}`]
+      : []),
     '=== CONVERSATION FOLLOWS ===',
   ].join('\n');
   const recent = (history ?? []).slice(-HISTORY_WINDOW).map(m => ({
@@ -104,4 +119,7 @@ function withShapeReminder(body) {
   return { ...body, systemInstruction: { ...body.systemInstruction, parts: [{ ...part, text: part.text + '\n' + SHAPE_RETRY_LINE }] } };
 }
 
-module.exports = { SHAPE_RETRY_LINE, withShapeReminder, TURN_SYSTEM_PROMPT, TABLE_SYSTEM_PROMPT, todayBlock, buildTurnBody, HISTORY_WINDOW };
+module.exports = {
+  SHAPE_RETRY_LINE, withShapeReminder, TURN_SYSTEM_PROMPT, TABLE_SYSTEM_PROMPT, todayBlock, buildTurnBody,
+  unansweredTail, HISTORY_WINDOW, GLUE_MAX,
+};

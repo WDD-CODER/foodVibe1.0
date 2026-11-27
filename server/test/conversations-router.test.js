@@ -254,6 +254,36 @@ describe('heldAt and hand back (plan 719)', () => {
   })
 })
 
+describe('a working assistant run (plan 753)', () => {
+  const lease = () => ({ id: 'r1', since: Date.now(), until: Date.now() + 60000, chain: 0, waiting: [] })
+  const stored = id => db('conversations').findOne({ _id: id })
+  async function leased() {
+    const { conversation } = await seed()
+    await db('conversations').updateOne({ _id: conversation._id }, { $set: { run: lease() } })
+    return conversation._id
+  }
+
+  it('a take over removes the lease', async () => {
+    const id = await leased()
+    const res = await put(`/${id}/takeover`)
+    expect(res.status).toBe(200)
+    expect(res.body.conversation.run).toBeUndefined()
+    expect((await stored(id)).run).toBeUndefined()
+  })
+
+  it('a member reply to a bot conversation removes the lease and says so', async () => {
+    const id = await leased()
+    logs.records.length = 0
+    const res = await post(`/${id}/messages`, { text: 'here' }, STAFF)
+    expect(res.status).toBe(201)
+    expect((await stored(id)).run).toBeUndefined()
+    expect(logs.byEvent('conversations.run_cancelled')).toHaveLength(1)
+    expect(logs.byEvent('conversations.run_cancelled')[0]).toMatchObject({ by: 'reply' })
+    await post(`/${id}/messages`, { text: 'again' }, STAFF)
+    expect(logs.byEvent('conversations.run_cancelled')).toHaveLength(1)
+  })
+})
+
 describe('logs', () => {
   it('carry no name, phone or reply text', async () => {
     const { conversation } = await seed()
