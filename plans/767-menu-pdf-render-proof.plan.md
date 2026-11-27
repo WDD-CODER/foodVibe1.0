@@ -68,6 +68,8 @@ server/test/menu-design-route.test.js
 render.yaml
 docs/brain/component-families.md
 docs/brain/inventory.md
+server/test/helpers/app.js
+docs/workflow-kit/manifest.json
 ```
 
 ## Read Scope
