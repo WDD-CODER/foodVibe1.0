@@ -4,11 +4,14 @@
  * returns only the profile's own facts and the business's live, approved, public knowledge items, in a fixed order.
  * Plan 755 (R-32): when the lines do not all fit in 6,000 characters the profile's lines are always sent and the items
  * are picked by `pickFacts` for the guest's current message; `factIds` are exactly the lines that were sent.
+ * Plan 760: how many characters is an engine setting (`factsMaxChars`).
  */
 const { KNOWLEDGE_TOPICS } = require('../generated/schemas/entities')
 const { pickFacts, TITLE_MAX } = require('./fact-pick')
+const { ENGINE_DEFAULTS, loadEngine } = require('./assistant-engine-settings')
 
-const MAX_CHARS = 6000
+/** The default of the most characters of facts one turn sends (`factsMaxChars`). */
+const MAX_CHARS = ENGINE_DEFAULTS.factsMaxChars
 
 /** A value on one line: any run of line breaks becomes a single space. */
 const oneLine = value => String(value).replace(/[\r\n]+/g, ' ').trim()
@@ -57,7 +60,7 @@ function itemLine(item) {
  * @param {{ query?: string, context?: string, budget?: number }} [ask] what the guest is asking now (`factQueryOf`)
  * @returns {Promise<{ text: string, factIds: string[], leftOutIds: string[], leftOutTitles: string[], stats: object }>}
  */
-async function publicFacts(db, businessId, { query = '', context = '', budget = MAX_CHARS } = {}) {
+async function publicFacts(db, businessId, { query = '', context = '', budget } = {}) {
   const profile = await db.collection('frontDeskProfiles').findOne({ businessId })
   const items = await db.collection('knowledgeItems')
     .find({ businessId, status: 'approved', visibility: 'public', deletedAt: { $exists: false } })
@@ -67,7 +70,8 @@ async function publicFacts(db, businessId, { query = '', context = '', budget = 
     (a.createdAt ?? 0) - (b.createdAt ?? 0) ||
     (String(a._id) < String(b._id) ? -1 : String(a._id) > String(b._id) ? 1 : 0))
 
-  return pickFacts({ core: profileLines(profile), items: items.map(itemLine), query, context, budget })
+  const most = budget ?? (await loadEngine(db)).factsMaxChars
+  return pickFacts({ core: profileLines(profile), items: items.map(itemLine), query, context, budget: most })
 }
 
 module.exports = { publicFacts, MAX_FACTS_CHARS: MAX_CHARS }

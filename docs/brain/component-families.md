@@ -1051,6 +1051,14 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 - When: any new fact about a run is a field of an existing step, registered in `STEP_FIELDS`; a second recorder, a second runs list or a log line with run content is never added. Plan 756: a new step is added to `RUN_STEP_KEYS` AND `FLOW_STEPS` (a test keeps them equal); a new setting that shapes the assistant is one more row of `SETTING_ROWS`; a number of the engine is shown only through the setup read, never typed into a text.
 - Known copies: none.
 
+### assistant-engine-settings — the assistant's engine numbers as platform settings (plan 760)
+
+- Status: stable — plan 760
+- Use: `server/services/assistant-engine-settings.js` · `ENGINE_SETTINGS` is the one table of each number's default, range and unit; `loadEngine` reads the numbers in force (cached a few seconds), `engineNow` gives the last read without a read, `saveEngineSetting` writes one number and its history entry in `platformSettings`; the save body is `engineSettingSaveSchema` (`shared/schemas/front-desk/engine-settings.schema.ts`). Browser: `AssistantEngineSettingsService` (`src/app/pages/frontdesk/assistant/assistant-engine-settings.service.ts`).
+- Pieces: ENGINE_SETTINGS, ENGINE_DEFAULTS, loadEngine, engineNow, saveEngineSetting, limitsOf, engineSettingSaveSchema, AssistantEngineSettingsService.
+- When: any new number of the assistant's engine is one more row of `ENGINE_SETTINGS` and is read through `loadEngine`; a number typed as a constant beside it, or a second platform-wide settings store, is never added.
+- Known copies: none.
+
 ### assistant-run-lease — takeLease, noteWaiting, leaseCheck, endLease, clearLease in server/services/frontdesk-lease.js, nextStep in server/services/inbound.js (plan 753)
 
 - Status: stable — server only

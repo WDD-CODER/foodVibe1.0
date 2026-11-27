@@ -17,15 +17,17 @@
  * first model is recorded per HTTP call.
  * Plan 755 (R-32): the facts are picked for the guest's current message (`factQueryOf`, `publicFacts`); the rules
  * judge the reply against the lines that were sent.
+ * Plan 760: the turn's numbers are the platform's engine settings, read once per run (`loadEngine`).
  */
 const { logger } = require('../logger');
 const { publicFacts } = require('./knowledge');
 const { factQueryOf } = require('./fact-pick');
-const { buildTurnBody, unansweredTail, todayBlock, HISTORY_WINDOW } = require('./frontdesk-prompt');
-const { applyGuardrails, preCheck, isRemoval, TURN_LIMIT, FOLLOW_UP_MAX } = require('./frontdesk-guardrails');
+const { buildTurnBody, unansweredTail, todayBlock } = require('./frontdesk-prompt');
+const { applyGuardrails, preCheck, isRemoval } = require('./frontdesk-guardrails');
+const { ENGINE_DEFAULTS, loadEngine } = require('./assistant-engine-settings');
 const { fillWhen } = require('./frontdesk-when');
 const { sendOut, showTyping } = require('./outbound');
-const { setTurnHandler, nextStep, waitFor, COALESCE_MS } = require('./inbound');
+const { setTurnHandler, nextStep, waitFor } = require('./inbound');
 const { loadConversation } = require('./conversations');
 const { takeLease, noteWaiting, leaseCheck, endLease } = require('./frontdesk-lease');
 const { tablesFor, handleTableIntent, deliver, cleanSuggested, turnProfile } = require('./frontdesk-tables');
@@ -35,7 +37,8 @@ const { fixedText, reasonText } = require('../utils/fixed-text');
 const { jerusalemDate } = require('../middleware/usage');
 const { WANTED_QUESTION_KEYS } = require('../generated/schemas/front-desk-templates');
 
-const FRONTDESK_DAILY_TURNS = 300;
+/** The default of a business's assistant answers per day (`dailyTurns`). */
+const FRONTDESK_DAILY_TURNS = ENGINE_DEFAULTS.dailyTurns;
 /** Plan 755: how much of what was left out a run record keeps. */
 const LEFT_OUT_IDS_MAX = 40;
 const LEFT_OUT_TITLES_MAX = 12;
@@ -293,12 +296,14 @@ async function runLeased(db, conversation, lease, opts) {
     if (chain === 0) first = one.result;
     // A superseded run wrote and sent nothing on purpose: its follow-up answers everything.
     const goesOn = !one.result?.skipped || one.result.skipped === 'superseded';
+    const engine = await loadEngine(db, { log });
     const next = await endLease(db, conv, lease, {
-      seen: one.seen, follow: goesOn && chain <= FOLLOW_UP_MAX, graceMs: COALESCE_MS,
+      seen: one.seen, follow: goesOn && chain <= engine.followUpMax, graceMs: engine.maxWaitMs,
     });
     if (!next.follow) return first;
     const at = next.conversation.lastInboundAt;
-    const step = nextStep({ conversation: next.conversation, at, now: Date.now(), waited: false, holder: true });
+    const asked = { conversation: next.conversation, at, now: Date.now(), waited: false, holder: true, engine };
+    const step = nextStep(asked);
     const waitStarted = Date.now();
     await waitFor(step.ms);
     const waitedMs = Date.now() - waitStarted;
@@ -352,10 +357,10 @@ function setupFacts(stored, profile) {
 }
 
 /** What a run answers: the unanswered guest messages (the newest few), and the newest guest text. */
-function triggerOf(history) {
+function triggerOf(history, glueMax) {
   const newest = history.filter(m => m.author === 'guest').at(-1);
   const text = (newest && (newest.kind === 'button' ? newest.buttonId : newest.text)) || '';
-  return { messageIds: unansweredTail(history).map(m => String(m._id)), text };
+  return { messageIds: unansweredTail(history, glueMax).map(m => String(m._id)), text };
 }
 
 /** Step 13 of a run that stops after the model call: nothing is written and nothing is sent. */
@@ -461,13 +466,14 @@ async function runTurnInner(db, conversation, opts = {}) {
   run.step('setup', { out: setupFacts(stored, profile) });
   run.set({ level: levelOf(profile) });
 
-  const limit = { limit: FRONTDESK_DAILY_TURNS };
+  const engine = await loadEngine(db, { log });
+  const limit = { limit: engine.dailyTurns };
   if (mode === 'turn' && !conversation.test) {
     const used = await run.time('limit', () => colOf(db, 'aiUsage').countDocuments({
       businessId, day: jerusalemDate(now), feature: 'frontdesk_turn', userId: { $ne: 'sim' },
     }));
     run.step('limit', { in: limit, out: { used } });
-    if (used >= FRONTDESK_DAILY_TURNS) {
+    if (used >= engine.dailyTurns) {
       run.step('limit', { status: 'stopped' });
       run.end('failed', 'quota');
       log.info({ event: 'frontdesk.turn.cap', conversationId: conversation._id });
@@ -482,22 +488,23 @@ async function runTurnInner(db, conversation, opts = {}) {
   const { history, aiTurns } = await run.time('history', async () => {
     const [recent, count] = await Promise.all([
       colOf(db, 'messages')
-        .find({ businessId, conversationId: conversation._id }).sort({ at: -1, _id: -1 }).limit(HISTORY_WINDOW).toArray(),
+        .find({ businessId, conversationId: conversation._id })
+        .sort({ at: -1, _id: -1 }).limit(engine.historyWindow).toArray(),
       colOf(db, 'messages').countDocuments({ businessId, conversationId: conversation._id, author: 'ai' }),
     ]);
     return { history: recent.reverse(), aiTurns: count };
   });
   run.step('history', {
-    in: { window: HISTORY_WINDOW }, out: { messages: history.length, messageIds: history.map(m => String(m._id)), aiTurns },
+    in: { window: engine.historyWindow }, out: { messages: history.length, messageIds: history.map(m => String(m._id)), aiTurns },
   });
-  run.set({ trigger: triggerOf(history) });
+  run.set({ trigger: triggerOf(history, engine.glueMax) });
   if (track) track.seen = history.filter(m => m.author === 'guest').map(m => m._id);
 
   const pre = run.timeSync('precheck', () => {
     if (mode === 'suggest' && isRemoval(history)) return { ok: false, reason: 'removal' };
-    return preCheck({ profile, history, aiTurns, chain, now, mode });
+    return preCheck({ profile, history, aiTurns, chain, now, mode, engine });
   });
-  const preIn = { aiTurns, turnLimit: TURN_LIMIT };
+  const preIn = { aiTurns, turnLimit: engine.turnLimit };
   if (pre.ok) {
     const skipped = mode === 'suggest';
     run.step('precheck', { status: skipped ? 'skipped' : 'ok', in: preIn, out: skipped ? { why: 'suggest' } : { ok: true } });
@@ -519,14 +526,16 @@ async function runTurnInner(db, conversation, opts = {}) {
 
   const { facts, tables } = await run.time('facts', async () => {
     const [found, room] = await Promise.all([
-      publicFacts(db, businessId, factQueryOf(history)), tablesFor(db, businessId),
+      publicFacts(db, businessId, { ...factQueryOf(history), budget: engine.factsMaxChars }),
+      tablesFor(db, businessId),
     ]);
     return { facts: found, tables: room };
   });
   logFacts(log, conversation, facts.stats);
   recordFacts(run, facts, tables);
+  const areas = tables ? tables.plan.areas : [];
   const body = run.timeSync('prompt',
-    () => buildTurnBody({ profile, facts, history, now, tablesOn: !!tables, areas: tables ? tables.plan.areas : [] }));
+    () => buildTurnBody({ profile, facts, history, now, tablesOn: !!tables, areas, engine }));
   const lead = body.contents[0].parts[0].text;
   run.step('prompt', {
     out: {
@@ -541,7 +550,7 @@ async function runTurnInner(db, conversation, opts = {}) {
     feature: feature === 'eval' ? 'eval' : mode === 'suggest' ? 'frontdesk_suggest' : 'frontdesk_turn',
     ...(conversation.test && { userId: 'sim' }),
   };
-  const asked = await run.time('ai', () => askTurnModel({ body, usage, log }));
+  const asked = await run.time('ai', () => askTurnModel({ body, usage, log, engine }));
   recordModelCall(run, asked, usage.feature);
   // Plan 753 (R-27): the model call takes seconds; read the conversation again before anything is written or sent.
   let overtaken = 0;

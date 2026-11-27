@@ -4,6 +4,8 @@ import { provideRouter, Router } from '@angular/router'
 import { LucideAngularModule, Settings } from 'lucide-angular'
 import { TEST_LUCIDE_ICONS } from 'src/testing/test-lucide-icons'
 import { AssistantRunDataService } from '@services/assistant-run-data.service'
+import { AssistantEngineSettingsService } from '../../assistant-engine-settings.service'
+import type { EditableSetup } from '../../assistant-engine-settings.service'
 import { ModuleService } from '@services/module.service'
 import { TranslationService } from '@services/translation.service'
 import type { AssistantSetup } from '@models/assistant-run.model'
@@ -21,6 +23,14 @@ const DICT: Record<string, string> = {
   asr_set_go_settings: 'להגדרות העמדה',
   asr_val_filled: '{n} מתוך {total} מולאו',
   asr_val_none: '—',
+  asr_set_why_fixed: 'חלק מהמנוע',
+  asr_engine_val_seconds: '{n} שנ׳',
+  asr_set_range: 'טווח:',
+  asr_set_out_of_range: 'המספר צריך להיות בתוך הטווח',
+  asr_unit_ms: 'שנ׳',
+  asr_unit_replies: 'תשובות',
+  fd_save: 'שמירה',
+  cancel: 'ביטול',
   retry: 'נסה שוב'
 }
 
@@ -62,6 +72,7 @@ describe('SettingsTableComponent (plan 756)', () => {
   let tables: WritableSignal<boolean>
   let loadSetup: jasmine.Spy
   let navigate: jasmine.Spy
+  let save: jasmine.Spy
 
   beforeEach(() => {
     setupSig = signal<AssistantSetup | null>(setup)
@@ -69,6 +80,7 @@ describe('SettingsTableComponent (plan 756)', () => {
     failed = signal(false)
     tables = signal(true)
     loadSetup = jasmine.createSpy('loadSetup').and.resolveTo()
+    save = jasmine.createSpy('save').and.resolveTo(true)
   })
 
   async function create(isAdmin = false) {
@@ -81,6 +93,7 @@ describe('SettingsTableComponent (plan 756)', () => {
           useValue: { setup_: setupSig, setupLoaded_: loaded, setupFailed_: failed, loadSetup }
         },
         { provide: ModuleService, useValue: { has: () => tables() } },
+        { provide: AssistantEngineSettingsService, useValue: { save } },
         { provide: TranslationService, useValue: { translate: (k: string) => DICT[k] ?? k } }
       ]
     }).compileComponents()
@@ -174,6 +187,133 @@ describe('SettingsTableComponent (plan 756)', () => {
     expect(blocked.cursor).toBe('not-allowed')
     expect(blocked.pointerEvents).not.toBe('none')
     expect(getComputedStyle(byId('set-change-level')!).opacity).toBe('1')
+  })
+
+  describe('plan 760: the engine numbers', () => {
+    const engineRows = SETTING_ROWS.filter((r) => r.value === 'engine')
+    const adminSetup: EditableSetup = {
+      ...setup,
+      editable: true,
+      limits: {
+        quietMs: { min: 1000, max: 10000, unit: 'ms' },
+        maxWaitMs: { min: 3000, max: 30000, unit: 'ms' },
+        dailyTurns: { min: 1, max: 2000, unit: 'daily' },
+        turnLimit: { min: 1, max: 50, unit: 'replies' },
+        followUpMax: { min: 0, max: 10, unit: 'replies' },
+        historyWindow: { min: 2, max: 40, unit: 'messages' },
+        glueMax: { min: 1, max: 10, unit: 'messages' },
+        factsMaxChars: { min: 1000, max: 20000, unit: 'chars' },
+        firstModelMs: { min: 2000, max: 14000, unit: 'ms' },
+        turnBudgetMs: { min: 10000, max: 60000, unit: 'ms' }
+      }
+    }
+    const input = (id: string) => byId('set-input-' + id) as HTMLInputElement
+    const press = (id: string) => {
+      byId(id)!.click()
+      fixture.detectChanges()
+    }
+    const type = (id: string, text: string) => {
+      input(id).value = text
+      input(id).dispatchEvent(new Event('input'))
+      fixture.detectChanges()
+    }
+    async function createAdmin() {
+      setupSig.set(adminSetup)
+      await create(true)
+    }
+
+    it('gives the platform admin "change" on each engine row, and no lock', async () => {
+      await createAdmin()
+      expect(engineRows.length).toBe(10)
+      for (const row of engineRows) {
+        expect(byId('set-change-' + row.id))
+          .withContext(row.id)
+          .not.toBeNull()
+        expect(byId('set-row-' + row.id)!.textContent)
+          .withContext(row.id)
+          .not.toContain('קבוע במערכת')
+      }
+      expect(byId('set-change-guard_words')).toBeNull()
+      expect(byId('set-value-quiet_wait')!.textContent!.trim()).toBe('2.0 שנ׳')
+    })
+
+    it('opens a number box in the row with its unit and range', async () => {
+      await createAdmin()
+      expect(byId('set-edit-quiet_wait')).toBeNull()
+      press('set-change-quiet_wait')
+      expect(input('quiet_wait').value).toBe('2.0')
+      expect(input('quiet_wait').min).toBe('1.0')
+      expect(input('quiet_wait').max).toBe('10.0')
+      const text = byId('set-edit-quiet_wait')!.textContent!.replace(/\s+/g, ' ')
+      expect(text).toContain('טווח: 1.0–10.0 שנ׳')
+      expect(byId('set-save-quiet_wait')!.textContent!.trim()).toBe('שמירה')
+      expect(byId('set-cancel-quiet_wait')!.textContent!.trim()).toBe('ביטול')
+      press('set-change-turn_limit')
+      expect(byId('set-edit-quiet_wait')).toBeNull()
+      expect(input('turn_limit').value).toBe('8')
+      expect(byId('set-edit-turn_limit')!.textContent).toContain('תשובות')
+    })
+
+    it('saves the typed seconds as milliseconds and closes the box', async () => {
+      await createAdmin()
+      press('set-change-quiet_wait')
+      type('quiet_wait', '4')
+      press('set-save-quiet_wait')
+      await fixture.whenStable()
+      fixture.detectChanges()
+      expect(save).toHaveBeenCalledOnceWith('quietMs', 4000)
+      expect(byId('set-edit-quiet_wait')).toBeNull()
+    })
+
+    it('keeps the box open and the old value when the save fails', async () => {
+      save.and.resolveTo(false)
+      await createAdmin()
+      press('set-change-turn_limit')
+      type('turn_limit', '9')
+      press('set-save-turn_limit')
+      await fixture.whenStable()
+      fixture.detectChanges()
+      expect(save).toHaveBeenCalledOnceWith('turnLimit', 9)
+      expect(byId('set-edit-turn_limit')).not.toBeNull()
+      expect(byId('set-value-turn_limit')!.textContent).toContain('asr_engine_val_turnLimit')
+    })
+
+    it('does not save a number outside the range, or an empty box', async () => {
+      await createAdmin()
+      press('set-change-quiet_wait')
+      for (const text of ['0.5', '11', '']) {
+        type('quiet_wait', text)
+        expect(byId('set-save-quiet_wait')!.getAttribute('aria-disabled')).withContext(text).toBe('true')
+        press('set-save-quiet_wait')
+      }
+      expect(save).not.toHaveBeenCalled()
+    })
+
+    it('closes the box on cancel without saving', async () => {
+      await createAdmin()
+      press('set-change-quiet_wait')
+      press('set-cancel-quiet_wait')
+      expect(byId('set-edit-quiet_wait')).toBeNull()
+      expect(save).not.toHaveBeenCalled()
+    })
+
+    it('keeps the rows locked for an owner, with the same tooltip', async () => {
+      await create()
+      for (const row of engineRows) {
+        expect(byId('set-change-' + row.id))
+          .withContext(row.id)
+          .toBeNull()
+        expect(byId('set-row-' + row.id)!.textContent)
+          .withContext(row.id)
+          .toContain('קבוע במערכת')
+      }
+      const chip = byId('set-row-quiet_wait')!.querySelector<HTMLElement>('.asr-set__who [tabindex="0"]')!
+      chip.dispatchEvent(new Event('focusin'))
+      fixture.detectChanges()
+      const tipId = chip.getAttribute('aria-describedby')!
+      expect(document.getElementById(tipId)!.textContent).toContain('חלק מהמנוע')
+      chip.dispatchEvent(new Event('focusout'))
+    })
   })
 
   it('shows a loader until the setup is here', async () => {

@@ -58,6 +58,12 @@ describe('server/constants/collections.js', () => {
     }
   });
 
+  it('plan 760: the platform settings are server-only', () => {
+    expect(COLLECTIONS.find(c => c.name === 'platformSettings')).toEqual({
+      name: 'platformSettings', userData: false, cloneable: false, backup: false, searchable: false, softDelete: false,
+    });
+  });
+
   it('suppliers precedes products in CLONEABLE_TYPES (supplierIdMap ordering)', () => {
     expect(CLONEABLE_TYPES.indexOf('suppliers')).toBeLessThan(CLONEABLE_TYPES.indexOf('products'));
   });

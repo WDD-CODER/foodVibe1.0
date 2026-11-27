@@ -5,11 +5,12 @@
  * business always comes from the signed token; every query lives in `services/frontdesk-runs.js`. A real guest's words
  * reach the acting platform admin only by opening the run, and that leaves a trace on it. Logs carry ids, counts and
  * enums only — never text from a run. Plan 756 adds `GET /setup`: how the assistant is set up
- * (`services/assistant-setup.js`), for the same readers.
+ * (`services/assistant-setup.js`), for the same readers. Plan 760 adds `PUT /engine-settings`: the platform admin
+ * saves one engine number (`services/assistant-engine-settings.js`); nobody else may.
  */
 const { Router } = require('express');
 const mongoose = require('mongoose');
-const { verifyToken, isPlatformAdmin } = require('../middleware/auth');
+const { verifyToken, isPlatformAdmin, requirePlatformAdmin } = require('../middleware/auth');
 const { requireModule } = require('../middleware/require-module');
 const { dataWriteLimiter } = require('../middleware/write-limit');
 const { scopeFilter } = require('../utils/business-scope');
@@ -18,6 +19,9 @@ const { logger } = require('../logger');
 const { listRuns, loadRun, markAdminView } = require('../services/frontdesk-runs');
 const { TURN_SYSTEM_PROMPT, TABLE_SYSTEM_PROMPT } = require('../services/frontdesk-prompt');
 const { assistantSetup } = require('../services/assistant-setup');
+const { saveEngineSetting } = require('../services/assistant-engine-settings');
+const { engineSettingSaveSchema } = require('../generated/schemas/front-desk/engine-settings.schema');
+const { actorOf } = require('../utils/actor');
 
 const router = Router();
 const db = () => mongoose.connection.db;
@@ -82,6 +86,19 @@ router.get('/setup', async (req, res) => {
     return res.json(out);
   } catch (err) {
     return failed(req, res, 'assistant_runs.setup.failed', err);
+  }
+});
+
+// The numbers are one shared, platform-wide document: only the platform admin writes it.
+router.put('/engine-settings', requirePlatformAdmin, async (req, res) => {
+  try {
+    const parsed = engineSettingSaveSchema.safeParse(req.body);
+    if (!parsed.success) return badInput(res);
+    const saved = await saveEngineSetting(db(), { ...parsed.data, actor: actorOf(req), log: logOf(req) });
+    if (!saved.ok) return res.status(400).json({ error: saved.reason, min: saved.min, max: saved.max });
+    return res.json({ engine: saved.engine, limits: saved.limits });
+  } catch (err) {
+    return failed(req, res, 'assistant_engine.save.failed', err);
   }
 });
 

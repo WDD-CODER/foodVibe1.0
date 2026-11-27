@@ -4,9 +4,12 @@ import type { SettingRow, SettingValueKind } from './assistant-settings.data'
 /** Plan 756: one setting's value for this business — a dictionary key with its numbers, or text that is not translated. */
 export type SettingValue = { key: string; params?: Record<string, string | number> } | { text: string } | null
 
-/** An engine number as it is shown: a time in milliseconds becomes seconds, with at most one decimal. */
-export const engineAmount = (field: keyof AssistantEngine, engine: AssistantEngine): number =>
-  field.endsWith('Ms') ? Math.round(engine[field] / 100) / 10 : engine[field]
+/** A time in milliseconds as seconds, always with one decimal. */
+export const engineSeconds = (ms: number): string => (ms / 1000).toFixed(1)
+
+/** An engine number as it is shown: a time in milliseconds becomes seconds with one decimal. */
+export const engineAmount = (field: keyof AssistantEngine, engine: AssistantEngine): number | string =>
+  field.endsWith('Ms') ? engineSeconds(engine[field]) : engine[field]
 
 type BusinessKind = Exclude<SettingValueKind, 'models' | 'engine' | 'none'>
 
@@ -41,7 +44,9 @@ export function settingValue(row: SettingRow, setup: AssistantSetup | null, isAd
   if (kind === 'models') return isAdmin && setup.models?.length ? { text: setup.models.join(' → ') } : null
   if (kind === 'engine') {
     const field = row.engineField
-    return field ? { key: `asr_engine_val_${field}`, params: { n: engineAmount(field, setup.engine) } } : null
+    if (!field) return null
+    const key = field.endsWith('Ms') ? 'asr_engine_val_seconds' : `asr_engine_val_${field}`
+    return { key, params: { n: engineAmount(field, setup.engine) } }
   }
   return setup.business ? BUSINESS_VALUES[kind](setup.business) : null
 }

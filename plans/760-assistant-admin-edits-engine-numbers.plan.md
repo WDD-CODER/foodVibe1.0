@@ -107,6 +107,7 @@ append the path to the scope block above and retry.
 - INV-2: preserves — the settings document is platform-wide, not business data; no business-scoped query changes.
 - INV-4: preserves — the save body is validated on the server by a Zod schema in `shared/schemas/front-desk/`.
 - INV-6: preserves — AI calls still go only through the server; only the numbers they read change.
+- INV-7: preserves — the table engine still decides every table; `server/services/frontdesk-turn.js` only reads the engine's numbers from the settings service.
 - INV-none: preserves — no money field, no module gate, no CSP change.
 
 ## Reuse Check
@@ -162,11 +163,11 @@ line or file this plan names was removed, renamed or rewritten).
 
 These are the plan's milestones: a Worker does them in order and ticks each one after it is checked.
 
-- [ ] D1: Write the server test for defaults, admin save, ranges, refusals and history — server/test/assistant-engine-settings.test.js
-- [ ] D2: Add the engine settings service with defaults (quiet wait 3 s) and history — server/services/assistant-engine-settings.js
-- [ ] D3: Read every engine number through the service — server/services/inbound.js
-- [ ] D4: Let the admin edit each number inline on the settings tab — src/app/pages/frontdesk/assistant/components/settings-table/settings-table.component.ts
-- [ ] D5: Remove the redundant «reads» field from the flow map — src/app/pages/frontdesk/assistant/components/flow-map/flow-map.component.html
+- [x] D1: Write the server test for defaults, admin save, ranges, refusals and history — server/test/assistant-engine-settings.test.js
+- [x] D2: Add the engine settings service with defaults (quiet wait 3 s) and history — server/services/assistant-engine-settings.js
+- [x] D3: Read every engine number through the service — server/services/inbound.js
+- [x] D4: Let the admin edit each number inline on the settings tab — src/app/pages/frontdesk/assistant/components/settings-table/settings-table.component.ts
+- [x] D5: Remove the redundant «reads» field from the flow map — src/app/pages/frontdesk/assistant/components/flow-map/flow-map.component.html
 - [ ] D6: Run every automatic check and paste the outputs under Execution Notes — plans/760-assistant-admin-edits-engine-numbers.plan.md
 
 ## What happens when
@@ -185,3 +186,37 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
 - none
 
 ## Execution Notes
+
+Builder, round 0 (2026-11-27).
+
+- Step 0: `scope-check --drift` → `REALITY: drift` (8 commits on `origin/main`, none an ancestor of this branch; they touch
+  only registry / breadcrumbs files in scope, no symbol this plan names) → ok.
+- `INV-7` line added under Architecture Impact: `--arch` asked for it (`frontdesk-turn.js` is in INV-7's Touches).
+- The save route is `PUT /api/v1/assistant-runs/engine-settings` `{ field, value }`.
+
+**Open (D6): `pnpm run test:server` exits non-zero until two test files outside the scope are updated.**
+185 test files pass, 2 fail (11 of 2840 tests), each because it asserts the old 2 s quiet wait:
+
+- `server/test/inbound.test.js` (10): the numbers become 3000; five-message burst waits `[500, 1500, 3000, 3000, 3000]`;
+  "a follow-up waits what is left" cases use 3000.
+- `server/test/frontdesk-one-run.test.js` (1, line 188): `calls[0]` is 3000.
+
+`plan-ledger-check` fails on the base too: `.claude/todo.md` names plans 758, 759 and 761, which this branch does not hold
+(this branch changes neither). The three files are on `origin/main`. The check is the last step of the pre-commit hook, so
+`git commit` exits 1 and nothing is committed or pushed; the work is staged in the builder folder. The hook was not
+bypassed (`--no-verify` is denied in `.claude/settings.json`).
+
+Evidence:
+
+- `pnpm run build` → exit 0
+- `pnpm run lint` → exit 0 (0 errors, 72 warnings)
+- `pnpm run test:ci` → exit 0, `TOTAL: 3346 SUCCESS`
+- `pnpm run test:server` → `Test Files 2 failed | 185 passed (187)`, `Tests 11 failed | 2829 passed (2840)`
+- `vitest run test/assistant-engine-settings.test.js test/collections.test.js test/assistant-runs-router.test.js` →
+  3 files, 41 tests passed
+- `scope-check --arch` → `ARCH: ok`; `--reuse` → `REUSE: ok`; gate scope check → `SCOPE: ok`
+- `kit-manifest-check` → ok; `kit-checks` → `KIT_CHECKS: ok (6 checks)`; `override-check` → ok
+- `breadcrumbs-check` → clean; `inventory --check` → ok; `lint:icons`, `lint:no-native-select` → ok
+- `log-query --since=plan-start --level=error` → `SKIP: no database configured`
+- `ci-scope-check --checkout-branch` → skipped, exit 0
+- `plan-ledger-check` → exit 1 (see above)

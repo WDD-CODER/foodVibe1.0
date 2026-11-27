@@ -3380,6 +3380,15 @@
     "asr_set_guard_words": "מילים שמעבירות את השיחה מיד לצוות",
     "asr_set_facts_budget": "כמה מידע על העסק נשלח ל-AI בכל פעם",
     "asr_set_prompt_rules": "כללי הבית של העוזר",
-    "asr_set_answer_checks": "מבנה התשובה ובדיקות הבטיחות"
+    "asr_set_answer_checks": "מבנה התשובה ובדיקות הבטיחות",
+    "asr_engine_val_seconds": "{n} שנ׳",
+    "asr_set_range": "טווח:",
+    "asr_set_out_of_range": "המספר צריך להיות בתוך הטווח",
+    "asr_set_save_failed": "השמירה נכשלה. הערך הקודם נשאר.",
+    "asr_unit_ms": "שנ׳",
+    "asr_unit_daily": "תשובות ביום",
+    "asr_unit_replies": "תשובות",
+    "asr_unit_messages": "הודעות",
+    "asr_unit_chars": "תווים"
   }
 }

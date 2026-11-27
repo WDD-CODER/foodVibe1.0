@@ -107,13 +107,22 @@ describe('FlowMapComponent (plan 756)', () => {
     expect(all('flow-reason-code').map((c) => c.textContent!.trim())).toContain('unsupported_time')
   })
 
+  it('shows what can stop an open step and no "what this step reads" row (plan 760)', async () => {
+    await create()
+    press('flow-step-precheck')
+    const titles = Array.from(panel('precheck')!.querySelectorAll('dt')).map((t) => t.textContent!.trim())
+    expect(titles).toContain('asr_flow_stops')
+    expect(titles).not.toContain('asr_flow_reads')
+    expect(panel('precheck')!.textContent).not.toContain('asr_flow_reads')
+  })
+
   it('shows the current values from the engine, in seconds', async () => {
     await create()
     press('flow-step-inbound')
     const lines = all('flow-engine')
     expect(lines.length).toBe(2)
-    expect(lines[0].textContent).toContain('3')
-    expect(lines[1].textContent).toContain('9')
+    expect(lines[0].textContent).toContain('3.0')
+    expect(lines[1].textContent).toContain('9.0')
     expect(panel('inbound')!.textContent).toContain('השלב הזה לא עוצר')
   })
 

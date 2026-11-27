@@ -24,24 +24,28 @@ const { checkStoredDoc, badRequest } = require('../../middleware/validate');
 const { newId } = require('../../utils/id');
 const { withShapeReminder } = require('../../services/frontdesk-prompt');
 const { buildCorrectionBody } = require('../../services/knowledge-correction-prompt');
+const { ENGINE_DEFAULTS, engineNow } = require('../../services/assistant-engine-settings');
 
 const router = Router();
 
-const TURN_BUDGET_MS = 35000;
+/** The default of the longest one turn may spend on the model (`turnBudgetMs`). */
+const TURN_BUDGET_MS = ENGINE_DEFAULTS.turnBudgetMs;
 const MIN_RETRY_MS = 2000; // the floor of plan 701's MIN_CALL_MS
 // Plan 754 (R-30): the first model gets 6 s, then the next one is tried. From the simulator tests of 2026-11-23..25:
 // 71 % of the first model's good answers came within 6 s; 13 % of its calls ran into the 15 s limit. Tune it from
-// `aiUsage` (`errorCode: 'slow'`, `latencyMs`) — see plan 754, Technical Considerations.
-const FIRST_MODEL_LIMIT_MS = 6000;
+// `aiUsage` (`errorCode: 'slow'`, `latencyMs`) — see plan 754, Technical Considerations. Plan 760: both limits are
+// engine settings; these are their defaults.
+const FIRST_MODEL_LIMIT_MS = ENGINE_DEFAULTS.firstModelMs;
 const issuePaths = issues => issues.slice(0, 10).map(i => (i.path.length ? i.path.join('.') : '(root)'));
 const issueCodes = issues => issues.slice(0, 10).map(i => i.code);
 
 /**
- * One model call, and one retry on a malformed answer, inside the same 35 s budget. `{ ok: true, answer }` or
+ * One model call, and one retry on a malformed answer, inside one budget (`turnBudgetMs`). `{ ok: true, answer }` or
  * `{ ok: false, reason }`; `reason` is the failure kind of `callGemini`, `bad_json` or `bad_shape`. Never throws.
  * `trace` (plan 752) tells the run record which model answered, each try and the raw text; it never goes to a log.
  */
-async function askTurnModel({ body, usage, log }) {
+async function askTurnModel({ body, usage, log, engine = engineNow() }) {
+  const { turnBudgetMs, firstModelMs } = engine;
   const startedAt = Date.now();
   const trace = { attempts: [], model: null, raw: '', rawChars: 0, shapeTries: 1 };
   const attempt = async (reqBody, deadlineMs, n) => {
@@ -52,7 +56,7 @@ async function askTurnModel({ body, usage, log }) {
     // Plan 754: a slow first model does too; the trace gets one entry per HTTP call.
     const call = await callGemini({
       body: reqBody, timeoutMs: 15000, deadlineMs, fallback: true, log, eventPrefix: 'frontdesk.turn', usage,
-      firstLimitMs: FIRST_MODEL_LIMIT_MS, onCall: c => trace.attempts.push({ ...c, try: n }),
+      firstLimitMs: firstModelMs, onCall: c => trace.attempts.push({ ...c, try: n }),
     });
     // A refusal made no HTTP call (all exhausted, the business's cap, a removed model): it still shows as one entry.
     if (trace.attempts.length === before) {
@@ -78,9 +82,9 @@ async function askTurnModel({ body, usage, log }) {
     return { ok: true, answer: parsed.data };
   };
   const strip = ({ retry: _retry, ...rest }) => ({ ...rest, trace: { ...trace, firstModel: modelChain()[0] ?? null } });
-  const first = await attempt(body, TURN_BUDGET_MS, 1);
+  const first = await attempt(body, turnBudgetMs, 1);
   if (!first.retry) return strip(first);
-  const left = TURN_BUDGET_MS - (Date.now() - startedAt);
+  const left = turnBudgetMs - (Date.now() - startedAt);
   if (left < MIN_RETRY_MS) return strip(first);
   return strip(await attempt(withShapeReminder(body), left, 2));
 }

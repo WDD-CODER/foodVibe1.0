@@ -37,7 +37,10 @@ export interface SettingRow {
 const SETTINGS = '/frontdesk/settings'
 const KNOWLEDGE = '/frontdesk/knowledge'
 
-/** A number fixed in the engine: the same for every business. */
+/** Where an engine number's default and range live. */
+const engineCode = (field: keyof AssistantEngine): string => `server/services/assistant-engine-settings.js · ${field}`
+
+/** An engine number: the same for every business; only the platform admin changes it (plan 760). */
 const fixedNumber = (
   id: string,
   steps: readonly RunStepKey[],
@@ -80,15 +83,15 @@ export const SETTING_ROWS: readonly SettingRow[] = [
     value: 'models'
   },
   { id: 'monthly_cap', steps: ['ai'], who: 'foodvibe', route: '/platform', value: 'none' },
-  fixedNumber('daily_turns', ['limit'], 'dailyTurns', 'server/services/frontdesk-turn.js · FRONTDESK_DAILY_TURNS'),
-  fixedNumber('quiet_wait', ['inbound'], 'quietMs', 'server/services/inbound.js · QUIET_MS'),
-  fixedNumber('max_wait', ['inbound'], 'maxWaitMs', 'server/services/inbound.js · MAX_WAIT_MS'),
-  fixedNumber('history_window', ['history'], 'historyWindow', 'server/services/frontdesk-prompt.js · HISTORY_WINDOW'),
-  fixedNumber('glue_max', ['prompt'], 'glueMax', 'server/services/frontdesk-prompt.js · GLUE_MAX'),
-  fixedNumber('turn_limit', ['precheck'], 'turnLimit', 'server/services/frontdesk-guardrails.js · TURN_LIMIT'),
-  fixedNumber('follow_up_max', ['precheck'], 'followUpMax', 'server/services/frontdesk-guardrails.js · FOLLOW_UP_MAX'),
-  fixedNumber('first_model_limit', ['ai'], 'firstModelMs', 'server/routes/ai/frontdesk.js · FIRST_MODEL_LIMIT_MS'),
-  fixedNumber('turn_budget', ['ai'], 'turnBudgetMs', 'server/routes/ai/frontdesk.js · TURN_BUDGET_MS'),
+  fixedNumber('daily_turns', ['limit'], 'dailyTurns', engineCode('dailyTurns')),
+  fixedNumber('quiet_wait', ['inbound'], 'quietMs', engineCode('quietMs')),
+  fixedNumber('max_wait', ['inbound'], 'maxWaitMs', engineCode('maxWaitMs')),
+  fixedNumber('history_window', ['history'], 'historyWindow', engineCode('historyWindow')),
+  fixedNumber('glue_max', ['prompt'], 'glueMax', engineCode('glueMax')),
+  fixedNumber('turn_limit', ['precheck'], 'turnLimit', engineCode('turnLimit')),
+  fixedNumber('follow_up_max', ['precheck'], 'followUpMax', engineCode('followUpMax')),
+  fixedNumber('first_model_limit', ['ai'], 'firstModelMs', engineCode('firstModelMs')),
+  fixedNumber('turn_budget', ['ai'], 'turnBudgetMs', engineCode('turnBudgetMs')),
   {
     id: 'guard_words',
     steps: ['precheck'],
@@ -100,7 +103,7 @@ export const SETTING_ROWS: readonly SettingRow[] = [
     'facts_budget',
     ['facts'],
     'factsMaxChars',
-    'server/services/knowledge.js · MAX_FACTS_CHARS · server/services/fact-pick.js · pickFacts'
+    `${engineCode('factsMaxChars')} · server/services/fact-pick.js · pickFacts`
   ),
   {
     id: 'prompt_rules',

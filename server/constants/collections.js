@@ -79,6 +79,9 @@ const COLLECTIONS = [
   { name: 'messages',                 userData: false, cloneable: false, backup: false, searchable: false, softDelete: false }, // C-CONV, plan 675
   { name: 'tableHolds',               userData: false, cloneable: false, backup: false, searchable: false, softDelete: false }, // C-HOLD, INV-7, plan 667
   { name: 'assistantRuns',            userData: false, cloneable: false, backup: false, searchable: false, softDelete: false }, // C-RUNS, plan 752: server-only; read through routes/assistant-runs.js
+  // Plan 760: platform-wide settings, not business data (one document per subject). Server-only; the platform admin
+  // writes it through routes/assistant-runs.js.
+  { name: 'platformSettings',         userData: false, cloneable: false, backup: false, searchable: false, softDelete: false },
 ]
 
 const ALL_USER_ENTITY_TYPES = COLLECTIONS.filter(c => c.userData).map(c => c.name)

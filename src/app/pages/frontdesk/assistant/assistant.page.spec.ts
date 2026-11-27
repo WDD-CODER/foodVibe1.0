@@ -5,6 +5,7 @@ import { BehaviorSubject } from 'rxjs'
 import { ListChecks, LucideAngularModule, Settings } from 'lucide-angular'
 import { TEST_LUCIDE_ICONS } from 'src/testing/test-lucide-icons'
 import { AssistantRunDataService } from '@services/assistant-run-data.service'
+import { AssistantEngineSettingsService } from './assistant-engine-settings.service'
 import { ModuleService } from '@services/module.service'
 import { PermissionService } from '@services/permission.service'
 import { TranslationService } from '@services/translation.service'
@@ -93,6 +94,7 @@ describe('AssistantPage (plan 752)', () => {
         { provide: PermissionService, useValue: { isOwner_: owner } },
         { provide: UserService, useValue: { isPlatformAdmin_: admin, user_: signedIn } },
         { provide: ModuleService, useValue: { has: () => true } },
+        { provide: AssistantEngineSettingsService, useValue: { save: () => Promise.resolve(true) } },
         { provide: TranslationService, useValue: { translate: (k: string) => DICT[k] ?? k } }
       ]
     }).compileComponents()
