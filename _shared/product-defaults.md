@@ -213,3 +213,15 @@ Each default is one `### <id>` section with these fields, one `- field: value` l
 - card: a screen with a summary box · change one typed number without saving · the summary box shows the new result at once
 - exceptions: (say where it does not apply)
 - turned on: the Human, 2026-11-26
+
+### tooltip-tap-dismiss
+
+- status: on
+- rule: On a phone, tapping a control that cannot be used shows its tooltip, and any tap or scroll anywhere hides it; on bigger screens only hovering shows a tooltip and a click never pins it.
+- applies when: custom
+- plan words: \b(?:tooltip|hint|disabled|blocked|cannot be used)\b
+- how: the shared tooltip directive [appTooltip] and appDisabledWhy (src/app/shared/tooltip/, family tooltip; reaches main with orch/biz-house, plan 762)
+- check: card
+- card: a page with a blocked button · at phone width tap it, then tap elsewhere or scroll; on a desktop click it, then hover it · phone: the tooltip shows and then hides; desktop: a click shows nothing and hover shows it
+- exceptions: (say where it does not apply)
+- turned on: the Human, 2026-11-27
