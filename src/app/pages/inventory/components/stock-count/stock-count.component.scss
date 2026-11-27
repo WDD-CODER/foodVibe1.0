@@ -5,7 +5,8 @@
     display: block;
   }
 
-  // Plan 762: above a phone the row's two containers take no place of their own, so the row stays one line.
+  // Plans 762/763: above a narrow phone the row's two containers take no place of their own, so the row stays
+  // one line.
   .stock-count__name-box,
   .stock-count__controls {
     display: contents;
@@ -172,9 +173,9 @@
   }
 }
 
-// Plan 762: on a phone each row is two lines — the name, then the controls in the list's own columns, under their
-// headings. Outside @layer so it wins over the unlayered .c-list-body-cell rules in styles.scss.
-@media (max-width: $break-phone-max) {
+// Plans 762/763: on a narrow phone (≤ 419px) each row is two lines — the name, then the controls in the list's own
+// columns, under their headings. Outside @layer so it wins over the unlayered .c-list-body-cell rules in styles.scss.
+@media (max-width: $break-phone-narrow-max) {
   :host .stock-count__head-name,
   :host .stock-count__name-box,
   :host .stock-count__controls {

@@ -73,6 +73,8 @@ export class NutritionBadgeComponent {
 
       if (!el.matches(':popover-open')) el.showPopover()
       this.place_(el)
+      // Measure again once the box has painted, as the shared tooltip does: a late font may have changed its size.
+      const frame = requestAnimationFrame(() => this.place_(el))
 
       const reposition = (event?: Event): void => {
         // Scrolling the tooltip's own content is not a page scroll — leave it where it is.
@@ -82,6 +84,7 @@ export class NutritionBadgeComponent {
       window.addEventListener('scroll', reposition, true)
       window.addEventListener('resize', reposition)
       onCleanup(() => {
+        cancelAnimationFrame(frame)
         window.removeEventListener('scroll', reposition, true)
         window.removeEventListener('resize', reposition)
       })
@@ -116,8 +119,9 @@ export class NutritionBadgeComponent {
     tooltip.style.top = `${top}px`
     tooltip.style.left = `${left}px`
     // Physical offset on purpose: this is a geometric distance from the box's
-    // left edge, independent of the tooltip's RTL text direction.
-    tooltip.style.setProperty('--nb-arrow-x', `${badgeCenterX - left}px`)
+    // left edge, independent of the tooltip's RTL text direction. The arrow is
+    // positioned inside the border, so the border is taken off.
+    tooltip.style.setProperty('--nb-arrow-x', `${badgeCenterX - left - tooltip.clientLeft}px`)
     this.updateScrollHints()
   }
 

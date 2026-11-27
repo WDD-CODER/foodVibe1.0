@@ -411,6 +411,8 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 - the browser breakpoint constants (plan 656): `breakpoints` in `src/app/core/utils/breakpoints.ts` — `PHONE_MAX`,
   `TABLET_MAX`, `PHONE_QUERY`, `TABLET_DOWN_QUERY`, `DESKTOP_QUERY` (phone ≤767, tablet ≤1023, desktop ≥1024); the
   only `.ts` file that types a media width. Styles use the same names from `src/app/core/styles/_breakpoints.scss`.
+  Plan 763 adds one narrow step inside the phone range: `PHONE_NARROW_MAX` / `PHONE_NARROW_QUERY` in the browser code,
+  `$break-phone-narrow-max` (≤419) in the styles — the stock count's two-line rows.
 - the net price of a dish (plan 724): `netPriceOf` in `shared/schemas/dish-analysis/net-price.ts` — the price without VAT
   by the business VAT rate and dealer type (`patur` = unchanged); the menu page, the month close and the analysis use it.
 - the month key (plan 726): `month-key.util` in `src/app/core/utils/month-key.util.ts` — `currentMonthKey`, `shiftMonthKey`, `isMonthKey`, `monthKeyLabel` for a `YYYY-MM` month; the monthly plan page (727) uses it too.

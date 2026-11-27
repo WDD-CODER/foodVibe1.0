@@ -237,6 +237,49 @@ describe('InventoryProductListComponent', () => {
       expect((component as any).getSupplierName('')).toBe('')
     })
   })
+  describe('the nutrition leaf in one fixed spot (plan 763)', () => {
+    const product = (id: string, nameHebrew: string, withNutrition: boolean): Product =>
+      ({
+        _id: id,
+        nameHebrew,
+        categories: ['Pantry'],
+        sources: [{ supplierId: 'Supplier A', price: 5 }],
+        purchaseOptions: [],
+        allergens: [],
+        baseUnit: 'kg',
+        ...(withNutrition ? { nutritionPer100g: { proteinG: 3, fatG: 1 } } : {})
+      }) as unknown as Product
+
+    it('every name cell keeps a slot of one width, and every leaf sits at the same spot in it', () => {
+      const state = TestBed.inject(KitchenStateService) as unknown as {
+        products_: ReturnType<typeof signal<Product[]>>
+      }
+      state.products_.set([
+        product('a', 'מלח', true),
+        product('b', 'שמן זית כתית מעולה בכבישה קרה מהגליל העליון', true),
+        product('c', 'קמח', false)
+      ])
+      ;(component as any).searchQuery_.set('')
+      ;(component as any).activeFilters_.set({})
+      fixture.detectChanges()
+      const root = fixture.nativeElement as HTMLElement
+      const cells = Array.from(root.querySelectorAll<HTMLElement>('.col-name.c-list-body-cell'))
+      expect(cells.length).toBe(3)
+      const slots = cells.map((cell) => cell.querySelector<HTMLElement>(':scope > .name-nutrition-slot')!)
+      expect(slots.every((slot) => !!slot)).toBeTrue()
+      expect(new Set(slots.map((slot) => Math.round(slot.getBoundingClientRect().width))).size).toBe(1)
+      expect(root.querySelector('.name-text app-nutrition-badge')).toBeNull()
+      const leaves = cells.flatMap((cell) => {
+        const leaf = cell.querySelector<HTMLElement>('.nb-leaf')
+        if (!leaf) return []
+        const rect = leaf.getBoundingClientRect()
+        return [Math.round(rect.left + rect.width / 2 - cell.getBoundingClientRect().left)]
+      })
+      expect(leaves.length).toBe(2)
+      expect(new Set(leaves).size).toBe(1)
+    })
+  })
+
   describe('one status mark per row (plan 462)', () => {
     const base = {
       nameHebrew: 'Item',

@@ -74,4 +74,100 @@ describe('NutritionBadgeComponent (tap, hover and scroll hints, plan 348)', () =
     expect(component.canScrollDown_()).toBeTrue()
     expect(component.canScrollUp_()).toBeFalse()
   })
+
+  describe('plan 763 — the box opens in the same place every time', () => {
+    const GAP = 8
+    const MARGIN = 8
+    const host = (): HTMLElement => fixture.nativeElement as HTMLElement
+    const viewW = (): number => document.documentElement.clientWidth
+    const viewH = (): number => document.documentElement.clientHeight
+
+    const putBadgeAt = (top: number, left: number): void => {
+      Object.assign(host().style, { position: 'fixed', top: `${top}px`, left: `${left}px` })
+    }
+
+    /** Opens the box, reads where it sits against the leaf, and closes it again. */
+    const openAndMeasure = () => {
+      wrap().click()
+      fixture.detectChanges()
+      const element = tooltip()!
+      const box = element.getBoundingClientRect()
+      const badge = host().getBoundingClientRect()
+      const below = element.classList.contains('nb-tooltip--below')
+      const arrowX = box.left + element.clientLeft + parseFloat(element.style.getPropertyValue('--nb-arrow-x'))
+      const scroller = element.querySelector<HTMLElement>('.nb-scroll-body')!
+      const measured = {
+        below,
+        gap: below ? box.top - badge.bottom : badge.top - box.bottom,
+        offCentre: box.left + box.width / 2 - (badge.left + badge.width / 2),
+        arrowOffLeaf: arrowX - (badge.left + badge.width / 2),
+        left: box.left,
+        right: box.right,
+        width: box.width,
+        height: box.height,
+        capped: element.style.maxHeight !== '',
+        hidden: scroller.scrollHeight - scroller.clientHeight,
+        truncated: Array.from(element.querySelectorAll<HTMLElement>('.nb-row-label')).filter(
+          (label) => label.scrollWidth > label.clientWidth
+        ).length
+      }
+      wrap().click()
+      fixture.detectChanges()
+      return measured
+    }
+
+    afterEach(() => host().removeAttribute('style'))
+
+    it('near the bottom: above the leaf, the standard gap, centred on it, placed from the final size', () => {
+      putBadgeAt(viewH() - 40, viewW() / 2)
+      const box = openAndMeasure()
+      expect(box.below).toBeFalse()
+      expect(Math.abs(box.gap - GAP)).toBeLessThanOrEqual(1)
+      expect(Math.abs(box.offCentre)).toBeLessThanOrEqual(1)
+      expect(Math.abs(box.arrowOffLeaf)).toBeLessThanOrEqual(1)
+      // The height used to place it was the content's final one: header, legend, rows and note are all in it.
+      expect(box.height).toBeGreaterThan(80)
+      if (!box.capped) expect(box.hidden).toBeLessThanOrEqual(0)
+    })
+
+    it('near the top (no room above): below the leaf, the same gap, centred on it', () => {
+      putBadgeAt(10, viewW() / 2)
+      const box = openAndMeasure()
+      expect(box.below).toBeTrue()
+      expect(Math.abs(box.gap - GAP)).toBeLessThanOrEqual(1)
+      expect(Math.abs(box.offCentre)).toBeLessThanOrEqual(1)
+      expect(Math.abs(box.arrowOffLeaf)).toBeLessThanOrEqual(1)
+    })
+
+    for (const where of ['top', 'bottom'] as const) {
+      it(`opening twice on the same badge near the ${where} gives the same place`, () => {
+        putBadgeAt(where === 'top' ? 10 : viewH() - 40, viewW() / 2)
+        const first = openAndMeasure()
+        const second = openAndMeasure()
+        expect(second).toEqual(first)
+      })
+    }
+
+    for (const edge of ['left', 'right'] as const) {
+      it(`at the ${edge} screen edge the box is pushed inside and the arrow stays on the leaf`, () => {
+        putBadgeAt(viewH() - 40, edge === 'left' ? 0 : viewW() - 18)
+        const box = openAndMeasure()
+        expect(box.left).toBeGreaterThanOrEqual(MARGIN - 0.5)
+        expect(box.right).toBeLessThanOrEqual(viewW() - MARGIN + 0.5)
+        expect(Math.abs(box.gap - GAP)).toBeLessThanOrEqual(1)
+        expect(Math.abs(box.arrowOffLeaf)).toBeLessThanOrEqual(1)
+      })
+    }
+
+    it('is as wide as its text: no label is cut off, and a longer figure makes it wider', () => {
+      putBadgeAt(viewH() - 40, viewW() / 2)
+      const short = openAndMeasure()
+      fixture.componentRef.setInput('nutrition', { energyKcal: 1, proteinG: 123456789012345, fatG: 1 })
+      fixture.detectChanges()
+      const long = openAndMeasure()
+      expect(short.truncated).toBe(0)
+      expect(long.truncated).toBe(0)
+      expect(long.width).toBeGreaterThan(short.width)
+    })
+  })
 })
