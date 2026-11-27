@@ -247,7 +247,7 @@
       }
     },
     "reuse-copy.tooltip": {
-      "total": 202,
+      "total": 240,
       "files": {
         "src/app/core/components/acting-banner/acting-banner.component.html": 1,
         "src/app/core/components/auth-modal/auth-modal.component.html": 2,
@@ -292,6 +292,10 @@
         "src/app/pages/metadata-manager/components/unit-edit-dialog/unit-edit-dialog.component.html": 1,
         "src/app/pages/metadata-manager/components/user-management/user-management.component.html": 1,
         "src/app/pages/metadata-manager/metadata-manager.page.component.html": 3,
+        "src/app/pages/monthly-plan/components/fixed-costs-card/fixed-costs-card.component.html": 5,
+        "src/app/pages/monthly-plan/components/labour-card/labour-card.component.html": 2,
+        "src/app/pages/monthly-plan/components/month-pair/month-pair.component.html": 2,
+        "src/app/pages/monthly-plan/monthly-plan.page.html": 9,
         "src/app/pages/platform-dashboard/components/front-desk-admin-dialog/front-desk-admin-dialog.component.html": 2,
         "src/app/pages/platform-dashboard/components/grant-access-dialog/grant-access-dialog.component.html": 2,
         "src/app/pages/platform-dashboard/components/platform-business-dialog/platform-business-dialog.component.html": 9,
@@ -307,6 +311,10 @@
         "src/app/pages/recipe-builder/recipe-builder.page.html": 2,
         "src/app/pages/requests/components/new-request-dialog/new-request-dialog.component.html": 1,
         "src/app/pages/requests/components/request-card/request-card.component.html": 4,
+        "src/app/pages/restaurant-menu/components/menu-dish-dialog/menu-dish-dialog.component.html": 3,
+        "src/app/pages/restaurant-menu/dish-sales/components/return-reasons-dialog/return-reasons-dialog.component.html": 1,
+        "src/app/pages/restaurant-menu/dish-sales/dish-sales.page.html": 10,
+        "src/app/pages/restaurant-menu/restaurant-menu.page.html": 3,
         "src/app/pages/settings/components/baseline-tab/baseline-tab.component.html": 2,
         "src/app/pages/settings/components/business-name-form/business-name-form.component.html": 1,
         "src/app/pages/settings/components/business-settings-tab/business-settings-tab.component.html": 1,
@@ -328,6 +336,7 @@
         "src/app/shared/empty-state/empty-state.component.html": 1,
         "src/app/shared/inline-rename-field/inline-rename-field.component.html": 1,
         "src/app/shared/list-selection/list-row-checkbox.component.html": 1,
+        "src/app/shared/month-figures/month-figures.component.html": 3,
         "src/app/shared/new-inquiry-dialog/new-inquiry-dialog.component.html": 1,
         "src/app/shared/partial-cost-badge/partial-cost-badge.component.html": 1,
         "src/app/shared/quick-add-product-modal/quick-add-product-modal.component.html": 2,

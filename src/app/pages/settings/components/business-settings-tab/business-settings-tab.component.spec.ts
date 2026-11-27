@@ -131,7 +131,7 @@ describe('BusinessSettingsTabComponent', () => {
   it('101 in the VAT rate shows the range error and disables save (plan 723)', () => {
     type('vatRatePct', '101')
     expect(el().querySelector('[data-testid="business-error-vatRatePct"]')?.textContent).toContain('vat_rate_range')
-    expect(saveBtn().disabled).toBeTrue()
+    expect(saveBtn().getAttribute('aria-disabled')).toBe('true')
   })
 
   it('changing only the dealer type enables save, sends all six and counts as unsaved (plan 723)', async () => {
@@ -140,7 +140,7 @@ describe('BusinessSettingsTabComponent', () => {
     cmp.form.controls.dealerType.setValue('patur')
     fixture.detectChanges()
     expect(cmp.hasRealChanges()).toBeTrue()
-    expect(saveBtn().disabled).toBeFalse()
+    expect(saveBtn().getAttribute('aria-disabled')).toBeNull()
     await cmp.save()
     expect(updateSettings).toHaveBeenCalledWith({
       profitTargetPct: 25,
@@ -176,7 +176,7 @@ describe('BusinessSettingsTabComponent', () => {
     box.dispatchEvent(new Event('input'))
     fixture.detectChanges()
     expect(cmp.hasRealChanges()).toBeTrue()
-    expect(saveBtn().disabled).toBeFalse()
+    expect(saveBtn().getAttribute('aria-disabled')).toBeNull()
     await cmp.save()
     expect(updateSettings).toHaveBeenCalledWith(
       jasmine.objectContaining({ monthTargets: { ...MONTH_TARGETS, profitPct: 8 }, profitTargetPct: 25 })
@@ -188,7 +188,7 @@ describe('BusinessSettingsTabComponent', () => {
     box.value = '101'
     box.dispatchEvent(new Event('input'))
     fixture.detectChanges()
-    expect(saveBtn().disabled).toBeTrue()
+    expect(saveBtn().getAttribute('aria-disabled')).toBe('true')
   })
 
   it('a server refusal shows the invalid-settings toast', async () => {
