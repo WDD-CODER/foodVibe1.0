@@ -2,7 +2,8 @@
 /**
  * Plan 675 (C-CONV): the one way in. Every inbound message, from the simulator or a phone, goes through
  * `handleInbound`: idempotent on `providerMessageId`, finds the guest by phone (R-01), keeps one live conversation,
- * stores the message, keeps the 24-hour window, runs a registered button handler, or waits (R-03) and calls the turn handler.
+ * stores the message, keeps the 24-hour window, runs a registered button handler, or waits for the guest to go quiet
+ * (R-29, plan 754; it was a fixed 6 s, R-03) and calls the turn handler.
  * Plan 753 (R-26): a message that arrives while a run holds the conversation's lease starts no run; it is noted on the
  * lease and the run answers it in a follow-up.
  * Logs carry ids and booleans only — never the text, the name or the phone.
@@ -15,7 +16,11 @@ const { channelFor, defaultActor } = require('./channels');
 const { findOrCreateConversation, loadConversation } = require('./conversations');
 const { leaseLive, noteWaiting } = require('./frontdesk-lease');
 
-const COALESCE_MS = 6000;
+const QUIET_MS = 2000; // a run starts when the guest has been quiet this long
+const MAX_WAIT_MS = 6000; // and never later than this after the first unanswered message of the burst
+// The old name of the longest wait; kept for its readers (`frontdesk-turn.js` passes it as the lease's grace, plan 753).
+const COALESCE_MS = MAX_WAIT_MS;
+const BURST_SCAN_MAX = 30;
 const DAY_MS = 86400000;
 const HUMAN_IDLE_MS = 2 * 60 * 60 * 1000;
 
@@ -46,14 +51,42 @@ const waitFor = ms => wait(ms);
  * Plan 753 (R-26): the one place that decides what a guest message does next — start a run, wait, or leave it to the
  * run that is working. Plan 754 changes the timing here and nowhere else.
  * `at` is the message's time, `waited` says the burst wait is over, `holder` is the run that already holds the lease
- * and is about to start a follow-up. Pure.
+ * and is about to start a follow-up, `burstAt` is the time of the first message of the burst. Pure.
+ * Plan 754 (R-29): a quiet wait — run after `QUIET_MS` without a newer guest message, at most `MAX_WAIT_MS` after the
+ * first message of the burst.
  */
-function nextStep({ conversation, at, now, waited, holder = false }) {
+function nextStep({ conversation, at, now, waited, holder = false, burstAt }) {
   if (!conversation || conversation.status !== 'bot') return { do: 'stop', why: 'not_bot' };
   if (!holder && leaseLive(conversation, now)) return { do: 'leave', why: 'running' };
   if (!holder && waited && conversation.lastInboundAt > at) return { do: 'leave', why: 'newer' };
-  if (!waited) return { do: 'wait', ms: holder ? Math.max(0, COALESCE_MS - Math.max(0, now - at)) : COALESCE_MS };
-  return { do: 'run' };
+  if (waited) return { do: 'run' };
+  // A follow-up waits what is left of the quiet time since the newest guest message.
+  if (holder) return { do: 'wait', ms: Math.max(0, QUIET_MS - Math.max(0, now - at)), capped: false };
+  // From the stored times of the messages only, never the server's clock.
+  const start = typeof burstAt === 'number' && burstAt <= at ? burstAt : at;
+  const left = Math.max(0, start + MAX_WAIT_MS - at);
+  return { do: 'wait', ms: Math.min(QUIET_MS, left), capped: left < QUIET_MS };
+}
+
+/** The time of the first message of the burst that ends at `at`; `rows` are message rows, newest first. Pure. */
+function burstAtOf(rows, at) {
+  let start = at;
+  for (const row of rows) {
+    if (row.direction !== 'in' || row.author !== 'guest') break;
+    start = Math.min(start, row.at);
+  }
+  return start;
+}
+
+/** The burst: guest messages with nothing between them that began at most `MAX_WAIT_MS` before this one. */
+async function burstStart(db, conversation, at) {
+  const rows = await db.collection('messages')
+    .find(
+      { businessId: conversation.businessId, conversationId: conversation._id, at: { $gte: at - MAX_WAIT_MS, $lte: at } },
+      { projection: { at: 1, direction: 1, author: 1 } }
+    )
+    .sort({ at: -1, _id: -1 }).limit(BURST_SCAN_MAX).toArray();
+  return burstAtOf(rows, at);
 }
 
 /** Why a `human` conversation may go back to the assistant on a guest message (plan 719), or null. */
@@ -68,7 +101,7 @@ async function backReason(db, conversation, now) {
   return client && client.doNotContact ? null : why;
 }
 
-/** Plan 719: one conditional move human -> bot, written before the R-03 wait. True when it moved. */
+/** Plan 719: one conditional move human -> bot, written before the quiet wait. True when it moved. */
 async function backToBot(db, conversation, { now, log }) {
   const why = await backReason(db, conversation, now);
   if (!why) return false;
@@ -81,7 +114,7 @@ async function backToBot(db, conversation, { now, log }) {
   return true;
 }
 
-/** Plan 719: runs the turn for a guest message that waits for an answer (hand back); no R-03 wait. */
+/** Plan 719: runs the turn for a guest message that waits for an answer (hand back); no quiet wait. */
 async function answerWaiting(db, conversation, { log = logger } = {}) {
   const [newest] = await db.collection('messages')
     .find({ businessId: conversation.businessId, conversationId: conversation._id })
@@ -98,6 +131,7 @@ async function leftToRun(db, conversation, messageId, log) {
 }
 
 async function afterStored(db, conversation, { buttonId, at, messageId }, log) {
+  const arrivedAt = Date.now();
   if (buttonId) {
     const i = buttonId.indexOf(':');
     const prefix = i < 0 ? buttonId : buttonId.slice(0, i);
@@ -114,12 +148,17 @@ async function afterStored(db, conversation, { buttonId, at, messageId }, log) {
       || (await loadConversation(db, conversation.businessId, conversation._id))?.status === 'bot';
     if (moved) conversation = { ...conversation, status: 'bot' };
   }
-  let step = nextStep({ conversation, at, now: Date.now(), waited: false });
+  const burstAt = conversation.status === 'bot' ? await burstStart(db, conversation, at) : at;
+  let step = nextStep({ conversation, at, now: Date.now(), waited: false, burstAt });
   if (step.do === 'stop') return;
   // A lease that ended between the read and the note takes none: this message goes on as any other.
-  if (step.do === 'leave' && await leftToRun(db, conversation, messageId, log)) return;
+  if (step.do === 'leave') {
+    if (await leftToRun(db, conversation, messageId, log)) return;
+    step = nextStep({ conversation: { ...conversation, run: undefined }, at, now: Date.now(), waited: false, burstAt });
+  }
+  const { ms: quietMs, capped } = step;
   const waitStarted = Date.now();
-  await wait(COALESCE_MS);
+  await wait(quietMs);
   const waitedMs = Date.now() - waitStarted;
   const fresh = await loadConversation(db, conversation.businessId, conversation._id);
   step = nextStep({ conversation: fresh, at, now: Date.now(), waited: true });
@@ -128,8 +167,8 @@ async function afterStored(db, conversation, { buttonId, at, messageId }, log) {
     return;
   }
   if (step.why === 'running' && await leftToRun(db, fresh, messageId, log)) return;
-  // Plan 752: the turn's run record shows how long this message waited for a second one.
-  await turnHandler(db, fresh, { log, inbound: { at, waitedMs }, messageId });
+  // Plans 752 and 754: the turn's run record shows how long this message waited for a second one.
+  await turnHandler(db, fresh, { log, inbound: { at, waitedMs, quietMs, capped, arrivedAt }, messageId });
 }
 
 async function handleInbound(db, input, { log = logger } = {}) {
@@ -185,7 +224,7 @@ async function handleInbound(db, input, { log = logger } = {}) {
 
 module.exports = {
   handleInbound, registerButton, setTurnHandler, setWaitForTest, resetInboundForTest, COALESCE_MS, HUMAN_IDLE_MS,
-  answerWaiting, nextStep, waitFor,
+  answerWaiting, nextStep, waitFor, QUIET_MS, MAX_WAIT_MS, burstAtOf, burstStart,
 };
 
 require('./booking-buttons').registerBookingButtons(registerButton);

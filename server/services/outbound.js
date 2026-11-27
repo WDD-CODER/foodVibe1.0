@@ -3,6 +3,7 @@
  * Plan 675 (C-CHANNEL): the one sender. Every outbound message of the app goes through `sendOut`: it checks
  * do-not-contact (R-02), the test rule and the live profile (R-19), the 24-hour window and the button limit (R-12),
  * writes the `messages` row and calls the transport. No other file calls a transport's `send`.
+ * Plan 754 (R-31): `showTyping` is the one place that calls a transport's `typing`.
  * Logs carry the reason, the kind, the author and the conversation id only — never a name, a phone or a text.
  */
 const { newId } = require('../utils/id');
@@ -81,4 +82,34 @@ async function sendOut(db, conversation, outbound, author, { now = Date.now(), m
   return { ok: true, message: row };
 }
 
-module.exports = { sendOut };
+/**
+ * Plan 754 (R-31): asks the channel to show 'typing…' for the newest guest message. A real channel is asked only when
+ * a message could be sent (R-19, R-02). Never throws: `{ shown: true }` or `{ shown: false, why }`.
+ */
+async function showTyping(db, conversation, { log = logger } = {}) {
+  const notShown = why => ({ shown: false, why });
+  try {
+    const transport = channelFor(conversation);
+    if (typeof transport.typing !== 'function') return notShown('no_typing');
+    const businessId = conversation.businessId;
+    if (transport.real) {
+      if (conversation.test === true) return notShown('not_live');
+      const profile = await db.collection('frontDeskProfiles').findOne({ businessId, deletedAt: { $exists: false } });
+      if (!profile || !LIVE_STATUSES.includes(profile.status)) return notShown('not_live');
+    }
+    const client = await db.collection('clients').findOne({ _id: conversation.clientId, businessId });
+    if (client && client.doNotContact) return notShown('do_not_contact');
+    const [newest] = await db.collection('messages')
+      .find({ businessId, conversationId: conversation._id, direction: 'in', author: 'guest' })
+      .sort({ at: -1, _id: -1 }).limit(1).toArray();
+    if (!newest || !newest.providerMessageId) return notShown('no_message');
+    await transport.typing(db, conversation, { providerMessageId: newest.providerMessageId });
+    log.info({ event: 'outbound.typing', conversationId: conversation._id });
+    return { shown: true };
+  } catch (err) {
+    log.warn({ event: 'outbound.typing.failed', conversationId: conversation._id, errName: err && err.name });
+    return notShown('failed');
+  }
+}
+
+module.exports = { sendOut, showTyping };

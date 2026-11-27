@@ -13,13 +13,15 @@
  * requires this one.
  * Plan 753 (R-26, R-27): `runTurn` holds the conversation's lease (`frontdesk-lease.js`) for a run and its follow-ups;
  * after the model call the turn reads the conversation again and sends and writes nothing when a person stepped in.
+ * Plan 754: the run asks the channel to show 'typing…' (`showTyping`) before it reads the facts; a run cut for a slow
+ * first model is recorded per HTTP call.
  */
 const { logger } = require('../logger');
 const { publicFacts } = require('./knowledge');
 const { buildTurnBody, unansweredTail, todayBlock, HISTORY_WINDOW } = require('./frontdesk-prompt');
 const { applyGuardrails, preCheck, isRemoval, TURN_LIMIT, FOLLOW_UP_MAX } = require('./frontdesk-guardrails');
 const { fillWhen } = require('./frontdesk-when');
-const { sendOut } = require('./outbound');
+const { sendOut, showTyping } = require('./outbound');
 const { setTurnHandler, nextStep, waitFor, COALESCE_MS } = require('./inbound');
 const { loadConversation } = require('./conversations');
 const { takeLease, noteWaiting, leaseCheck, endLease } = require('./frontdesk-lease');
@@ -302,7 +304,10 @@ async function runLeased(db, conversation, lease, opts) {
     log.info({ event: 'frontdesk.turn.follow_up', conversationId: conv._id, chain: next.chain, waitMs: waitedMs });
     chain = next.chain;
     follows = one.runId;
-    turnOpts = { ...turnOpts, inbound: { at: conv.lastInboundAt, waitedMs }, messageId: undefined };
+    const inbound = {
+      at: conv.lastInboundAt, waitedMs, quietMs: step.ms, capped: false, arrivedAt: conv.lastInboundAt,
+    };
+    turnOpts = { ...turnOpts, inbound, messageId: undefined };
   }
 }
 
@@ -444,9 +449,11 @@ async function runTurnInner(db, conversation, opts = {}) {
   }
 
   const { history, aiTurns } = await run.time('history', async () => {
-    const recent = await colOf(db, 'messages')
-      .find({ businessId, conversationId: conversation._id }).sort({ at: -1, _id: -1 }).limit(HISTORY_WINDOW).toArray();
-    const count = await colOf(db, 'messages').countDocuments({ businessId, conversationId: conversation._id, author: 'ai' });
+    const [recent, count] = await Promise.all([
+      colOf(db, 'messages')
+        .find({ businessId, conversationId: conversation._id }).sort({ at: -1, _id: -1 }).limit(HISTORY_WINDOW).toArray(),
+      colOf(db, 'messages').countDocuments({ businessId, conversationId: conversation._id, author: 'ai' }),
+    ]);
     return { history: recent.reverse(), aiTurns: count };
   });
   run.step('history', {
@@ -476,9 +483,13 @@ async function runTurnInner(db, conversation, opts = {}) {
     return { ok: true, handoff: 'removal' };
   }
 
-  const { facts, tables } = await run.time('facts', async () => ({
-    facts: await publicFacts(db, businessId), tables: await tablesFor(db, businessId),
-  }));
+  // Plan 754 (R-31): asked once per run, only by a run that holds the lease and may send; never delays the model call.
+  if (mode === 'turn' && lease && feature !== 'eval' && levelOf(profile) >= 1) void showTyping(db, conversation, { log });
+
+  const { facts, tables } = await run.time('facts', async () => {
+    const [found, room] = await Promise.all([publicFacts(db, businessId), tablesFor(db, businessId)]);
+    return { facts: found, tables: room };
+  });
   run.step('facts', {
     out: {
       factIds: facts.factIds, factsChars: facts.text.length, tablesOn: !!tables,

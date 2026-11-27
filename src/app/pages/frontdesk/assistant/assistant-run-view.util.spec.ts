@@ -1,6 +1,6 @@
 import { RUN_OUTCOMES, RUN_STEP_KEYS } from '@models/assistant-run.model'
 import type { RunStep, RunStepKey } from '@models/assistant-run.model'
-import { STEP_FIELDS, outcomeTone, reasonKey, stepRows, verdictOf } from './assistant-run-view.util'
+import { STEP_FIELDS, outcomeTone, reasonKey, stepRows, tryResultKey, verdictOf } from './assistant-run-view.util'
 
 const steps = (stopped?: RunStepKey): RunStep[] =>
   RUN_STEP_KEYS.map((key) => ({ key, status: key === stopped ? 'stopped' : 'ok', ms: 0 }))
@@ -71,7 +71,54 @@ describe('assistant-run-view.util (plan 752)', () => {
     ])
     const kinds = Array.from({ length: 14 }, (_, i) => `k${i}`)
     const [list] = stepRows({ key: 'setup', out: { kinds } }, 'out')
-    expect(list.value.split(', ').length).toBe(12)
+    expect(String(list.value).split(', ').length).toBe(12)
+  })
+
+  it('plan 754: tryResultKey() names how a call ended', () => {
+    expect(tryResultKey({ ok: true })).toBe('asr_try_ok')
+    expect(tryResultKey({ ok: false, reason: 'slow' })).toBe('asr_try_slow')
+    expect(tryResultKey({ ok: false, reason: 'timeout' })).toBe('asr_try_timeout')
+    expect(tryResultKey({ ok: false, reason: 'network' })).toBe('asr_try_busy')
+    for (const status of [429, 500, 502, 503, 504]) {
+      expect(tryResultKey({ ok: false, reason: 'gemini_error', status })).toBe('asr_try_busy')
+    }
+    expect(tryResultKey({ ok: false, reason: 'gemini_error', status: 400 })).toBe('asr_try_other')
+    for (const reason of ['model_exhausted', 'all_exhausted', 'business_cap']) {
+      expect(tryResultKey({ ok: false, reason })).toBe('asr_try_quota')
+    }
+    expect(tryResultKey({ ok: false, reason: 'model_removed' })).toBe('asr_try_other')
+  })
+
+  it('plan 754: the AI step lists every try with its time, beside the count', () => {
+    const attempts = [
+      { model: 'm1', ms: 6003, ok: false, reason: 'slow' },
+      { model: 'm2', ms: 1040, ok: true }
+    ]
+    expect(stepRows({ key: 'ai', out: { attempts } }, 'out')).toEqual([
+      { labelKey: 'asr_f_attempts', kind: 'count', value: '2' },
+      {
+        labelKey: 'asr_f_try_list',
+        kind: 'tries',
+        value: [
+          { model: 'm1', seconds: '6.0', resultKey: 'asr_try_slow' },
+          { model: 'm2', seconds: '1.0', resultKey: 'asr_try_ok' }
+        ]
+      }
+    ])
+    const many = Array.from({ length: 10 }, () => ({ ok: true }))
+    const [, tries] = stepRows({ key: 'ai', out: { attempts: many } }, 'out')
+    expect(tries.value.length).toBe(8)
+  })
+
+  it('plan 754: the wait numbers and the time to answer are shown', () => {
+    expect(stepRows({ key: 'inbound', out: { waitedMs: 500, quietMs: 500, capped: true } }, 'out')).toEqual([
+      { labelKey: 'asr_f_waited', kind: 'ms', value: '0.5' },
+      { labelKey: 'asr_f_quiet', kind: 'ms', value: '0.5' },
+      { labelKey: 'asr_f_capped', kind: 'bool', value: 'true', valueKey: 'asr_yes' }
+    ])
+    expect(stepRows({ key: 'send', out: { answerMs: 5400 } }, 'out')).toEqual([
+      { labelKey: 'asr_f_answer_ms', kind: 'ms', value: '5.4' }
+    ])
   })
 
   it('stepRows() leaves out an absent, null or empty value', () => {

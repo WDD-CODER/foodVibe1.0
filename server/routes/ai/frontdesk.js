@@ -29,6 +29,10 @@ const router = Router();
 
 const TURN_BUDGET_MS = 35000;
 const MIN_RETRY_MS = 2000; // the floor of plan 701's MIN_CALL_MS
+// Plan 754 (R-30): the first model gets 6 s, then the next one is tried. From the simulator tests of 2026-11-23..25:
+// 71 % of the first model's good answers came within 6 s; 13 % of its calls ran into the 15 s limit. Tune it from
+// `aiUsage` (`errorCode: 'slow'`, `latencyMs`) — see plan 754, Technical Considerations.
+const FIRST_MODEL_LIMIT_MS = 6000;
 const issuePaths = issues => issues.slice(0, 10).map(i => (i.path.length ? i.path.join('.') : '(root)'));
 const issueCodes = issues => issues.slice(0, 10).map(i => i.code);
 
@@ -43,17 +47,18 @@ async function askTurnModel({ body, usage, log }) {
   const attempt = async (reqBody, deadlineMs, n) => {
     trace.shapeTries = n;
     const calledAt = performance.now();
+    const before = trace.attempts.length;
     // Plan 701: no user is there to pick another model, so an overloaded model moves on to the next free one.
+    // Plan 754: a slow first model does too; the trace gets one entry per HTTP call.
     const call = await callGemini({
       body: reqBody, timeoutMs: 15000, deadlineMs, fallback: true, log, eventPrefix: 'frontdesk.turn', usage,
+      firstLimitMs: FIRST_MODEL_LIMIT_MS, onCall: c => trace.attempts.push({ ...c, try: n }),
     });
-    trace.attempts.push({
-      model: call.model ?? null,
-      ms: Math.round(performance.now() - calledAt),
-      ok: call.kind === 'ok',
-      ...(call.kind !== 'ok' && { reason: call.kind }),
-      ...(call.status && { status: call.status }),
-    });
+    // A refusal made no HTTP call (all exhausted, the business's cap, a removed model): it still shows as one entry.
+    if (trace.attempts.length === before) {
+      const ms = Math.round(performance.now() - calledAt);
+      trace.attempts.push({ model: call.model ?? null, ms, ok: false, reason: call.kind, try: n });
+    }
     if (call.kind !== 'ok') return { ok: false, reason: call.kind, status: call.status, retry: false };
     const text = String(responseText(call.data));
     Object.assign(trace, { model: call.model ?? null, raw: text.slice(0, RAW_MAX), rawChars: text.length });
@@ -181,3 +186,4 @@ router.post('/fix', verifyToken, requireModule('frontdesk'), fixLimiter, async (
 module.exports = router;
 module.exports.askTurnModel = askTurnModel;
 module.exports.TURN_BUDGET_MS = TURN_BUDGET_MS;
+module.exports.FIRST_MODEL_LIMIT_MS = FIRST_MODEL_LIMIT_MS;
