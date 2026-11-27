@@ -943,4 +943,12 @@ Evidence (on commit 18c2281e):
 - `ci-scope-check.mjs --checkout-branch` → exit 0 (it prints `skipped`)
 - `inventory.mjs --check` → exit 0, `INVENTORY: ok`
 - `log-query.mjs --since=plan-start --level=error` → exit 0, `SKIP: no database configured`
+
+Fix round 1 (`rev-1`, 2026-11-27, on commit cee570c0):
+- `AssistantRunDataService` keeps the setup read with its viewer (user id and business id); `setup_`, `setupLoaded_` and `setupFailed_` are empty for any other viewer, and a late answer is dropped. `AssistantPage` reads again when the user changes on an open tab. New cases: three in the service spec, one in the page spec.
+- `pnpm run build` → exit 0; `pnpm run lint` → exit 0 (0 errors); `pnpm --dir server run lint` → exit 0 (0 errors)
+- `pnpm run test:ci` → first run exit 1, `TOTAL: 2 FAILED, 3336 SUCCESS` (the failing names were not captured); the next two runs had no failure, the last printing `TOTAL: 3338 SUCCESS`
+- `pnpm run test:server` → exit 0, 186 files, 2824 tests passed
+- `kit-manifest-check.mjs`, `node scripts/scope-check.mjs`, `kit-checks.mjs`, `override-check`, `lint:icons`, `lint:no-native-select`, `plan-ledger-check`, `breadcrumbs-check`, `ci-scope-check` (prints `skipped`), `inventory --check`, `log-query` (`SKIP: no database configured`) → exit 0
+- The main checkout's copy of `scope-check.mjs`, run by its path from this folder, reads the main checkout's tree (it resolves the root from its own location) and exits 1 on files this branch does not touch.
 - A11 stays open: the three `[human]` page checks need the slot's servers and the Human; this builder folder starts none.
