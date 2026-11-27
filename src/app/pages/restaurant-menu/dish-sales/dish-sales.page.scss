@@ -94,5 +94,14 @@
     .ds-row__wide {
       display: none;
     }
+
+    /* Wider text (another font) must not push «שמירה» off the screen: the two buttons wrap instead. */
+    .ds-row__actions {
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      min-inline-size: 0;
+      max-inline-size: 100%;
+      white-space: normal;
+    }
   }
 }
