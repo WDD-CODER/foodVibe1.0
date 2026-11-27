@@ -1,4 +1,5 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing'
+import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing'
+import { TOOLTIP_HOVER_DELAY_MS } from 'src/app/shared/tooltip/tooltip.directive'
 import { signal } from '@angular/core'
 import { of, throwError } from 'rxjs'
 import { LucideAngularModule } from 'lucide-angular'
@@ -81,17 +82,18 @@ describe('UserManagementComponent', () => {
     expect(text).toContain('business_role_staff')
   })
 
-  it('the platform admin chip names itself with the shared tooltip, not the browser title', () => {
+  it('the platform admin chip names itself with the shared tooltip, not the browser title', fakeAsync(() => {
     const chip = (fixture.nativeElement as HTMLElement).querySelector<HTMLElement>(
       '[data-testid="platform-admin-chip"]'
     )!
     expect(chip.getAttribute('title')).toBeNull()
     expect(chip.getAttribute('aria-label')).toBe('platform_admin')
-    chip.dispatchEvent(new FocusEvent('focusin'))
+    chip.dispatchEvent(new PointerEvent('pointerenter', { pointerType: 'mouse' }))
+    tick(TOOLTIP_HOVER_DELAY_MS)
     expect(document.body.querySelector('.c-tooltip')?.textContent).toContain('platform_admin')
-    chip.dispatchEvent(new FocusEvent('focusout'))
+    chip.dispatchEvent(new PointerEvent('pointerleave', { pointerType: 'mouse' }))
     expect(document.body.querySelector('.c-tooltip')).toBeNull()
-  })
+  }))
 
   it('deleting an owner asks, then the learned-data question, then the final confirm; keep deletes with false', async () => {
     await component.onDeleteUser(OWNER)
