@@ -63,6 +63,8 @@ Reusable standalone components, modals, and list/table primitives used across pa
 | `translation-key-modal/` | Hebrew → English key | TranslationKeyModalComponent |
 | `unit-creator/` | Unit registry editor | UnitCreatorModal |
 | `venue-link-chip/` | Venue link chip | VenueLinkChipComponent |
+| `menu-designer/` | Every control that sets a menu's look, beside the sample menu; changes the `design` model and never saves (plan 765) | MenuDesignerComponent |
+| `menu-preview/` | One design drawn by the shared menu template in a script-free `srcdoc` frame, scaled to its box (plan 765) | MenuPreviewComponent |
 | `version-history-panel/` | Version history UI | VersionHistoryPanelComponent |
 
 ## Architecture Context

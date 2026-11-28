@@ -363,6 +363,8 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
   `src/app/core/services/dish-data.service.ts`, `src/app/core/services/product-data.service.ts`,
   `src/app/core/services/menu-event-data.service.ts`). A service's own log event and "empty the list on
   reload" go in `EntityLoadOptions`; a legacy-field migration goes in a `normalizeRow` override.
+- Plan 765: MenuDesignDataService (created by plan 764) overrides `ensureLoaded` so a failed load is remembered
+  (`loadFailed_`) and tried again; it adds `duplicateDesign`, `defaultDesign_` and `menuDesignsEnsureLoadedResolver`.
 - When: a new entity type needs a client data service.
 - Known copies: none.
 
@@ -403,6 +405,8 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 - Use: `src/app/core/utils/` (one file per topic, each with a spec); money / quantity / percent rounding and
   formatting only from `src/app/core/engine/rounding.ts`; Hebrew-insensitive matching: `normalizeHebrew` in
   `src/app/core/utils/recipe-match.util.ts`. Import through `@utils/*` (and pipes through `@pipes/*`).
+- Plan 765: `designFromForm` / `formFromDesign` in `src/app/core/utils/menu-design-form.util.ts` (menu-design-form) — the menu designer's form to a design the shared schema accepts, and back.
+- Plan 765: `menuFontsHref` in `src/app/core/utils/menu-fonts-link.util.ts` (menu-fonts-link) — one Google Fonts stylesheet address for the curated menu fonts.
 - the unit mapping after a pick (plan 653): `unitForSpoken` in `src/app/pages/inventory/components/stock-count/spoken-unit.ts` — the spoken unit mapped to
   the picked product's own units, same table as the server `resolveUnit`; none fits → flagged, not counted.
 - reading the unit word from the text (plan 654): `unitWordFromText` in `server/utils/stock-extract.js` — when the model
@@ -442,6 +446,7 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 - Use: `src/app/core/services/http-storage.adapter.ts`; auth header and errors: `src/app/core/interceptors/auth.interceptor.ts`.
 - When: any call to the server API; never a raw `fetch` or a hand-built `/api/v1` URL.
 - `MonthPlanService` (`src/app/pages/monthly-plan/services/month-plan.service.ts`, plan 727): page-scoped client of the server-only `monthPlans` through `API.monthPlans`: `list`, `get`, `create`, `update`; throws the `HttpErrorResponse`.
+- Plan 765: `BusinessService.setMenuDesignDefault` (`src/app/core/services/business.service.ts`) — one owner-only PUT through `API.business('menu-design-default')`; the stored menu settings go into `business_`.
 - `PlatformAdminService.updatePlatform` (`src/app/core/services/platform-admin.service.ts`): one PUT of a business's modules, monthly AI cap and private mode with a reason, then reloads the table (plan 620).
 - `PlatformAdminService.eraseLearnedData(businessId, reason)` (same file): one POST that erases what the platform learned from a business, returns the counts; `UserAdminService.deleteUser(userId, eraseLearned)` adds `?eraseLearned=true` (plan 639).
 - `PlatformAdminService.getPlatformHistory(businessId)` (same file): one GET of a business's change history, newest first, read each time the dialog's history panel opens (plan 638).
@@ -793,6 +798,40 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
   `src/app/core/services/menu-design-data.service.ts`.
 - Pieces: renderMenuDocument, designCssVars, menuDocFromEvent, SAMPLE_MENU_DOC, resolveMenuDesign, baseDesign, MENU_FONTS, MENU_TEXTURES, MenuDesignDataService.
 - When: a screen, an export or a server path shows a designed menu; never a second menu template or design fallback rule.
+- Known copies: none.
+
+### menu-pdf — the server's one headless browser (plan 767)
+
+- Status: pilot — plan 767; adopted for good only after the measurement on a free Render instance
+- Use: `server/services/menu-pdf.js` · `renderPdf(html)` (A4, JavaScript off, loads only `data:`, Google Fonts and
+  Cloudinary), `renderPdfMeasured(html)` (the same with time and memory), `screenshotUrl(url, { width })` (public https
+  pages only) and `embedFonts(html)` (the two kept fonts of `server/assets/menu-fonts/`, fetched by
+  `server/scripts/menu-fonts-fetch.js`). One browser at a time, closed after 60 s idle, three jobs may wait; failures are
+  the coded errors of `server/services/menu-pdf/errors.js` (`PDF_BUSY`, `PDF_UNAVAILABLE`, …). The helpers in
+  `server/services/menu-pdf/` are private to it. `GET /api/v1/menu-design/pdf-smoke` (`server/routes/menu-design.js`,
+  platform admin) measures it.
+- Pieces: renderPdf, renderPdfMeasured, screenshotUrl, embedFonts, isMenuPdfError, setBrowserLauncherForTests.
+- When: a server path makes a PDF from HTML or takes a picture of a web page; never a second import of a browser driver.
+- Known copies: none.
+
+### menu-designer — every control that sets a menu's look (plan 765)
+
+- Status: stable — plan 765
+- Use: `src/app/shared/menu-designer/` · `app-menu-designer` (`[(design)]` a design draft, `sampleDoc`, `(uploading)`).
+  It holds the font, colour, background, frame, logo, layout and fixed-text controls beside the sample menu, and never
+  saves: the host does. The form to design mapping is `src/app/core/utils/menu-design-form.util.ts`; the fonts link is
+  `src/app/core/utils/menu-fonts-link.util.ts`.
+- Pieces: MenuDesignerComponent, designFromForm, formFromDesign, menuFontsHref.
+- When: a screen lets someone change how a menu looks; never a second look editor.
+- Known copies: none.
+
+### menu-preview — a designed menu shown safely on screen (plan 765)
+
+- Status: stable — plan 765
+- Use: `src/app/shared/menu-preview/` · `app-menu-preview` (`design`, `doc`, `poweredBy`): an `<iframe sandbox="">`
+  whose `srcdoc` is `renderMenuDocument`, scaled from the A4 width to the host's width.
+- Pieces: MenuPreviewComponent.
+- When: a screen shows a whole designed menu; never another way to put the template's HTML on a page.
 - Known copies: none.
 
 ### excel-export — one house style for every Excel sheet

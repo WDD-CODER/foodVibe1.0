@@ -24,6 +24,7 @@ import { moduleGuard } from './core/guards/module.guard'
 import { diagnosisGuard } from './pages/diagnosis/diagnosis.guard'
 import { monthlyPlanGuard } from './pages/monthly-plan/monthly-plan.guard'
 import { KnowledgeItemDataService } from './core/services/knowledge-item-data.service'
+import { menuDesignsEnsureLoadedResolver } from '@services/menu-design-data.service'
 
 export const routes: Routes = [
   // Plan 338: equipment lives only under /inventory/equipment — old URLs redirect.
@@ -243,6 +244,27 @@ export const routes: Routes = [
       kitchenDataLoaded: kitchenDataEnsureLoadedResolver,
       clientsLoaded: clientsEnsureLoadedResolver,
     },
+  },
+  // Plan 765: the menu designer. Needs the `menu_design` module only.
+  {
+    path: 'menu-design',
+    loadComponent: () => import('./pages/menu-design/menu-design-list.page').then(m => m.MenuDesignListPage),
+    canActivate: [authGuard, moduleGuard(['menu_design'])],
+    resolve: { designsLoaded: menuDesignsEnsureLoadedResolver },
+  },
+  {
+    path: 'menu-design/new',
+    loadComponent: () => import('./pages/menu-design/menu-design-edit.page').then(m => m.MenuDesignEditPage),
+    canActivate: [authGuard, moduleGuard(['menu_design'])],
+    canDeactivate: [pendingChangesGuard],
+    resolve: { designsLoaded: menuDesignsEnsureLoadedResolver },
+  },
+  {
+    path: 'menu-design/:id',
+    loadComponent: () => import('./pages/menu-design/menu-design-edit.page').then(m => m.MenuDesignEditPage),
+    canActivate: [authGuard, moduleGuard(['menu_design'])],
+    canDeactivate: [pendingChangesGuard],
+    resolve: { designsLoaded: menuDesignsEnsureLoadedResolver },
   },
   {
     path: 'cook',

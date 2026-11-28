@@ -1,0 +1,55 @@
+<div class="design-edit" dir="rtl">
+  <app-page-header backLink="/menu-design">
+    <ng-container header-title>
+      @if (isEditing) { {{ 'menu_design_edit_title' | translatePipe }}: <span dir="auto">{{ existing_()?.name }}</span>
+      } @else { {{ 'menu_design_new' | translatePipe }} }
+    </ng-container>
+  </app-page-header>
+
+  @switch (problem()) { @case ('failed') {
+  <app-empty-state
+    messageKey="menu_design_load_failed"
+    icon="alert-triangle"
+    ctaLabelKey="menu_design_retry"
+    (ctaClick)="onRetry()"
+  />
+  } @case ('missing') {
+  <app-empty-state messageKey="menu_design_not_found" icon="palette" ctaLabelKey="back" (ctaClick)="onCancel()" />
+  } @default {
+  <section class="form-section design-edit__name c-glass-panel">
+    <app-form-field label="menu_design_name" forId="menu-design-name" [error]="nameError_()">
+      <input
+        #nameInput
+        id="menu-design-name"
+        type="text"
+        class="c-input"
+        dir="auto"
+        autocomplete="off"
+        [formControl]="nameControl"
+        [attr.maxlength]="nameMax"
+        [class.c-input--invalid]="nameError_()"
+        [attr.aria-invalid]="nameError_() ? true : null"
+      />
+    </app-form-field>
+  </section>
+
+  <app-menu-designer [(design)]="design_" (uploading)="isUploading_.set($event)" />
+
+  <div class="c-form-actions design-edit__actions">
+    <button type="button" class="c-btn-ghost" data-testid="menu-design-cancel" (click)="onCancel()">
+      {{ 'cancel' | translatePipe }}
+    </button>
+    <button
+      type="button"
+      class="c-btn-primary"
+      data-testid="menu-design-save"
+      [disabled]="isSaving_() || isUploading_()"
+      (click)="onSave()"
+    >
+      @if (isSaving_()) {
+      <app-loader size="small" [inline]="true" />
+      } {{ 'menu_design_save' | translatePipe }}
+    </button>
+  </div>
+  } }
+</div>

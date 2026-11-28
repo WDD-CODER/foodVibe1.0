@@ -28,7 +28,7 @@ Singleton services for data, state, modals, HTTP concerns, logging, export, and 
 | `scaling.service.ts` | Scale by yield | ScalingService, ScaledIngredientRow, ScaledPrepRow |
 | `cook-view-state.service.ts` | Cook-view workflow state | CookViewStateService |
 | `menu-event-data.service.ts` | Menu events CRUD (on BaseEntityDataService) | MenuEventDataService |
-| `menu-design-data.service.ts` | Menu designs CRUD (on BaseEntityDataService; loads on `ensureLoaded()` only, plan 764) | MenuDesignDataService |
+| `menu-design-data.service.ts` | Menu designs CRUD (on BaseEntityDataService; loads on `ensureLoaded()` only, plan 764); plan 765: duplicate, the default design, a remembered load failure and the route resolver | MenuDesignDataService, menuDesignsEnsureLoadedResolver |
 | `access.service.ts` | The businesses the user may enter, and the consultant grants of a business: load, create, remove (plan 632; `canSwitch_` drives the header switcher) | AccessService |
 | `client-data.service.ts` | Clients CRUD (on BaseEntityDataService; owner writes, staff read name + phone) | ClientDataService |
 | `menu-dish-data.service.ts` | Standing-menu dishes (`menuDishes`) load / add / update; leaving the menu is `active: false` (plan 725) | MenuDishDataService |
@@ -38,7 +38,7 @@ Singleton services for data, state, modals, HTTP concerns, logging, export, and 
 | `front-desk-profile-data.service.ts` | Front desk profile CRUD, one per business (owner writes; createFromTemplate) | FrontDeskProfileDataService |
 | `menu-intelligence.service.ts` | Menu intelligence logic | MenuIntelligenceService |
 | `trash.service.ts` | Trash/restore | TrashService |
-| `business.service.ts` | The signed-in user's business (`business_`) | BusinessService |
+| `business.service.ts` | The signed-in user's business (`business_`) and its owner-only writes, the default menu design among them (plan 765) | BusinessService |
 | `module.service.ts` | Which modules the business has (`has`, `hasType`, `ready`); the browser only hides, the server gates (plan 620) | ModuleService |
 | `permission.service.ts` | Client mirror of the server permission checker; UI hides/locks by the same rules | PermissionService, PermissionAction |
 | `activity-log.service.ts` | Activity log | ActivityLogService, ActivityEntry, ACTIVITY_STORAGE_KEY |

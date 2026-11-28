@@ -22,6 +22,13 @@
       <lucide-icon name="phone-incoming" [size]="18"></lucide-icon>
       <span class="btn-label">{{ 'new_inquiry' | translatePipe }}</span>
     </button>
+    @if (showDesigns_()) {
+      <!-- The leading slot: the header draws every action into one cell, so a second action would lie under "new menu". -->
+      <button header-leading type="button" class="c-btn-ghost header-designs-btn" (click)="openDesigns()">
+        <lucide-icon name="palette" [size]="18"></lucide-icon>
+        <span class="btn-label">{{ 'menu_designs' | translatePipe }}</span>
+      </button>
+    }
     <button header-actions type="button" class="c-btn-primary" (click)="onCreateNew()">
       <lucide-icon name="plus" [size]="18"></lucide-icon>
       <span class="btn-label">{{ 'menu_new_event' | translatePipe }}</span>

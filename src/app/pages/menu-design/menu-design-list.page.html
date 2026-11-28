@@ -1,0 +1,155 @@
+<app-list-shell
+  layout="cards"
+  cardMin="26rem"
+  [isPanelOpen]="false"
+  [resultCount]="isLoadFailed() ? null : cards().length"
+  [resultTotal]="isLoadFailed() ? null : total()"
+>
+  <ng-container shell-title>{{ 'menu_designs' | translatePipe }}</ng-container>
+
+  <ng-container shell-search>
+    <label class="visually-hidden" for="menu-design-search">{{ 'search' | translatePipe }}</label>
+    <div class="c-input-wrapper">
+      <lucide-icon name="search" [size]="18"></lucide-icon>
+      <input
+        #searchInput
+        id="menu-design-search"
+        type="text"
+        [value]="searchQuery_()"
+        (input)="searchQuery_.set(searchInput.value)"
+        [placeholder]="'search' | translatePipe"
+        autocomplete="off"
+        autocorrect="off"
+        autocapitalize="off"
+        spellcheck="false"
+        (keydown.escape)="listControls.onSearchEscape($event, searchInput)"
+      />
+      <app-input-clear [visible]="!!searchQuery_()" (clear)="listControls.onClearSearch(searchInput)" />
+    </div>
+  </ng-container>
+
+  <ng-container shell-actions>
+    <button type="button" class="c-btn-primary" data-testid="menu-design-new" (click)="isPickerOpen_.set(true)">
+      <lucide-icon name="plus" [size]="18"></lucide-icon>
+      <span class="btn-label">{{ 'menu_design_new' | translatePipe }}</span>
+    </button>
+  </ng-container>
+
+  <ng-container shell-cards>
+    <p class="designs-intro">{{ 'menu_designs_intro' | translatePipe }}</p>
+
+    @if (isLoadFailed()) {
+    <app-empty-state
+      class="designs-state"
+      messageKey="menu_design_load_failed"
+      icon="alert-triangle"
+      ctaLabelKey="menu_design_retry"
+      (ctaClick)="onRetry()"
+    />
+    } @else if (total() === 0) {
+    <app-empty-state
+      class="designs-state"
+      messageKey="menu_designs_empty"
+      icon="palette"
+      ctaLabelKey="menu_design_new"
+      (ctaClick)="isPickerOpen_.set(true)"
+    />
+    } @else if (cards().length === 0) {
+    <app-empty-state class="designs-state" messageKey="menu_designs_no_match" icon="search" />
+    } @else { @for (card of cards(); track card.design._id) {
+    <article class="design-card c-list-row c-glass-panel" [attr.data-design]="card.design._id">
+      @if (renamingId_() === card.design._id) {
+      <app-inline-rename-field
+        class="design-card__rename"
+        ariaLabelKey="menu_design_name"
+        [value]="card.design.name"
+        [isSaving]="busyId_() === card.design._id"
+        (saved)="onRename(card.design, $event)"
+        (cancelled)="renamingId_.set(null)"
+      />
+      } @else {
+      <h3 class="design-card__name" dir="auto" [attr.title]="card.design.name">{{ card.design.name }}</h3>
+      <span class="design-card__colors" aria-hidden="true">
+        @for (color of card.colors; track color.key) {
+        <span class="design-card__dot" [style.background]="color.value"></span>
+        }
+      </span>
+      <span class="design-card__font" dir="ltr">{{ card.titleFont }}</span>
+      @if (card.isDefault) {
+      <span class="c-chip c-chip--tag c-chip--teal design-card__default">
+        {{ 'menu_design_default_chip' | translatePipe }}
+      </span>
+      } @if (busyId_() === card.design._id) {
+      <app-loader size="small" [inline]="true" />
+      } @else {
+      <app-row-actions-menu class="design-card__actions">
+        @if (card.canEdit) {
+        <button
+          type="button"
+          class="c-icon-btn"
+          data-action="edit"
+          [attr.title]="'edit' | translatePipe"
+          [attr.aria-label]="'edit' | translatePipe"
+          (click)="onEdit(card.design)"
+        >
+          <lucide-icon name="pencil" [size]="16"></lucide-icon>
+        </button>
+        <button
+          type="button"
+          class="c-icon-btn"
+          data-action="rename"
+          [attr.title]="'menu_design_rename' | translatePipe"
+          [attr.aria-label]="'menu_design_rename' | translatePipe"
+          (click)="renamingId_.set(card.design._id)"
+        >
+          <lucide-icon name="type" [size]="16"></lucide-icon>
+        </button>
+        }
+        <button
+          type="button"
+          class="c-icon-btn"
+          data-action="duplicate"
+          [attr.title]="'menu_design_duplicate' | translatePipe"
+          [attr.aria-label]="'menu_design_duplicate' | translatePipe"
+          [disabled]="busyId_() !== null"
+          (click)="onDuplicate(card.design)"
+        >
+          <lucide-icon name="copy" [size]="16"></lucide-icon>
+        </button>
+        @if (isOwner_() && !card.isDefault) {
+        <button
+          type="button"
+          class="c-icon-btn"
+          data-action="default"
+          [attr.title]="'menu_design_set_default' | translatePipe"
+          [attr.aria-label]="'menu_design_set_default' | translatePipe"
+          [disabled]="busyId_() !== null"
+          (click)="onSetDefault(card.design)"
+        >
+          <lucide-icon name="star" [size]="16"></lucide-icon>
+        </button>
+        } @if (card.canDelete) {
+        <button
+          type="button"
+          class="c-icon-btn danger"
+          data-action="delete"
+          [attr.title]="'delete' | translatePipe"
+          [attr.aria-label]="'delete' | translatePipe"
+          [disabled]="busyId_() !== null"
+          (click)="onDelete(card.design)"
+        >
+          <lucide-icon name="trash-2" [size]="16"></lucide-icon>
+        </button>
+        }
+      </app-row-actions-menu>
+      } }
+    </article>
+    } }
+  </ng-container>
+
+  <ng-container shell-modal>
+    @if (isPickerOpen_()) {
+    <app-base-template-picker (picked)="onPickBase($event)" (dismissed)="isPickerOpen_.set(false)" />
+    }
+  </ng-container>
+</app-list-shell>

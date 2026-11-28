@@ -1,0 +1,26 @@
+<app-modal-shell size="md" titleKey="menu_design_base_title" (dismissed)="dismissed.emit()">
+  <div class="base-picker">
+    @for (choice of choices; track choice.id) {
+      <div class="base-picker__card c-glass-card">
+        <!-- Only a picture: it takes no focus and no tap, so the whole card is the one button. -->
+        <div class="base-picker__preview" inert aria-hidden="true">
+          <app-menu-preview [design]="choice.design" />
+        </div>
+        <span class="base-picker__name" aria-hidden="true">{{ choice.labelKey | translatePipe }}</span>
+        <button
+          type="button"
+          class="base-picker__pick"
+          [attr.data-base]="choice.id"
+          [attr.title]="choice.hintKey | translatePipe"
+          [attr.aria-label]="choice.labelKey | translatePipe"
+          [attr.aria-describedby]="choice.hintId"
+          (click)="picked.emit(choice.id)"
+        ></button>
+        <span class="visually-hidden" [id]="choice.hintId">{{ choice.hintKey | translatePipe }}</span>
+      </div>
+    }
+  </div>
+  <div class="c-modal-actions">
+    <button type="button" class="c-btn-ghost" (click)="dismissed.emit()">{{ 'cancel' | translatePipe }}</button>
+  </div>
+</app-modal-shell>

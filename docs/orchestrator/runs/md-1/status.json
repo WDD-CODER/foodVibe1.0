@@ -1,0 +1,1459 @@
+{
+  "run": "md-1",
+  "branch": "orch/md-1",
+  "base": "main",
+  "startedAt": "2026-11-27T18:35:42.171Z",
+  "mainShaAtStart": "6f9b82573ec95de722703d58bb1c692bab025f07",
+  "plans": {
+    "765": {
+      "nnn": "765",
+      "title": "The menu designer screen: build, preview, save and manage designs by hand",
+      "branch": "feat/765-menu-designer-screen",
+      "state": "merged",
+      "round": 1,
+      "tier": "judgment",
+      "models": {
+        "builder": {
+          "model": "opus",
+          "tier": "judgment",
+          "at": "2026-11-27T20:42:38.164Z"
+        },
+        "reviewer": {
+          "model": "sonnet",
+          "at": "2026-11-27T21:06:27.492Z"
+        }
+      },
+      "humanItems": [
+        "The look: on a desktop the controls and the sample menu sit side by side and the sample changes as you type",
+        "the form's page · change one field, then follow a link out of the page · a question asks whether to leave or stay — here: in the designer change a color, then press the menu library link in the header: «לצאת בלי לשמור?» appears and «הישאר» keeps the change.",
+        "the page with the delete button · press delete, then cancel · a confirmation appears and nothing is removed — here: a design's row menu «מחיקה», then «ביטול»: the design stays; with «אישור» it leaves the list (and Trash lists it).",
+        "the list's page with no items · open the page · a message says the list is empty — here: «עיצובי תפריט» of a business with no designs says «עוד אין עיצובים לתפריט» with «עיצוב חדש».",
+        "the screen's page with the data request failing · open the page · a readable error with a retry appears, not a blank page — here: with the server stopped, «עיצובי תפריט» shows «לא הצלחנו לטעון את העיצובים» and «נסו שוב».",
+        "any list page on a phone and on a desktop · look at the rows · the page header matches the other list pages and every row stays on one line — here: «עיצובי תפריט» next to «ספריית תפריטים».",
+        "any list page with row actions · look at a row's edit and remove actions · they are the pencil and trash icon buttons used on the products list, with no text buttons — here: a design row's edit and delete.",
+        "a dialog with an explained control · hover the control · its explanation shows as a tooltip and no explanation text sits on the modal — here: the base-template popup's four choices.",
+        "On a phone the editor shows the sample menu above the controls and every control is reachable by scrolling the page."
+      ],
+      "history": [
+        {
+          "at": "2026-11-27T18:37:58.230Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-27T18:37:58.389Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-27T19:11:48.974Z",
+          "state": "parked",
+          "round": 0
+        },
+        {
+          "at": "2026-11-27T19:12:40.570Z",
+          "state": "asking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-27T19:17:43.637Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-27T19:17:43.872Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-27T19:28:20.098Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-27T19:31:40.983Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-27T19:31:49.316Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-27T19:35:39.757Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-27T19:35:39.912Z",
+          "state": "fixing",
+          "round": 1
+        },
+        {
+          "at": "2026-11-27T19:35:40.049Z",
+          "state": "fixing",
+          "round": 1
+        },
+        {
+          "at": "2026-11-27T19:43:35.331Z",
+          "state": "gate",
+          "round": 1
+        },
+        {
+          "at": "2026-11-27T19:44:47.359Z",
+          "state": "checking",
+          "round": 1
+        },
+        {
+          "at": "2026-11-27T19:44:54.983Z",
+          "state": "checking",
+          "round": 1
+        },
+        {
+          "at": "2026-11-27T19:48:22.044Z",
+          "state": "checking",
+          "round": 1
+        },
+        {
+          "at": "2026-11-27T19:48:22.240Z",
+          "state": "parked",
+          "round": 1
+        },
+        {
+          "at": "2026-11-27T19:49:30.050Z",
+          "state": "asking",
+          "round": 1
+        },
+        {
+          "at": "2026-11-27T19:50:59.528Z",
+          "state": "fixing",
+          "round": 1
+        },
+        {
+          "at": "2026-11-27T19:50:59.708Z",
+          "state": "fixing",
+          "round": 1
+        },
+        {
+          "at": "2026-11-27T19:52:37.371Z",
+          "state": "parked",
+          "round": 1
+        },
+        {
+          "at": "2026-11-27T19:53:37.546Z",
+          "state": "asking",
+          "round": 1
+        },
+        {
+          "at": "2026-11-27T20:07:52.098Z",
+          "state": "fixing",
+          "round": 1
+        },
+        {
+          "at": "2026-11-27T20:07:52.600Z",
+          "state": "fixing",
+          "round": 1
+        },
+        {
+          "at": "2026-11-27T20:20:08.199Z",
+          "state": "gate",
+          "round": 1
+        },
+        {
+          "at": "2026-11-27T20:24:17.384Z",
+          "state": "checking",
+          "round": 1
+        },
+        {
+          "at": "2026-11-27T20:24:36.282Z",
+          "state": "checking",
+          "round": 1
+        },
+        {
+          "at": "2026-11-27T20:27:52.595Z",
+          "state": "merging",
+          "round": 1
+        },
+        {
+          "at": "2026-11-27T20:27:53.100Z",
+          "state": "parked",
+          "round": 1
+        },
+        {
+          "at": "2026-11-27T20:42:37.899Z",
+          "state": "fixing",
+          "round": 1
+        },
+        {
+          "at": "2026-11-27T20:42:38.165Z",
+          "state": "fixing",
+          "round": 1
+        },
+        {
+          "at": "2026-11-27T20:57:16.867Z",
+          "state": "gate",
+          "round": 1
+        },
+        {
+          "at": "2026-11-27T21:06:09.233Z",
+          "state": "checking",
+          "round": 1
+        },
+        {
+          "at": "2026-11-27T21:06:27.495Z",
+          "state": "checking",
+          "round": 1
+        },
+        {
+          "at": "2026-11-27T21:10:04.813Z",
+          "state": "checking",
+          "round": 1
+        },
+        {
+          "at": "2026-11-27T21:10:05.092Z",
+          "state": "parked",
+          "round": 1
+        }
+      ],
+      "earlier": [
+        {
+          "nnn": "765",
+          "title": "The menu designer screen: build, preview, save and manage designs by hand",
+          "branch": "feat/765-menu-designer-screen",
+          "state": "asking",
+          "round": 0,
+          "tier": "build",
+          "models": {
+            "builder": {
+              "model": "sonnet",
+              "tier": "build",
+              "at": "2026-11-27T18:37:58.388Z"
+            }
+          },
+          "tiers": [
+            "build"
+          ],
+          "freeDiskGb": 9.3,
+          "reason": "asking 765-1: replan needed: ESCALATE: scope — the [human] delete item says Trash lists a deleted design, but src/app/core/services/trash.service.ts:35 has a fixed type list without menuDesigns and is outside the Read-Write Scope.",
+          "calls": [
+            {
+              "stage": "builder",
+              "model": "sonnet",
+              "seconds": 2030.2,
+              "tokens": {
+                "input": 27623136,
+                "output": 174375
+              },
+              "exit": 0
+            }
+          ],
+          "park": {
+            "at": "2026-11-27T19:12:29.604Z",
+            "reason": "replan needed: ESCALATE: scope — the [human] delete item says Trash lists a deleted design, but src/app/core/services/trash.service.ts:35 has a fixed type list without menuDesigns and is outside the Read-Write Scope."
+          },
+          "parkBranch": "park/md-1-765"
+        },
+        {
+          "nnn": "765",
+          "title": "The menu designer screen: build, preview, save and manage designs by hand",
+          "branch": "feat/765-menu-designer-screen",
+          "state": "asking",
+          "round": 1,
+          "tier": "build",
+          "models": {
+            "builder": {
+              "model": "sonnet",
+              "tier": "build",
+              "at": "2026-11-27T19:17:43.870Z"
+            },
+            "reviewer": {
+              "model": "sonnet",
+              "at": "2026-11-27T19:44:54.982Z"
+            },
+            "builder fix": {
+              "model": "sonnet",
+              "tier": "build",
+              "at": "2026-11-27T19:35:40.047Z"
+            }
+          },
+          "escalations": [
+            {
+              "step": "resumed after: asking 765-1: replan needed: ESCALATE: scope — the [human] delete item says Trash lists a deleted design, but src/app/core/services/trash.service.ts:3",
+              "check": "(not given)"
+            }
+          ],
+          "replan": "no — (not given)",
+          "tiers": [
+            "build"
+          ],
+          "freeDiskGb": 8.1,
+          "sha": "7aae558eefb702bf070ae3882f76acc56deafd7f",
+          "calls": [
+            {
+              "stage": "builder",
+              "model": "sonnet",
+              "seconds": 633.4,
+              "tokens": {
+                "input": 1287774,
+                "output": 20792
+              },
+              "exit": 0
+            },
+            {
+              "stage": "reviewer",
+              "model": "sonnet",
+              "seconds": 229,
+              "tokens": {
+                "input": 2467671,
+                "output": 30583
+              },
+              "exit": 0
+            },
+            {
+              "stage": "builder fix",
+              "model": "sonnet",
+              "seconds": 472.4,
+              "tokens": {
+                "input": 624732,
+                "output": 10727
+              },
+              "exit": 0
+            },
+            {
+              "stage": "reviewer",
+              "model": "sonnet",
+              "seconds": 205.6,
+              "tokens": {
+                "input": 2474327,
+                "output": 25978
+              },
+              "exit": 0
+            }
+          ],
+          "roundCauses": [
+            "round 1: review STOP: major e2e/ui/765-2.spec.ts:32 done-when: 765-2 checks another sample title than the plan names",
+            "round 2: review STOP: major e2e/ui/765-2.spec.ts:32 done-when: the 765-2 UI test asserts a different preview text than the plan's criterion, and the diff rewrites that criterion"
+          ],
+          "reason": "asking 765-2: same reason twice: review STOP: major e2e/ui/765-2.spec.ts:32 done-when: the 765-2 UI test asserts a different preview text than the plan's criterion, and the diff rewrites that criterion",
+          "park": {
+            "at": "2026-11-27T19:49:20.119Z",
+            "reason": "same reason twice: review STOP: major e2e/ui/765-2.spec.ts:32 done-when: the 765-2 UI test asserts a different preview text than the plan's criterion, and the diff rewrites that criterion"
+          },
+          "parkBranch": "park/md-1-765"
+        },
+        {
+          "nnn": "765",
+          "title": "The menu designer screen: build, preview, save and manage designs by hand",
+          "branch": "feat/765-menu-designer-screen",
+          "state": "asking",
+          "round": 1,
+          "tier": "judgment",
+          "models": {
+            "builder": {
+              "model": "opus",
+              "tier": "judgment",
+              "at": "2026-11-27T19:50:59.706Z"
+            }
+          },
+          "tiers": [
+            "build",
+            "judgment"
+          ],
+          "freeDiskGb": 8.1,
+          "reason": "asking 765-3: replan needed: Done-when [ui] 765-2 cannot be met as the run branch holds it: the preview can only show «תפריט לדוגמה» if menu-doc.ts changes, which the Human forbade. The criterion must say «תפריט ערב» on orch/md-1 so the reviewer's frozen copy matches.",
+          "calls": [
+            {
+              "stage": "builder",
+              "model": "opus",
+              "seconds": 97.2,
+              "tokens": {
+                "input": 351738,
+                "output": 7359
+              },
+              "exit": 0
+            }
+          ],
+          "park": {
+            "at": "2026-11-27T19:53:30.791Z",
+            "reason": "replan needed: Done-when [ui] 765-2 cannot be met as the run branch holds it: the preview can only show «תפריט לדוגמה» if menu-doc.ts changes, which the Human forbade. The criterion must say «תפריט ערב» on orch/md-1 so the reviewer's frozen copy matches."
+          },
+          "parkBranch": "park/md-1-765"
+        },
+        {
+          "nnn": "765",
+          "title": "The menu designer screen: build, preview, save and manage designs by hand",
+          "branch": "feat/765-menu-designer-screen",
+          "state": "parked",
+          "round": 1,
+          "tier": "judgment",
+          "models": {
+            "builder": {
+              "model": "opus",
+              "tier": "judgment",
+              "at": "2026-11-27T20:07:52.595Z"
+            },
+            "reviewer": {
+              "model": "sonnet",
+              "at": "2026-11-27T20:24:36.279Z"
+            }
+          },
+          "tiers": [
+            "build",
+            "judgment"
+          ],
+          "freeDiskGb": 8.6,
+          "sha": "b51ed6cd50f6b138697ffc89255afef0d44470f2",
+          "calls": [
+            {
+              "stage": "builder",
+              "model": "opus",
+              "seconds": 729.3,
+              "tokens": {
+                "input": 312137,
+                "output": 6242
+              },
+              "exit": 0
+            },
+            {
+              "stage": "reviewer",
+              "model": "sonnet",
+              "seconds": 191.4,
+              "tokens": {
+                "input": 2007938,
+                "output": 23312
+              },
+              "exit": 0
+            }
+          ],
+          "checkedHead": "b51ed6cd50f6b138697ffc89255afef0d44470f2",
+          "reason": "environment: merge: git fetch origin failed: ",
+          "park": {
+            "at": "2026-11-27T20:29:55.078Z",
+            "reason": "environment: merge: git fetch origin failed:"
+          },
+          "parkBranch": "park/md-1-765"
+        }
+      ],
+      "tiers": [
+        "build",
+        "judgment"
+      ],
+      "freeDiskGb": 6.3,
+      "sha": "b0a10bcbe9cfe119049c47add686bc4d061eb805",
+      "calls": [
+        {
+          "stage": "builder",
+          "model": "opus",
+          "seconds": 870.9,
+          "tokens": {
+            "input": 205681,
+            "output": 5030
+          },
+          "exit": 0
+        },
+        {
+          "stage": "reviewer",
+          "model": "sonnet",
+          "seconds": 213.6,
+          "tokens": {
+            "input": 2225996,
+            "output": 24566
+          },
+          "exit": 0
+        }
+      ],
+      "roundCauses": [
+        "round 2: review STOP: major e2e/ui/765-2.spec.ts:32 done-when: 765-2 checks another preview title than the criterion names"
+      ],
+      "reason": "review STOP: major e2e/ui/765-2.spec.ts:32 done-when: 765-2 checks another preview title than the criterion names (fix rounds used: 1 of 2) — needs the Human (asked 3 times in this run)",
+      "park": {
+        "at": "2026-11-27T21:13:14.413Z",
+        "reason": "review STOP: major e2e/ui/765-2.spec.ts:32 done-when: 765-2 checks another preview title than the criterion names (fix rounds used: 1 of 2) — needs the Human (asked 3 times in this run)"
+      },
+      "parkBranch": "park/md-1-765"
+    },
+    "767": {
+      "nnn": "767",
+      "title": "PDF proof on the real Render server: headless browser, memory and start-up measured",
+      "branch": "feat/767-menu-pdf-render-proof",
+      "state": "merged",
+      "round": 0,
+      "tier": "build",
+      "models": {
+        "builder": {
+          "model": "sonnet",
+          "tier": "build",
+          "at": "2026-11-27T21:21:38.399Z"
+        },
+        "reviewer": {
+          "model": "sonnet",
+          "at": "2026-11-27T22:01:23.335Z"
+        }
+      },
+      "humanItems": [
+        "Dandan deploys the plan branch to a free Render test instance (see Critical Questions Q1), opens",
+        "Dandan reads the decision line in Execution Notes (adopt the measured setup, or the free fallback) and"
+      ],
+      "history": [
+        {
+          "at": "2026-11-27T19:12:41.110Z",
+          "state": "queued",
+          "round": 0
+        },
+        {
+          "at": "2026-11-27T20:30:21.590Z",
+          "state": "skipped",
+          "round": 0
+        },
+        {
+          "at": "2026-11-27T21:13:29.659Z",
+          "state": "skipped",
+          "round": 0
+        },
+        {
+          "at": "2026-11-27T21:21:38.140Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-27T21:21:38.400Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-27T21:50:52.854Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-27T22:01:12.983Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-27T22:01:23.336Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-27T22:03:06.775Z",
+          "state": "merging",
+          "round": 0
+        },
+        {
+          "at": "2026-11-27T22:41:28.369Z",
+          "state": "merged",
+          "round": 0
+        }
+      ],
+      "earlier": [
+        {
+          "nnn": "767",
+          "round": 0,
+          "models": {},
+          "state": "skipped",
+          "reason": "shares files with parked 765",
+          "freeDiskGb": 7
+        }
+      ],
+      "tiers": [
+        "build"
+      ],
+      "freeDiskGb": 7.9,
+      "sha": "3810a5455e209961ec2e8d6df5acae0a4908cca7",
+      "calls": [
+        {
+          "stage": "builder",
+          "model": "sonnet",
+          "seconds": 1751.3,
+          "tokens": {
+            "input": 6151216,
+            "output": 77089
+          },
+          "exit": 0
+        },
+        {
+          "stage": "reviewer",
+          "model": "sonnet",
+          "seconds": 100.9,
+          "tokens": {
+            "input": 406823,
+            "output": 13066
+          },
+          "exit": 0
+        }
+      ],
+      "checkedHead": "c65c8557f4b1eeac58c17a7d70268a454579a62c"
+    }
+  },
+  "notes": [
+    {
+      "at": "2026-11-27T18:35:58.180Z",
+      "plan": "767",
+      "text": "decided without the Human: advisor · readiness: the question up front (tests and manifest the plan needs) answered: approved: server/test/helpers/app.js, docs/workflow-kit/manifest.json"
+    },
+    {
+      "at": "2026-11-27T18:37:58.079Z",
+      "plan": "765",
+      "text": "the folder foodVibe1.0-orch-md-1-765 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-27T19:11:48.774Z",
+      "plan": "765",
+      "text": "builder left undone (round 0): [human] delete item, «Trash lists it»: needs src/app/core/services/trash.service.ts, outside the scope; A6 was not opened in a slot's served build: a builder folder has no QA login; 765-1: written, not run; 765-2: written, not run (its «תפריט לדוגמה» assertion will fail until the question above is a"
+    },
+    {
+      "at": "2026-11-27T19:12:40.437Z",
+      "plan": "765",
+      "text": "parked: nothing to save (nothing uncommitted)"
+    },
+    {
+      "at": "2026-11-27T19:12:40.701Z",
+      "plan": "765",
+      "text": "ask 765-1 (scope, the Human or the advisor answers): Trash does not list deleted menu designs (src/app/core/services/trash.service.ts is out of scope), and UI test 765-2 expects «תפריט לדוגמה» while the sample menu is titled «תפריט ערב» (shared/schemas/menu-design/menu-doc.ts:58, out of scope): which files may the build change?"
+    },
+    {
+      "at": "2026-11-27T19:16:11.431Z",
+      "plan": "765",
+      "text": "ask 765-1 answered by the human: approved: src/app/core/services/trash.service.ts, src/app/core/services/trash.service.spec.ts — and do not change shared/schemas/menu-design/menu-doc.ts: make UI test 765-2 expect the existing sample title «תפריט ערב» instead (the plan's quoted title was a drafting slip)"
+    },
+    {
+      "at": "2026-11-27T19:16:21.551Z",
+      "plan": "765",
+      "text": "scope of plan 765 extended on orch/md-1 by the answer to 765-1: src/app/core/services/trash.service.ts, src/app/core/services/trash.service.spec.ts, shared/schemas/menu-design/menu-doc.ts"
+    },
+    {
+      "at": "2026-11-27T19:17:36.678Z",
+      "plan": "765",
+      "text": "resumed from park/md-1-765: round 0, tier build, after: asking 765-1: replan needed: ESCALATE: scope — the [human] delete item says Trash lists a deleted design, but src/app/core/services/trash.service.ts:35 has a fi"
+    },
+    {
+      "at": "2026-11-27T19:17:43.493Z",
+      "plan": "765",
+      "text": "the folder foodVibe1.0-orch-md-1-765 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-27T19:28:17.398Z",
+      "plan": "765",
+      "text": "builder left undone (round 0): [ui] 765-1 designs button and module gate: written, not run; [ui] 765-2 empty list to editor with the sample menu: written, not run; [ui] 765-3 live business name and save: written, not run; [ui] 765-4 set default and duplicate: written, not run"
+    },
+    {
+      "at": "2026-11-27T19:43:32.646Z",
+      "plan": "765",
+      "text": "builder left undone (round 1): 765-1: written, not run; 765-2: written, not run; 765-3: written, not run; 765-4: written, not run"
+    },
+    {
+      "at": "2026-11-27T19:43:35.837Z",
+      "plan": "765",
+      "text": "GATE: cached pnpm run test:ci — passed on the same files in plan 765"
+    },
+    {
+      "at": "2026-11-27T19:49:29.921Z",
+      "plan": "765",
+      "text": "parked: nothing to save (nothing uncommitted)"
+    },
+    {
+      "at": "2026-11-27T19:49:30.184Z",
+      "plan": "765",
+      "text": "ask 765-2 (technical, the Human or the advisor answers): Plan 765 failed twice for the same reason (review STOP: major e2e/ui/765-2.spec.ts:32 done-when: the 765-2 UI test asserts a different preview text than the plan's criterion, and the diff rewrites that criterion). Leave it parked, or retry it?"
+    },
+    {
+      "at": "2026-11-27T19:49:30.468Z",
+      "plan": "765",
+      "text": "decided without the Human: advisor · technical: ask 765-2 (\"Plan 765 failed twice for the same reason (review STOP: major e2e/ui/765-2.spec.ts:32 done-when: the 765-2 UI test asserts a different preview text than the pla\") answered: retry: a fresh judgment-tier builder with the hand-off and this answer"
+    },
+    {
+      "at": "2026-11-27T19:49:30.788Z",
+      "plan": "765",
+      "text": "ask 765-2 answered by the advisor: retry: a fresh judgment-tier builder with the hand-off and this answer"
+    },
+    {
+      "at": "2026-11-27T19:50:49.807Z",
+      "plan": "765",
+      "text": "resumed from park/md-1-765: round 1, tier judgment, after: asking 765-2: same reason twice: review STOP: major e2e/ui/765-2.spec.ts:32 done-when: the 765-2 UI test asserts a different preview text than the plan's criter"
+    },
+    {
+      "at": "2026-11-27T19:50:50.003Z",
+      "plan": "765",
+      "text": "starts on the judgment tier: the answer to 765-2: retry on the judgment tier"
+    },
+    {
+      "at": "2026-11-27T19:50:59.344Z",
+      "plan": "765",
+      "text": "the folder foodVibe1.0-orch-md-1-765 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-27T19:52:37.079Z",
+      "plan": "765",
+      "text": "builder left undone (round 1): 765-2 review stop: the frozen criterion («תפריט לדוגמה») and the Human's answer («תפריט ערב», menu-doc.ts unchanged) conflict; can only be settled on the run branch's plan; [ui] 765-1: written, not run; [ui] 765-2: written, not run; [ui] 765-3: written, not run; [ui] 765-4: written, not run"
+    },
+    {
+      "at": "2026-11-27T19:53:37.410Z",
+      "plan": "765",
+      "text": "parked: nothing to save (nothing uncommitted)"
+    },
+    {
+      "at": "2026-11-27T19:53:37.677Z",
+      "plan": "765",
+      "text": "ask 765-3 (product, only the Human answers): The 765-2 criterion on orch/md-1 still says «תפריט לדוגמה», but your answer to 765-1 keeps the sample title «תפריט ערב». How should the plan be settled?"
+    },
+    {
+      "at": "2026-11-27T20:05:38.553Z",
+      "plan": "765",
+      "text": "ask 765-3 answered by the human: commit the 765-2 criterion change («תפריט ערב») to plans/765-menu-designer-screen.plan.md on orch/md-1, then rerun the review of this branch"
+    },
+    {
+      "at": "2026-11-27T20:07:32.066Z",
+      "plan": "765",
+      "text": "resumed from park/md-1-765: round 1, tier judgment, after: asking 765-3: replan needed: Done-when [ui] 765-2 cannot be met as the run branch holds it: the preview can only show «תפריט לדוגמה» if menu-doc.ts changes, whi"
+    },
+    {
+      "at": "2026-11-27T20:07:32.459Z",
+      "plan": "765",
+      "text": "starts on the judgment tier: resumed on the tier the stopped attempt ran on"
+    },
+    {
+      "at": "2026-11-27T20:07:51.766Z",
+      "plan": "765",
+      "text": "the folder foodVibe1.0-orch-md-1-765 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-27T20:20:02.274Z",
+      "plan": "765",
+      "text": "builder left undone (round 1): e2e/ui/765-1..765-4: written, not run (no running app or QA login in a builder folder); Committing straight to orch/md-1: not done by the builder (its rules forbid touching the run branch). The change merges in with this branch, and the run reruns the review"
+    },
+    {
+      "at": "2026-11-27T20:20:12.487Z",
+      "plan": "765",
+      "text": "GATE: cached pnpm run test:ci — passed on the same files in plan 765"
+    },
+    {
+      "at": "2026-11-27T20:30:20.137Z",
+      "plan": "765",
+      "text": "parked: nothing to save (nothing uncommitted)"
+    },
+    {
+      "at": "2026-11-27T20:30:22.416Z",
+      "text": "make this a default? the «עיצובי תפריט» button sits in the page header's leading slot, because a second header action is drawn under «תפריט חדש» — reverse: move it to header-actions once the shared header lays actions sid (trigger: screen) — reply: default yes run-screen"
+    },
+    {
+      "at": "2026-11-27T20:30:22.762Z",
+      "text": "make this a default? on a phone a design card hides the title font's name so the row stays on one line — reverse: remove the phone rule of .design-card__font (trigger: destructive-action) — reply: default yes run-destructive-action"
+    },
+    {
+      "at": "2026-11-27T20:30:23.115Z",
+      "text": "make this a default? staff see edit, rename and delete only on their own designs; opening another's design by address shows the editor and the server refuses the save — reverse: gate the save button with PermissionService (trigger: editable-form) — reply: default yes run-editable-form"
+    },
+    {
+      "at": "2026-11-27T20:30:23.590Z",
+      "text": "make this a default? an unknown design address shows «העיצוב לא נמצא» with a back button — reverse: redirect to the list (trigger: list) — reply: default yes run-list"
+    },
+    {
+      "at": "2026-11-27T20:42:22.148Z",
+      "plan": "765",
+      "text": "resumed from park/md-1-765: round 1, tier judgment, after: environment: merge: git fetch origin failed:"
+    },
+    {
+      "at": "2026-11-27T20:42:22.390Z",
+      "plan": "765",
+      "text": "starts on the judgment tier: resumed on the tier the stopped attempt ran on"
+    },
+    {
+      "at": "2026-11-27T20:42:37.645Z",
+      "plan": "765",
+      "text": "the folder foodVibe1.0-orch-md-1-765 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-27T20:57:09.537Z",
+      "plan": "765",
+      "text": "builder left undone (round 1): 765-1 [ui]: written, not run; 765-2 [ui]: written, not run; 765-3 [ui]: written, not run; 765-4 [ui]: written, not run"
+    },
+    {
+      "at": "2026-11-27T20:57:24.284Z",
+      "plan": "765",
+      "text": "GATE: cached pnpm run test:ci — passed on the same files in plan 765"
+    },
+    {
+      "at": "2026-11-27T21:13:28.913Z",
+      "plan": "765",
+      "text": "parked: nothing to save (nothing uncommitted)"
+    },
+    {
+      "at": "2026-11-27T21:13:30.238Z",
+      "text": "make this a default? on a phone a design card hides the title font's name so the row stays on one line — reverse: remove the phone rule of .design-card__font (trigger: destructive-action) — reply: default yes run-destructive-action"
+    },
+    {
+      "at": "2026-11-27T21:21:37.902Z",
+      "plan": "767",
+      "text": "the folder foodVibe1.0-orch-md-1-767 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-27T21:50:49.898Z",
+      "plan": "767",
+      "text": "builder left undone (round 0): A8: not ticked - the measurement on a free Render instance and the filled decision line are the Human's; the decision template and console steps are in Execution Notes; [human] deploy to a temporary free Render service, read the numbers and check the downloaded PDF: not run; [human] approve the deci"
+    },
+    {
+      "at": "2026-11-27T21:50:54.504Z",
+      "plan": "767",
+      "text": "the folder foodVibe1.0-orch-md-1-767 was installed (server)"
+    },
+    {
+      "at": "2026-11-27T21:50:55.223Z",
+      "plan": "767",
+      "text": "GATE: skip pnpm run test:ci — no change under src/**, public/**, shared/**, angular.json, tsconfig*.json, karma.conf.*"
+    },
+    {
+      "at": "2026-11-27T22:03:29.326Z",
+      "plan": "767",
+      "text": "the folder foodVibe1.0-orch-merge-md-1 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-27T22:42:22.748Z",
+      "text": "FINAL: same tree as plan 767's gate — node scripts/orch-state.mjs prepare --missing server/generated/schemas --script build:schemas --pm pnpm, pnpm run build, pnpm run lint, node scripts/override-check.mjs, pnpm run lint:icons, pnpm run lint:no-native-select, node scripts/plan-ledger-check.mjs, node scripts/breadcrumbs-check.mjs, node scripts/ci-scope-check.mjs --checkout-branch skipped"
+    }
+  ],
+  "attempts": 3,
+  "phase": "finished",
+  "freeDiskGb": 7.9,
+  "updatedAt": "2026-11-27T22:45:38.697Z",
+  "selfDecided": [
+    {
+      "plan": "767",
+      "kind": "advisor · readiness",
+      "what": "the question up front (tests and manifest the plan needs) answered: approved: server/test/helpers/app.js, docs/workflow-kit/manifest.json",
+      "why": "scope: 2 named file(s), none sensitive — the same rule as a scope ask",
+      "undo": "before merge it: on the run branch, drop those lines from the plan's scope block and git checkout origin/main -- server/test/helpers/app.js docs/workflow-kit/manifest.json",
+      "at": "2026-11-27T18:35:58.033Z"
+    },
+    {
+      "plan": "765",
+      "kind": "advisor · technical",
+      "what": "ask 765-2 (\"Plan 765 failed twice for the same reason (review STOP: major e2e/ui/765-2.spec.ts:32 done-when: the 765-2 UI test asserts a different preview text than the pla\") answered: retry: a fresh judgment-tier builder with the hand-off and this answer",
+      "why": "technical: one retry on the judgment tier with the hand-off",
+      "undo": "nothing to undo: the retry is checked by the same gate and review; a second failure parks; the first attempt is kept on park/md-1-765",
+      "at": "2026-11-27T19:49:30.329Z"
+    }
+  ],
+  "decisions": [
+    {
+      "id": "D1",
+      "plan": "765",
+      "type": "behaviour",
+      "text": "behaviour: the «עיצובי תפריט» button sits in the page header's leading slot, because a second header action is drawn under «תפריט חדש» — reverse: move it to header-actions once the shared header lays actions side by side",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D2",
+      "plan": "765",
+      "type": "behaviour",
+      "text": "behaviour: the leave question is the shared guard's, with «ביטול» / «יציאה בלי לשמור», not «לצאת בלי לשמור?» / «הישאר» as the [human] item words it — reverse: give the page its own confirmLeave() and the confirm popup a cancel label",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D3",
+      "plan": "765",
+      "type": "behaviour",
+      "text": "behaviour: on a phone a design card hides the title font's name so the row stays on one line — reverse: remove the phone rule of .design-card__font",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D4",
+      "plan": "765",
+      "type": "behaviour",
+      "text": "behaviour: rename, copy and set-default are icon buttons with tooltips beside the pencil and trash — reverse: give them text in the card's row menu",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D5",
+      "plan": "765",
+      "type": "behaviour",
+      "text": "behaviour: staff see edit, rename and delete only on their own designs; opening another's design by address shows the editor and the server refuses the save — reverse: gate the save button with PermissionService",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D6",
+      "plan": "765",
+      "type": "behaviour",
+      "text": "behaviour: an unknown design address shows «העיצוב לא נמצא» with a back button — reverse: redirect to the list",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D7",
+      "plan": "765",
+      "type": "behaviour",
+      "text": "behaviour: an uploaded picture over 300KB is re-encoded as JPEG, so a transparent logo gets a white background — reverse: upload logos without shrinking",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D8",
+      "plan": "765",
+      "type": "behaviour",
+      "text": "behaviour: copy, rename and set-default answer «העיצוב נשמר», delete answers «העיצוב נמחק» — reverse: drop the messages",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D9",
+      "plan": "765",
+      "type": "behaviour",
+      "text": "behaviour: a long name is shortened so « (עותק)» still fits in 60 characters, and a longer rename is cut at 60 — reverse: cut the whole copied name, or show a field error",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D10",
+      "plan": "765",
+      "type": "behaviour",
+      "text": "behaviour: a background upload that finishes after another background kind was picked keeps the picture but not the image kind — reverse: switch to image when the upload ends",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D11",
+      "plan": "765",
+      "type": "behaviour",
+      "text": "behaviour: the editor puts the cursor in the name field when it opens, as the form recipe says — reverse: remove the focus call in menu-design-edit.page.ts",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D12",
+      "plan": "765",
+      "type": "seen",
+      "text": "seen: src/app/shared/page-header/page-header.component.scss:190 — every [header-actions] button shares one grid cell, so by this rule «פנייה חדשה» on a desktop /menu-library lies under «תפריט חדש», and the two actions of /frontdesk/knowledge overlap too (open each page on a desktop to confirm)",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D13",
+      "plan": "765",
+      "type": "seen",
+      "text": "seen: src/app/shared/list-shell/list-shell.component.html:10 — the filter toggle is always drawn and does nothing on a page without filters, such as /menu-design",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D14",
+      "plan": "765",
+      "type": "behaviour",
+      "text": "behaviour: the Trash section is titled «עיצובי תפריט», sits after the events section and has no History button (designs keep no version history) — reverse: move or rename the menuDesigns row of TRASH_SECTIONS.",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D15",
+      "plan": "765",
+      "type": "behaviour",
+      "text": "behaviour: staff may create and edit designs (the default permission rules); only the owner sets the default — reverse: gate the create and edit buttons to the owner and add a server rule.",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D16",
+      "plan": "765",
+      "type": "behaviour",
+      "text": "behaviour: deleting the default design leaves no chosen default, so the first live design by creation date is used — reverse: ask for a new default on delete.",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D17",
+      "plan": "765",
+      "type": "behaviour",
+      "text": "behaviour: on a phone the sample menu sits above the controls, capped at 60% of the screen height — reverse: change the preview's phone rule in menu-designer.component.scss.",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D18",
+      "plan": "765",
+      "type": "behaviour",
+      "text": "behaviour: a design's copy is named «<name> (עותק)» — reverse: change the menu_design_copy_suffix dictionary value.",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D19",
+      "plan": "765",
+      "type": "behaviour",
+      "text": "behaviour: the leave question is the shared one («ביטול» / «יציאה בלי לשמור»), not the words «לצאת בלי לשמור?» / «הישאר» of the [human] item — reverse: give the page its own confirmLeave() and the confirm popup a cancel label.",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D20",
+      "plan": "765",
+      "type": "behaviour",
+      "text": "behaviour: on a phone a design card hides the title font's name so the row stays on one line — reverse: remove the phone rule of .design-card__font.",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D21",
+      "plan": "765",
+      "type": "behaviour",
+      "text": "behaviour: rename, copy and set default are icon buttons with a tooltip beside the pencil and trash — reverse: give them text in the card's row menu.",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D22",
+      "plan": "765",
+      "type": "behaviour",
+      "text": "behaviour: staff see edit, rename and delete only on designs they created; one who opens another's design by address sees the editor and the server refuses the save — reverse: gate the save button with PermissionService.",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D23",
+      "plan": "765",
+      "type": "behaviour",
+      "text": "behaviour: an unknown design address shows «העיצוב לא נמצא» with «חזרה» — reverse: redirect to the list.",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D24",
+      "plan": "765",
+      "type": "behaviour",
+      "text": "behaviour: a picture over 300KB is re-encoded as JPEG when shrunk, so a transparent logo gets a white background — reverse: upload logos without shrinking.",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D25",
+      "plan": "765",
+      "type": "behaviour",
+      "text": "behaviour: a successful copy, rename or set default answers «העיצוב נשמר», a delete «העיצוב נמחק» — reverse: drop the messages.",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D26",
+      "plan": "765",
+      "type": "behaviour",
+      "text": "behaviour: the «עיצובי תפריט» button sits in the menu library header's leading slot, because a second header action would lie under «תפריט חדש» — reverse: move it back to the header actions once the header can hold more than one.",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D27",
+      "plan": "765",
+      "type": "seen",
+      "text": "seen: src/app/shared/page-header/page-header.component.scss:190 — in the list layout every non-leading header action gets the same grid cell, so on /menu-library the «openInquiry» button and «תפריט חדש» (menu-library-list.component.html) appear to overlap on a desktop; open /menu-library and look at the header.",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D28",
+      "plan": "765",
+      "type": "behaviour",
+      "text": "behaviour: kept the 765-2 spec on «תפריט ערב» and did not add the text «תפריט לדוגמה» to the preview or the sample menu, so the Human's answer to 765-1 still holds — reverse: set the preview's doc title to «תפריט לדוגמה» and assert that instead",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D29",
+      "plan": "765",
+      "type": "seen",
+      "text": "seen: node scripts/ci-scope-check.mjs --checkout-branch prints 'skipped (branch \"\" is not feat/NNN-*)' on feat/765-menu-designer-screen (exit 0), so it reads an empty branch name and never checks this branch",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D30",
+      "plan": "765",
+      "type": "behaviour",
+      "text": "behaviour: the leave question uses the shared pendingChangesGuard wording («ביטול» / «יציאה בלי לשמור»), not the [human] item's «לצאת בלי לשמור?» / «הישאר» — reverse: give the page its own confirmLeave() and the confirm popup a cancel label",
+      "alsoFrom": [],
+      "attempt": 2,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D31",
+      "plan": "765",
+      "type": "behaviour",
+      "text": "behaviour: on a phone a design card hides the title font's name so the row stays on one line — reverse: remove the phone rule of .design-card__font",
+      "alsoFrom": [],
+      "attempt": 2,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D32",
+      "plan": "765",
+      "type": "behaviour",
+      "text": "behaviour: rename, copy and make-default are icon buttons with a tooltip beside the pencil and trash — reverse: put them as text items in the card's row menu",
+      "alsoFrom": [],
+      "attempt": 2,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D33",
+      "plan": "765",
+      "type": "behaviour",
+      "text": "behaviour: staff see edit, rename and delete only on designs they created; one who opens another's design by its address sees the editor and the server refuses the save — reverse: gate the save button with PermissionService",
+      "alsoFrom": [],
+      "attempt": 2,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D34",
+      "plan": "765",
+      "type": "behaviour",
+      "text": "behaviour: an unknown design address shows «העיצוב לא נמצא» with «חזרה» — reverse: redirect to the list",
+      "alsoFrom": [],
+      "attempt": 2,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D35",
+      "plan": "765",
+      "type": "behaviour",
+      "text": "behaviour: a picture over 300KB is re-encoded as JPEG by downscaleImage, so a transparent logo gets a white background — reverse: upload logos without shrinking",
+      "alsoFrom": [],
+      "attempt": 2,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D36",
+      "plan": "765",
+      "type": "behaviour",
+      "text": "behaviour: a successful copy, rename or make-default shows «העיצוב נשמר», a delete shows «העיצוב נמחק» — reverse: drop the messages",
+      "alsoFrom": [],
+      "attempt": 2,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D37",
+      "plan": "765",
+      "type": "behaviour",
+      "text": "behaviour: the Trash section is titled «עיצובי תפריט», sits after events and has no History button — reverse: move or rename the menuDesigns row of TRASH_SECTIONS",
+      "alsoFrom": [],
+      "attempt": 2,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D38",
+      "plan": "767",
+      "type": "behaviour",
+      "text": "behaviour: fonts that do not settle within 10 s fail the render (PDF_FAILED) instead of printing fallback fonts — reverse: catch the TimeoutError of setContent in printPage and print",
+      "alsoFrom": [],
+      "attempt": 3,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D39",
+      "plan": "767",
+      "type": "behaviour",
+      "text": "behaviour: coldStartMs is the browser's launch time for that call (0 when open, Render's wake-up not included); browserRssMb and peakTotalMb are null off Linux, and on Linux the two memory figures are the parts of the highest sample — reverse: change startMemorySampler and printJob",
+      "alsoFrom": [],
+      "attempt": 3,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D40",
+      "plan": "767",
+      "type": "behaviour",
+      "text": "behaviour: ?fonts=embedded keeps the classic design, so its dish font David Libre (not one of the two kept) falls back — reverse: set design.fonts.dish to frank-ruhl-libre for that mode in server/routes/menu-design.js",
+      "alsoFrom": [],
+      "attempt": 3,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D41",
+      "plan": "767",
+      "type": "behaviour",
+      "text": "behaviour: --disable-web-security and --allow-running-insecure-content are removed from the small Chromium's flags — reverse: drop them from REFUSED_FLAGS in server/services/menu-pdf/browser.js",
+      "alsoFrom": [],
+      "attempt": 3,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D42",
+      "plan": "767",
+      "type": "behaviour",
+      "text": "behaviour: a photographed page gets no WebSocket, WebTransport, WebRTC, workers, service worker or window.open (the request check cannot see them) and its dialogs are dismissed — reverse: remove sealPage in server/services/menu-pdf.js",
+      "alsoFrom": [],
+      "attempt": 3,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D43",
+      "plan": "767",
+      "type": "behaviour",
+      "text": "behaviour: the address guard also refuses 0/8, 192.0.0/24, 198.18/15, 240/4, every IPv6 address outside 2000::/3, Teredo, 6to4 and documentation ranges — reverse: trim the lists in server/services/menu-pdf/guard.js",
+      "alsoFrom": [],
+      "attempt": 3,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D44",
+      "plan": "767",
+      "type": "behaviour",
+      "text": "behaviour: screenshot width is kept within 320 to 1920; errors are URL_REFUSED 400, SCREENSHOT_FAILED 502, SCREENSHOT_TOO_LARGE 413, PDF_FAILED 500 — reverse: edit the constants and errors.js",
+      "alsoFrom": [],
+      "attempt": 3,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D45",
+      "plan": "767",
+      "type": "behaviour",
+      "text": "behaviour: menu_pdf.launch_failed is logged once until a browser starts again, with the error's name and first line, addresses stripped — reverse: edit openBrowser",
+      "alsoFrom": [],
+      "attempt": 3,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D46",
+      "plan": "767",
+      "type": "seen",
+      "text": "seen: shared/schemas/menu-design/menu-template.ts:144 the .md-content p { margin: 0 } rule outranks the margins of .md-subtitle, .md-note, .md-contact and .md-powered, so 'Powered by FoodVibe' sits tight under the bottom note",
+      "alsoFrom": [],
+      "attempt": 3,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D47",
+      "plan": "767",
+      "type": "seen",
+      "text": "seen: shared/schemas/menu-design/menu-template.ts:156 the ornament character comes from a system font (Segoe UI Symbol on Windows); the small Chromium carries few fonts, so it may be missing on Render",
+      "alsoFrom": [],
+      "attempt": 3,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    }
+  ],
+  "finishedAt": "2026-11-27T22:45:38.694Z",
+  "finalGate": {
+    "ok": true,
+    "command": null,
+    "at": "2026-11-27T22:45:38.696Z",
+    "attempt": 1,
+    "blamed": []
+  }
+}

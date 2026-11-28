@@ -62,6 +62,11 @@
 | `scripts/repair-supplier-refs.js` | Plan 649: lists (dry run) or repairs (`--write`) product sources whose supplier is foreign, unknown or empty — map by `_masterId`, by trimmed name, or clear; prices never change; `--target` other than `local` needs `--confirm-remote` |
 | `scripts/seed-demo-business.js` | Fills a local database with one demo catering business (dry run by default; `--write`; local only) |
 | `scripts/menu-sample-html.js` | Plan 764: writes the sample menu in the four base designs to the OS temp folder and prints the paths; no database |
+| `services/menu-pdf.js` | The one render service of the menu design program (plan 767, C-PDF): `renderPdf`, `renderPdfMeasured`, `screenshotUrl`, `embedFonts`; reads and writes no data, logs no HTML or address |
+| `services/menu-pdf/` | Its private helpers: `browser.js` (the one browser, queue, idle close, launch flags), `guard.js` (what a page may load), `memory.js`, `fonts.js`, `errors.js` |
+| `routes/menu-design.js` | Mounted at `/api/v1/menu-design` (plan 767): `GET /pdf-smoke?fonts=link\|embedded&download=1`, platform admin only — renders the sample menu and answers time and memory |
+| `assets/menu-fonts/` | Heebo and Frank Ruhl Libre woff2 files (both OFL, licence texts beside them) and their list `fonts.json` (plan 767) |
+| `scripts/menu-fonts-fetch.js` | Plan 767: downloads those font files once; the result is committed, a deploy never runs it |
 | `shared/schemas/menu-design/` | The one menu template (plan 764, ADR 0034): fonts, textures, base designs, `menuDocFromEvent`, `resolveMenuDesign`, `designCssVars`, `renderMenuDocument`; required here from `generated/schemas/menu-design` |
 | `routes/business.js` (menu design) | `PUT /api/v1/business/menu-design-default` `{ designId }` → `{ menuDesign }` (plan 764): owner only, a live design of the same business, one write (`setMenuDesignDefault`); `hidePoweredBy` is set only by `PUT /api/v1/admin/businesses/:id/platform` |
 | `middleware/auth.js` | `verifyToken` — JWT Bearer verification, attaches `req.user` |
