@@ -1,0 +1,147 @@
+<section class="ai-panel c-glass-panel">
+  <h2 class="ai-panel__title">
+    <lucide-icon name="sparkles" [size]="18"></lucide-icon>
+    {{ 'menu_design_ai_title' | translatePipe }}
+  </h2>
+
+  <div
+    class="c-chip-group ai-panel__kinds"
+    role="radiogroup"
+    data-picker="reference"
+    [attr.aria-label]="'menu_design_ai_title' | translatePipe"
+  >
+    @for (option of kinds; track option.value) {
+      <label
+        class="c-chip c-chip--toggle"
+        [attr.data-value]="option.value"
+        [attr.title]="option.hintKey | translatePipe"
+      >
+        <input
+          type="radio"
+          [name]="uid + '-reference'"
+          [checked]="kind_() === option.value"
+          [attr.aria-describedby]="option.hintId"
+          (change)="onKindPick(option.value)"
+        />
+        <span>
+          <lucide-icon [name]="option.icon" [size]="16" aria-hidden="true"></lucide-icon>
+          {{ option.labelKey | translatePipe }}
+        </span>
+      </label>
+    }
+  </div>
+  @for (option of kinds; track option.value) {
+    <span class="visually-hidden" [id]="option.hintId">{{ option.hintKey | translatePipe }}</span>
+  }
+
+  @switch (kind_()) {
+    @case ('image') {
+      <div class="ai-panel__row">
+        <input
+          #referenceFile
+          type="file"
+          accept="image/*"
+          hidden
+          data-upload="reference"
+          (change)="onFilePicked($event)"
+        />
+        <button type="button" class="c-btn-ghost" (click)="referenceFile.click()">
+          <lucide-icon name="image-up" [size]="18"></lucide-icon>
+          {{ 'menu_design_upload_image' | translatePipe }}
+        </button>
+        @if (file_(); as file) {
+          <span class="ai-panel__file" dir="auto">{{ file.name }}</span>
+        }
+      </div>
+      <input
+        type="text"
+        class="c-input"
+        dir="auto"
+        autocomplete="off"
+        data-field="note"
+        [attr.maxlength]="noteMax"
+        [attr.placeholder]="'menu_design_ai_note_placeholder' | translatePipe"
+        [attr.aria-label]="'menu_design_ai_note_placeholder' | translatePipe"
+        [value]="note_()"
+        (input)="onNoteInput($event)"
+      />
+    }
+    @case ('url') {
+      <app-form-field label="menu_design_ai_ref_url" [forId]="uid + '-url'">
+        <input
+          type="url"
+          class="c-input"
+          dir="ltr"
+          autocomplete="off"
+          placeholder="https://"
+          [id]="uid + '-url'"
+          [attr.maxlength]="urlMax"
+          [value]="url_()"
+          (input)="onUrlInput($event)"
+        />
+      </app-form-field>
+    }
+    @case ('text') {
+      <app-form-field label="menu_design_ai_ref_text" [forId]="uid + '-text'">
+        <textarea
+          class="c-input"
+          dir="auto"
+          rows="2"
+          [id]="uid + '-text'"
+          [attr.maxlength]="textMax"
+          [value]="text_()"
+          (input)="onTextInput($event)"
+        ></textarea>
+      </app-form-field>
+    }
+  }
+
+  <p class="ai-panel__note">{{ 'menu_design_ai_style_not_copy' | translatePipe }}</p>
+
+  <div class="ai-panel__row">
+    <button
+      type="button"
+      class="c-btn-primary"
+      data-testid="menu-design-ai-suggest"
+      [disabled]="!reference() || isBusy_()"
+      (click)="onSuggest()"
+    >
+      @if (isBusy_()) {
+        <app-loader size="small" [inline]="true" />
+      }
+      {{ 'menu_design_ai_suggest' | translatePipe }}
+    </button>
+  </div>
+
+  @if (errorKey_(); as key) {
+    <div class="ai-panel__row ai-panel__error" role="alert">
+      <span>{{ key | translatePipe }}</span>
+      <button type="button" class="c-btn-ghost c-btn-ghost--sm" [disabled]="isBusy_()" (click)="onSuggest()">
+        {{ 'menu_design_retry' | translatePipe }}
+      </button>
+    </div>
+  }
+</section>
+
+@if (variants_(); as variants) {
+  <app-modal-shell size="fluid" titleKey="menu_design_ai_variants_title" (dismissed)="onVariantsClose()">
+    <div class="ai-variants">
+      @for (variant of variants; track $index) {
+        <div class="ai-variants__card" data-testid="menu-design-ai-variant">
+          <app-menu-preview [design]="variant.design" [doc]="sampleDoc" />
+          @if (variant.fallback) {
+            <span class="c-chip c-chip--amber">{{ 'menu_design_ai_fallback' | translatePipe }}</span>
+          }
+          <button type="button" class="c-btn-primary ai-variants__pick" (click)="onPick(variant)">
+            {{ 'menu_design_ai_pick' | translatePipe }}
+          </button>
+        </div>
+      }
+    </div>
+    <div class="c-modal-actions">
+      <button type="button" class="c-btn-ghost" data-testid="menu-design-ai-close" (click)="onVariantsClose()">
+        {{ 'cancel' | translatePipe }}
+      </button>
+    </div>
+  </app-modal-shell>
+}

@@ -21,14 +21,18 @@
   }
 }
 
-.menu-designer__preview {
+.menu-designer__ai {
+  margin-block-end: var(--space-4);
+}
+
+/* The sample menu and, under it, the change-in-words box. */
+.menu-designer__side {
   grid-area: preview;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
 
   min-inline-size: 0;
-  max-block-size: 60vh;
-
-  overflow: auto;
-  scrollbar-width: none;
 
   @media (min-width: $break-desktop-min) {
     position: sticky;
@@ -36,6 +40,20 @@
     inset-block-start: calc(3.875rem + var(--space-4));
 
     max-block-size: calc(100dvh - 3.875rem - var(--space-8));
+  }
+}
+
+.menu-designer__preview {
+  min-inline-size: 0;
+  max-block-size: 60vh;
+
+  overflow: auto;
+  scrollbar-width: none;
+
+  @media (min-width: $break-desktop-min) {
+    /* Takes what the side column leaves it, and scrolls inside that. */
+    min-block-size: 0;
+    max-block-size: none;
   }
 }
 

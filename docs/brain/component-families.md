@@ -750,8 +750,11 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 - Use: `src/app/shared/menu-designer/` · `app-menu-designer` (`[(design)]` a design draft, `sampleDoc`, `(uploading)`).
   It holds the font, colour, background, frame, logo, layout and fixed-text controls beside the sample menu, and never
   saves: the host does. The form to design mapping is `src/app/core/utils/menu-design-form.util.ts`; the fonts link is
-  `src/app/core/utils/menu-fonts-link.util.ts`.
-- Pieces: MenuDesignerComponent, designFromForm, formFromDesign, menuFontsHref.
+  `src/app/core/utils/menu-fonts-link.util.ts`. With the `menu_design` module it also carries the AI tools of
+  `src/app/shared/menu-designer/ai-panel/` (plan 766: `app-menu-design-ai-panel`, `app-menu-design-ai-refine`, one
+  step of undo held by the designer); their calls are `src/app/core/services/menu-design-ai.service.ts`, the server side
+  `server/routes/ai/menu-design.js` with `server/utils/menu-design-ai.js`.
+- Pieces: MenuDesignerComponent, MenuDesignAiPanelComponent, MenuDesignAiRefineComponent, MenuDesignAiService, designFromForm, formFromDesign, menuFontsHref.
 - When: a screen lets someone change how a menu looks; never a second look editor.
 - Known copies: none.
 

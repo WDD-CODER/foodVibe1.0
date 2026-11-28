@@ -115,6 +115,7 @@ router.use('/logistics', require('./ai/logistics'));
 router.use('/invoices', require('./ai/invoices'));
 router.use('/diag', require('./ai/diag'));
 router.use('/stock', require('./ai/stock'));
+router.use('/menu-design', require('./ai/menu-design'));
 
 /** Plan 580: usage context for callGemini; `ids` lets the outcome tracker mark refused answers. */
 function usageOf(req) {
@@ -1892,3 +1893,5 @@ module.exports.respondFromGeminiFailure = respondFromGeminiFailure;
 module.exports.usageOf = usageOf;
 module.exports.requestedModel = requestedModel;
 module.exports.aiLimiter = aiLimiter;
+// Plan 766: the menu designer checks a reference link before the server's browser opens it.
+module.exports.isSafeUrl = isSafeUrl;

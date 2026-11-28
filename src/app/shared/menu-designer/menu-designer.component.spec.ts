@@ -7,6 +7,7 @@ import { MENU_FONTS } from '@schemas/menu-design/menu-fonts'
 import { MENU_TEXTURES } from '@schemas/menu-design/menu-textures'
 import { CloudinaryService } from '@services/cloudinary.service'
 import { LoggingService } from '@services/logging.service'
+import { ModuleService } from '@services/module.service'
 import { TranslationService } from '@services/translation.service'
 import { UserMsgService } from '@services/user-msg.service'
 import { TEST_LUCIDE_ICONS } from 'src/testing/test-lucide-icons'
@@ -52,6 +53,8 @@ describe('MenuDesignerComponent', () => {
       imports: [MenuDesignerComponent, LucideAngularModule.pick({ ...TEST_LUCIDE_ICONS, ImageUp })],
       providers: [
         { provide: CloudinaryService, useValue: cloudinary },
+        // Without the menu design module: the AI tools have their own spec (ai-panel).
+        { provide: ModuleService, useValue: { modules_: () => [] } },
         { provide: UserMsgService, useValue: userMsg },
         { provide: TranslationService, useValue: translation },
         { provide: LoggingService, useValue: jasmine.createSpyObj<LoggingService>('LoggingService', ['error']) }

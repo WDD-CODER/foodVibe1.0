@@ -1,0 +1,49 @@
+<section class="ai-panel c-glass-panel">
+  <app-form-field label="menu_design_ai_refine_label" [forId]="inputId">
+    <textarea
+      class="c-input"
+      dir="auto"
+      rows="1"
+      [id]="inputId"
+      [attr.maxlength]="requestMax"
+      [value]="request_()"
+      (input)="onRequestInput($event)"
+    ></textarea>
+  </app-form-field>
+
+  <div class="ai-panel__row">
+    <button
+      type="button"
+      class="c-btn-primary"
+      data-testid="menu-design-ai-apply"
+      [disabled]="!request_().trim() || isBusy_()"
+      (click)="onApply()"
+    >
+      @if (isBusy_()) {
+        <app-loader size="small" [inline]="true" />
+      }
+      {{ 'menu_design_ai_refine_apply' | translatePipe }}
+    </button>
+    @if (canUndo()) {
+      <button
+        type="button"
+        class="c-btn-ghost"
+        data-testid="menu-design-ai-undo"
+        [disabled]="isBusy_()"
+        (click)="onUndo()"
+      >
+        <lucide-icon name="undo-2" [size]="18"></lucide-icon>
+        {{ 'menu_design_ai_undo' | translatePipe }}
+      </button>
+    }
+  </div>
+
+  @if (errorKey_(); as key) {
+    <div class="ai-panel__row ai-panel__error" role="alert">
+      <span>{{ key | translatePipe }}</span>
+      <button type="button" class="c-btn-ghost c-btn-ghost--sm" [disabled]="isBusy_()" (click)="onApply()">
+        {{ 'menu_design_retry' | translatePipe }}
+      </button>
+    </div>
+  }
+</section>
