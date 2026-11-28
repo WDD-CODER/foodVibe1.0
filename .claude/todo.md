@@ -723,15 +723,6 @@ Every batch's plans depend only on plans in earlier batches, so the batches are 
 - [ ] G2: The leaf's box opens in the same place every time, like the triangle's — src/app/shared/nutrition-badge/nutrition-badge.component.ts
 - [ ] G3: Run every automatic check and paste the outputs under Execution Notes — plans/763-stock-count-narrow-breakpoint-and-leaf-box-placement.plan.md
 
-### Plan 766 — AI in the designer: three variants from a picture, link or description, then refine in words
-- [ ] A1: Describe what the browser may send for a style reference or a refine request — the two request schemas and the image limits, exported from the schemas index; build:schemas — shared/schemas/ai-menu-design.schema.ts, shared/schemas/index.ts
-- [ ] A2: Write the instructions for the AI and the cleaning that keeps only valid designs — menuDesignPrompt, cleanDesignVariant, cleanRefinedDesign (no pictures from the AI, fixed texts kept, base fallback) with their own tests — server/utils/menu-design-ai.js, server/test/menu-design-ai-clean.test.js
-- [ ] A3: Add the two AI routes that turn a picture, link or description into designs and refine one in words — sub-router with module gate, limiter, size checks, isSafeUrl (export it from ai.js) and screenshotUrl, metered callGemini, mount line — server/routes/ai/menu-design.js, server/routes/ai.js, server/test/ai-menu-design.test.js
-- [ ] A4: Let the browser call the two routes with a shrunk image — MenuDesignAiService with the two-step downscale — src/app/core/services/menu-design-ai.service.ts (+ spec), src/app/core/services/http-storage.adapter.ts (only if API.ai needs nothing new, leave it)
-- [ ] A5: Put the AI panel into the designer with the three-variant choice, refine in words and one-step undo — panel component, popup of three previews, style-not-copy line, cap message, dictionary keys, icons — src/app/shared/menu-designer/**, public/assets/data/dictionary.json, src/app/app.config.ts
-- [ ] A6: Prove the panel in the running app with the model answers faked — e2e/ui/766-1.spec.ts, e2e/ui/766-2.spec.ts with page.route answers and module restore
-- [ ] A7: Record the new route, helpers and panel in the folder maps and the family registry — server/breadcrumbs.md, src/app/shared/breadcrumbs.md, src/app/core/services/breadcrumbs.md, docs/brain/component-families.md, docs/brain/inventory.md
-
 ### Plan 767 — PDF proof on the real Render server: headless browser, memory and start-up measured
 - [x] A1: Add the small Chromium and its driver to the server without any install step — puppeteer-core and @sparticuz/chromium pinned exact — server/package.json, server/pnpm-lock.yaml
 - [x] A2: Build the one render service that turns menu HTML into a PDF and a page into a picture — renderPdf, screenshotUrl, one browser, idle close, queue of 3, navigation allow-list, private-address guard, launch-failure log — server/services/menu-pdf.js (helpers in server/services/menu-pdf/ if it grows past ~250 lines)
