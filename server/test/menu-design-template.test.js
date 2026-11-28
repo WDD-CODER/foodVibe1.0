@@ -116,6 +116,19 @@ describe('renderMenuDocument page', () => {
     expect(render(baseDesign('classic'), SAMPLE_MENU_DOC, { poweredBy: true, fonts: 'embedded' })).not.toContain('fonts.googleapis.com')
   })
 
+  it('links all three picked fonts and draws the title and the dishes with theirs', () => {
+    const design = baseDesign('classic')
+    design.fonts = { title: 'suez-one', section: 'karantina', dish: 'amatic-sc' }
+    const html = render(design)
+    expect(html).toContain('<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Suez+One:wght@400&amp;family=Karantina:wght@300;400;700&amp;family=Amatic+SC:wght@400;700&amp;display=swap">')
+    expect(html).toContain('--md-font-title: "Suez One", sans-serif;')
+    expect(html).toContain('--md-font-dish: "Amatic SC", cursive;')
+    // A dish has no font of its own: it takes the body's.
+    expect(html).toMatch(/\nbody \{[^}]*font-family: var\(--md-font-dish\);/)
+    expect(html).toMatch(/\n\.md-title \{[^}]*font-family: var\(--md-font-title\);/)
+    expect(html).not.toMatch(/\n\.md-dish \{[^}]*font-family/)
+  })
+
   it('writes no empty element for a missing text', () => {
     const html = render(baseDesign('minimal'), { sections: [] }, { poweredBy: false, fonts: 'link' })
     expect(textNodes(html)).toEqual([])

@@ -93,6 +93,25 @@ describe('MenuDesignerComponent', () => {
     expect(frame().srcdoc).toContain('--md-font-dish: "Karantina", sans-serif')
   })
 
+  it('keeps a picked title and dish font after change detection settles', async () => {
+    // In the page, so the three radio groups behave as the browser makes them.
+    document.body.appendChild(fixture.nativeElement)
+    fixture.autoDetectChanges(true)
+
+    el('[data-font-slot="title"] input[value="suez-one"]').closest('label')!.click()
+    el('[data-font-slot="dish"] input[value="amatic-sc"]').closest('label')!.click()
+    await fixture.whenStable()
+
+    const picked = { ...baseDesign('classic').fonts, title: 'suez-one', dish: 'amatic-sc' } as const
+    expect(design().fonts).toEqual(picked)
+    for (const [slot, id] of Object.entries(picked)) {
+      expect(el<HTMLInputElement>(`[data-font-slot="${slot}"] input:checked`).value).toBe(id)
+    }
+    expect(frame().srcdoc).toContain('--md-font-title: "Suez One", sans-serif')
+    expect(frame().srcdoc).toContain('--md-font-dish: "Amatic SC", cursive')
+    fixture.nativeElement.remove()
+  })
+
   it('loads the curated fonts with one stylesheet link, however many designers open', () => {
     TestBed.createComponent(MenuDesignerComponent).destroy()
     const links = document.head.querySelectorAll<HTMLLinkElement>('link[data-menu-fonts]')

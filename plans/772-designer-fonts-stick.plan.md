@@ -114,3 +114,18 @@ Runs only when `scope-check.mjs --drift` reports `REALITY: drift`.
 - none
 
 ## Execution Notes
+
+### Builder 2026-11-28: the revert did not reproduce; no product code changed
+
+- Karma, real clicks on title, dish and section chips: `design()`, the checked radio of every slot and the `--md-font-*`
+  values of the frame's `srcdoc` all held the picked ids after 1.5 s each (temporary logging spec, 16/16 pass).
+- The real app (`ng serve -c local --port 4391`, backend faked in the browser, `menu_design` on): Chromium desktop,
+  Chromium Pixel 7 and WebKit iPhone 13 — title, dish, section picked; computed `font-family` in the preview frame
+  showed the pick at +150 ms and was unchanged at +3 s and later.
+- Stress run: every font in every slot (42 picks, desktop Chromium and iPhone WebKit), 15 picks with font files delayed
+  1.2 s (Pixel 7 and iPhone), and six quick picks in a row — 0 mismatches, 0 failed font requests, 0 faces in error.
+- Candidates ruled out in this code: radio groups sharing state; `designFromForm` dropping `fonts.title`/`fonts.dish`;
+  a stale design in the preview; a bad weight (all 14 `MENU_FONTS` css2 requests answer 200 with a Hebrew subset).
+  The designer's font code is the same as at plan 765.
+- Not tried: a physical phone, the remote link, a real backend.
+- Added guards only (they pass before any fix): the designer spec, the template test, `e2e/ui/772-1.spec.ts`.
