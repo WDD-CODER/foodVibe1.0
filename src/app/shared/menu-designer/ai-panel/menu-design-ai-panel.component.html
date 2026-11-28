@@ -36,7 +36,7 @@
 
   @switch (kind_()) {
     @case ('image') {
-      <div class="ai-panel__row">
+      <div class="c-chip-group ai-panel__row">
         <input
           #referenceFile
           type="file"
@@ -50,7 +50,7 @@
           {{ 'menu_design_upload_image' | translatePipe }}
         </button>
         @if (file_(); as file) {
-          <span class="ai-panel__file" dir="auto">{{ file.name }}</span>
+          <span class="ai-panel__note" dir="auto">{{ file.name }}</span>
         }
       </div>
       <input
@@ -98,7 +98,7 @@
 
   <p class="ai-panel__note">{{ 'menu_design_ai_style_not_copy' | translatePipe }}</p>
 
-  <div class="ai-panel__row">
+  <div class="c-chip-group ai-panel__row">
     <button
       type="button"
       class="c-btn-primary"
@@ -114,7 +114,7 @@
   </div>
 
   @if (errorKey_(); as key) {
-    <div class="ai-panel__row ai-panel__error" role="alert">
+    <div class="c-chip-group ai-panel__row ai-panel__error" role="alert">
       <span>{{ key | translatePipe }}</span>
       <button type="button" class="c-btn-ghost c-btn-ghost--sm" [disabled]="isBusy_()" (click)="onSuggest()">
         {{ 'menu_design_retry' | translatePipe }}

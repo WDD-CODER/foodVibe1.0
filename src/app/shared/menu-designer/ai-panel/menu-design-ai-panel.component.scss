@@ -32,33 +32,22 @@
   padding-block: 0;
 }
 
-.ai-panel__kinds span {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-1);
+.ai-panel__kinds lucide-icon {
+  vertical-align: middle;
 }
 
+/* Beside `.c-chip-group`: a button, its file name or its failure message on one middle line. */
 .ai-panel__row {
-  display: flex;
-  flex-wrap: wrap;
   align-items: center;
-  gap: var(--space-2);
 }
 
-.ai-panel__file {
-  min-inline-size: 0;
-
-  color: var(--color-text-muted);
-  font-size: var(--fs-sm);
-  overflow-wrap: anywhere;
-}
-
+/* The style-not-copy line and the picked file's name. */
 .ai-panel__note {
   margin: 0;
 
   color: var(--color-text-muted);
   font-size: var(--fs-sm);
-  line-height: 1.5;
+  overflow-wrap: anywhere;
 }
 
 .ai-panel__error {

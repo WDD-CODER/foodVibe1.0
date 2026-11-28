@@ -11,7 +11,7 @@
     ></textarea>
   </app-form-field>
 
-  <div class="ai-panel__row">
+  <div class="c-chip-group ai-panel__row">
     <button
       type="button"
       class="c-btn-primary"
@@ -39,7 +39,7 @@
   </div>
 
   @if (errorKey_(); as key) {
-    <div class="ai-panel__row ai-panel__error" role="alert">
+    <div class="c-chip-group ai-panel__row ai-panel__error" role="alert">
       <span>{{ key | translatePipe }}</span>
       <button type="button" class="c-btn-ghost c-btn-ghost--sm" [disabled]="isBusy_()" (click)="onApply()">
         {{ 'menu_design_retry' | translatePipe }}
