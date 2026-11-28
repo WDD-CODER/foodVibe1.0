@@ -69,6 +69,7 @@ Singleton services for data, state, modals, HTTP concerns, logging, export, and 
 | `equipment-category-registry.service.ts` | Equipment category registry | EquipmentCategoryRegistryService |
 | `excel-workbook.util.ts` | Excel export style constants and the one house-style sheet helper (plan 471) | XLSX_MIME, EXCEL_TEAL, EXCEL_HEADER_GRAY, EXCEL_SUBTITLE_GRAY, EXCEL_BORDER_THIN, EXCEL_BORDER_MEDIUM, addStyledTableSheet, uniqueSheetName, addRecipeInfoSheet, HOUSE_PAGE_SETUP |
 | `gemini.service.ts` | Gemini AI calls (proxied via server/routes/ai.js) | GeminiService |
+| `menu-design-ai.service.ts` | The menu designer's two AI calls (variants and refine); shrinks a reference picture to the server's limit (plan 766) | MenuDesignAiService, MenuDesignImageTooLargeError, MenuDesignAiReference |
 | `product-name-matcher.service.ts` | Links a typed or pasted product name to an existing product: exact + plural/spelling variants in the browser, then one AI call for the rest (plan 463) | ProductNameMatcherService |
 | `gemini-shots.service.ts` | Gemini image/shot capture flow | GeminiShotsService |
 | `http-storage.adapter.ts` | HTTP-backed storage adapter | HttpStorageAdapter |

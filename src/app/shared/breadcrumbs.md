@@ -62,6 +62,7 @@ Reusable standalone components, modals, and list/table primitives used across pa
 | `unit-creator/` | Unit registry editor | UnitCreatorModal |
 | `venue-link-chip/` | Venue link chip | VenueLinkChipComponent |
 | `menu-designer/` | Every control that sets a menu's look, beside the sample menu; changes the `design` model and never saves (plan 765) | MenuDesignerComponent |
+| `menu-designer/ai-panel/` | The designer's AI tools, with the `menu_design` module only (plan 766): three designs from a picture, link or description, and change-in-words with one step back | MenuDesignAiPanelComponent, MenuDesignAiRefineComponent |
 | `menu-preview/` | One design drawn by the shared menu template in a script-free `srcdoc` frame, scaled to its box (plan 765) | MenuPreviewComponent |
 | `version-history-panel/` | Version history UI | VersionHistoryPanelComponent |
 

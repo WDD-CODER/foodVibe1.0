@@ -12,9 +12,23 @@
   </div>
 </ng-template>
 
+@if (hasAi()) {
+  <app-menu-design-ai-panel class="menu-designer__ai" [design]="design()" (picked)="onAiDesign($event)" />
+}
+
 <div class="menu-designer">
-  <div class="menu-designer__preview">
-    <app-menu-preview [design]="design()" [doc]="sampleDoc()" />
+  <div class="menu-designer__side">
+    <div class="menu-designer__preview">
+      <app-menu-preview [design]="design()" [doc]="sampleDoc()" />
+    </div>
+    @if (hasAi()) {
+      <app-menu-design-ai-refine
+        [design]="design()"
+        [canUndo]="canUndoAi()"
+        (refined)="onAiDesign($event)"
+        (undo)="onAiUndo()"
+      />
+    }
   </div>
 
   <div class="menu-designer__controls">
