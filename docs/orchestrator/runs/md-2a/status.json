@@ -1,0 +1,368 @@
+{
+  "run": "md-2a",
+  "branch": "orch/md-2a",
+  "base": "main",
+  "startedAt": "2026-11-28T05:31:52.881Z",
+  "mainShaAtStart": "2d3c1443adf832a163a8f69b539ad4f3d99cb456",
+  "plans": {
+    "766": {
+      "nnn": "766",
+      "title": "AI in the designer: three variants from a picture, link or description, then refine in words",
+      "branch": "feat/766-menu-designer-ai-variants",
+      "state": "merged",
+      "round": 0,
+      "tier": "build",
+      "models": {
+        "builder": {
+          "model": "sonnet",
+          "tier": "build",
+          "at": "2026-11-28T05:33:53.450Z"
+        },
+        "reviewer": {
+          "model": "sonnet",
+          "at": "2026-11-28T06:14:22.615Z"
+        }
+      },
+      "humanItems": [
+        "With the real model, a photo of a printed menu, a restaurant website link and the words «כפרי, חם, עץ» each give",
+        "Refining in words («יותר כהה», «יותר אלגנטי», «שמות מנות גדולים יותר») changes what was asked and little else;",
+        "The panel says, before anything is sent, that the reference gives a style and not a copy",
+        "the screen's page with the data request failing · open the page · a readable error with a retry appears, not a blank page — here: with the server stopped, «הצעת עיצובים» shows «לא הצלחנו ליצור עיצובים» with «נסו שוב» and the current design stays.",
+        "a dialog with an explained control · hover the control · its explanation shows as a tooltip and no explanation text sits on the modal — here: the three reference choices (תמונה, קישור, תיאור)."
+      ],
+      "history": [
+        {
+          "at": "2026-11-28T05:33:53.293Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-28T05:33:53.452Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-28T06:03:12.586Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-28T06:14:12.889Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-28T06:14:22.617Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-28T06:16:14.419Z",
+          "state": "merging",
+          "round": 0
+        },
+        {
+          "at": "2026-11-28T06:17:31.180Z",
+          "state": "merged",
+          "round": 0
+        }
+      ],
+      "tiers": [
+        "build"
+      ],
+      "freeDiskGb": 5.8,
+      "sha": "eeae6d6624895fe15cfe884f22a11e68cdd8f9d7",
+      "calls": [
+        {
+          "stage": "builder",
+          "model": "sonnet",
+          "seconds": 1755.8,
+          "tokens": {
+            "input": 9995892,
+            "output": 106880
+          },
+          "exit": 0
+        },
+        {
+          "stage": "reviewer",
+          "model": "sonnet",
+          "seconds": 110.3,
+          "tokens": {
+            "input": 1081897,
+            "output": 14030
+          },
+          "exit": 0
+        }
+      ],
+      "checkedHead": "347849db49e2f8bf05b90f1f6ba72fd1ab8ecef9"
+    },
+    "772": {
+      "nnn": "772",
+      "title": "Menu designer: a picked title or dish font stays on the sample menu",
+      "branch": "feat/772-designer-fonts-stick",
+      "state": "parked",
+      "round": 0,
+      "tier": "build",
+      "models": {
+        "builder": {
+          "model": "sonnet",
+          "tier": "build",
+          "at": "2026-11-28T06:20:45.218Z"
+        }
+      },
+      "humanItems": [
+        "On the phone (remote link) and on a desktop: pick a different title font and dish font; the sample menu"
+      ],
+      "history": [
+        {
+          "at": "2026-11-28T06:20:45.072Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-28T06:20:45.219Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-28T06:48:10.343Z",
+          "state": "parked",
+          "round": 0
+        },
+        {
+          "at": "2026-11-28T06:49:50.315Z",
+          "state": "asking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-28T07:29:21.882Z",
+          "state": "parked",
+          "round": 0
+        }
+      ],
+      "tiers": [
+        "build"
+      ],
+      "freeDiskGb": 7.2,
+      "reason": "ESCALATE product: ESCALATE: product — the reported revert cannot be reproduced (browser stress script: 0 mismatches), so no root cause can be found or fixed without details from the Human's phone. — ask 772-1 answered: park (by the human)",
+      "calls": [
+        {
+          "stage": "builder",
+          "model": "sonnet",
+          "seconds": 1644.8,
+          "tokens": {
+            "input": 3877486,
+            "output": 42397
+          },
+          "exit": 0
+        }
+      ],
+      "park": {
+        "at": "2026-11-28T06:49:40.838Z",
+        "reason": "ESCALATE product: ESCALATE: product — the reported revert cannot be reproduced (browser stress script: 0 mismatches), so no root cause can be found or fixed without details from the Human's phone."
+      },
+      "parkBranch": "park/md-2a-772"
+    }
+  },
+  "notes": [
+    {
+      "at": "2026-11-28T05:32:15.455Z",
+      "plan": "766",
+      "text": "decided without the Human: advisor · readiness: the question up front (tests and manifest the plan needs) answered: approved: server/test/ai-known-metadata.test.js, server/test/modules-registry.test.js, server/test/price-list-prompt.test.js, src/app/core/services/async-storage.service.spec.ts, docs/workflow-kit/manifest.json"
+    },
+    {
+      "at": "2026-11-28T05:32:15.729Z",
+      "plan": "772",
+      "text": "decided without the Human: advisor · readiness: the question up front (tests and manifest the plan needs) answered: approved: docs/workflow-kit/manifest.json"
+    },
+    {
+      "at": "2026-11-28T05:33:53.141Z",
+      "plan": "766",
+      "text": "the folder foodVibe1.0-orch-md-2a-766 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-28T06:03:09.395Z",
+      "plan": "766",
+      "text": "builder left undone (round 0): 766-1: written, not run; 766-2: written, not run"
+    },
+    {
+      "at": "2026-11-28T06:16:24.846Z",
+      "plan": "766",
+      "text": "the folder foodVibe1.0-orch-merge-md-2a was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-28T06:20:44.916Z",
+      "plan": "772",
+      "text": "the folder foodVibe1.0-orch-md-2a-772 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-28T06:48:10.162Z",
+      "plan": "772",
+      "text": "builder left undone (round 0): A1: not reproduced; the guard spec and e2e/ui/772-1.spec.ts are written but none of them fails on the current code; A2: no root cause found, no product code changed; A3: the template test is added; no gotcha written because no trap is known; e2e/ui/772-1.spec.ts (pick Amatic SC and Suez One, wait 3"
+    },
+    {
+      "at": "2026-11-28T06:49:50.179Z",
+      "plan": "772",
+      "text": "parked: nothing to save (nothing uncommitted)"
+    },
+    {
+      "at": "2026-11-28T06:49:50.455Z",
+      "plan": "772",
+      "text": "ask 772-1 (product, only the Human answers): The font revert does not reproduce in emulated desktop, Android or iPhone browsers: on which phone and browser, through which link, and with which design and fonts did you see it (a screen recording would settle it), and does it still happen on the current build?"
+    },
+    {
+      "at": "2026-11-28T07:29:21.749Z",
+      "plan": "772",
+      "text": "ask 772-1 answered by the human: park: I will retry on the current build first and reopen the plan only if it still happens"
+    },
+    {
+      "at": "2026-11-28T07:29:22.018Z",
+      "plan": "772",
+      "text": "ask 772-1 answered: park (by the human) — plan 772 parked; the question was: The font revert does not reproduce in emulated desktop, Android or iPhone browsers: on which phone and browser, through which link, and with which design and fonts did you see it (a screen recording would settle it), and does it still happen on the current build?"
+    },
+    {
+      "at": "2026-11-28T07:29:23.916Z",
+      "text": "FINAL: same tree as plan 766's gate — node scripts/orch-state.mjs prepare --missing server/generated/schemas --script build:schemas --pm pnpm, pnpm run build, pnpm run lint, pnpm run test:ci, node scripts/override-check.mjs, pnpm run lint:icons, pnpm run lint:no-native-select, node scripts/plan-ledger-check.mjs, node scripts/breadcrumbs-check.mjs, node scripts/ci-scope-check.mjs --checkout-branch"
+    },
+    {
+      "at": "2026-11-28T07:29:25.017Z",
+      "text": "make this a default? a failed AI call shows the toast and keeps the same message under the button with «נסו שוב», because the toast has no action button — reverse: remove the role=\"alert\" block in the two ai-panel templat (trigger: destructive-action) — reply: default yes run-destructive-action"
+    }
+  ],
+  "attempts": 1,
+  "phase": "finished",
+  "freeDiskGb": 7.2,
+  "updatedAt": "2026-11-28T07:29:27.258Z",
+  "selfDecided": [
+    {
+      "plan": "766",
+      "kind": "advisor · readiness",
+      "what": "the question up front (tests and manifest the plan needs) answered: approved: server/test/ai-known-metadata.test.js, server/test/modules-registry.test.js, server/test/price-list-prompt.test.js, src/app/core/services/async-storage.service.spec.ts, docs/workflow-kit/manifest.json",
+      "why": "scope: 5 named file(s), none sensitive — the same rule as a scope ask",
+      "undo": "before merge it: on the run branch, drop those lines from the plan's scope block and git checkout origin/main -- server/test/ai-known-metadata.test.js server/test/modules-registry.test.js server/test/price-list-prompt.test.js src/app/core/services/async-storage.service.spec.ts docs/workflow-kit/manifest.json",
+      "at": "2026-11-28T05:32:15.323Z"
+    },
+    {
+      "plan": "772",
+      "kind": "advisor · readiness",
+      "what": "the question up front (tests and manifest the plan needs) answered: approved: docs/workflow-kit/manifest.json",
+      "why": "scope: 1 named file(s), none sensitive — the same rule as a scope ask",
+      "undo": "before merge it: on the run branch, drop those lines from the plan's scope block and git checkout origin/main -- docs/workflow-kit/manifest.json",
+      "at": "2026-11-28T05:32:15.590Z"
+    }
+  ],
+  "decisions": [
+    {
+      "id": "D1",
+      "plan": "766",
+      "type": "behaviour",
+      "text": "behaviour: a failed AI call shows the toast and keeps the same message under the button with «נסו שוב», because the toast has no action button — reverse: remove the role=\"alert\" block in the two ai-panel templates",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D2",
+      "plan": "766",
+      "type": "behaviour",
+      "text": "behaviour: a refine answer marked fallback shows «לא הצלחנו להחיל את השינוי» with «נסו שוב» and adds no undo step — reverse: emit the design whatever fallback says in MenuDesignAiRefineComponent.onApply",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D3",
+      "plan": "766",
+      "type": "behaviour",
+      "text": "behaviour: the variants popup has a «ביטול» button; it, Escape and a backdrop click drop the three designs — reverse: remove the c-modal-actions row in the panel template",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D4",
+      "plan": "766",
+      "type": "behaviour",
+      "text": "behaviour: «ביטול השינוי» restores the whole draft from before the last AI change, so hand edits made after that change are lost too — reverse: change onAiUndo in the designer",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D5",
+      "plan": "766",
+      "type": "behaviour",
+      "text": "behaviour: an AI change clears a half-typed color and a picked image background that has no picture yet — reverse: edit showDesign_ in the designer",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D6",
+      "plan": "766",
+      "type": "behaviour",
+      "text": "behaviour: a refined design is marked origin 'ai' and the typed words stay in the box — reverse: change withoutOwnValues in server/utils/menu-design-ai.js; clear request_ after a success",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D7",
+      "plan": "766",
+      "type": "behaviour",
+      "text": "behaviour: a used-up AI model shows the general failure message and the designer offers no model switch — reverse: use GeminiService.offerModelSwitch in the two ai-panel components",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D8",
+      "plan": "766",
+      "type": "seen",
+      "text": "seen: server/routes/ai.js:37-38 with :64 — the private-address patterns ^fc and ^fd are also tested on host names, so a public site such as https://fdexample.com is refused as a link (in the designer and in the URL imports)",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    }
+  ],
+  "finishedAt": "2026-11-28T07:29:27.255Z",
+  "finalGate": {
+    "ok": true,
+    "command": null,
+    "at": "2026-11-28T07:29:27.258Z",
+    "attempt": 1,
+    "blamed": []
+  }
+}
