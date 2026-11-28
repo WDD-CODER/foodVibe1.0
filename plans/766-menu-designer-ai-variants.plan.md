@@ -1,7 +1,7 @@
 # Plan 766 — AI in the designer: three variants from a picture, link or description, then refine in words
 
 Status: draft
-Depends-on: 764, 765, 767
+Depends-on: 764, 765
 Track: code
 Snapshot: d34a01068fe2f1b28efd33b753b8a3f69aa8762b
 
@@ -298,6 +298,7 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
 - none
 
 ## Execution Notes
+- Planner 2026-11-28: Depends-on drops 767. Its code (`menu-pdf.js`, `screenshotUrl`) merged with run md-1 (PR #691); 767 stays open only for its human Render measurement (A8), which this plan doesn't need.
 - behaviour: an answer that is not a valid design gives a base template marked as such, never an error, so the chef always sees three choices.
 - behaviour: the AI never sets a picture: an AI background of kind `image` becomes the `paper` texture; the chef's own uploaded background and logo are kept when refining.
 - behaviour: picking a variant keeps the draft's business name, contact line and logo.
