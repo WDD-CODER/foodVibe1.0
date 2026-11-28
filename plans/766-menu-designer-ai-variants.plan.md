@@ -138,6 +138,11 @@ src/app/core/services/breadcrumbs.md
 docs/brain/component-families.md
 docs/brain/inventory.md
 docs/menu-design/menu-design-map.md
+server/test/ai-known-metadata.test.js
+server/test/modules-registry.test.js
+server/test/price-list-prompt.test.js
+src/app/core/services/async-storage.service.spec.ts
+docs/workflow-kit/manifest.json
 ```
 
 ## Read Scope
@@ -169,6 +174,9 @@ append the path to the scope block above and retry.
 - `menuDesignVariantsRequestSchema`, `menuDesignRefineRequestSchema` (`shared/schemas/ai-menu-design.schema.ts`) — family: entity-schemas — rung: 3 — why: one request schema file per AI route, as `ai-receipt-photo.schema.ts`
 - `MenuDesignAiService` (`src/app/core/services/menu-design-ai.service.ts`) — family: http — rung: 3 — why: two POSTs through `API.ai('menu-design/…')` with the image encode pattern of `GeminiService`; kept out of the 469-line `GeminiService`
 - `MenuDesignAiPanelComponent` (`src/app/shared/menu-designer/ai-panel/`) — family: none — rung: 4 — why: no piece takes a style reference and offers designs; it is part of the self-contained designer (plan 765), so every host of the designer gets it
+- `MenuDesignAiRefineComponent` and `menuDesignAiErrorKey` (`src/app/shared/menu-designer/ai-panel/`) — family: menu-design-ai — rung: 3 — why: the change-in-words box sits under the preview, away from the suggest panel, and shares its styles and failure keys
+- AI panel components `menu-design-ai-panel`, `menu-design-ai-refine` and their layout classes `.ai-panel`, `.ai-panel__title`, `.ai-panel__kinds`, `.ai-panel__row`, `.ai-panel__note`, `.ai-panel__error`, `.ai-variants`, `.ai-variants__card`, `.ai-variants__pick` (added by the builder) — family: menu-designer — rung: 2 — why: the designer's own AI groups, on `.c-glass-panel`, `.c-chip-group` and the button engines; registered as the family menu-design-ai
+- designer layout classes `.menu-designer__ai`, `.menu-designer__side` (added by the builder) — family: menu-designer — rung: 2 — why: room under the AI panel, and the column that holds the preview with the change box below it
 - reference kind choice — family: chip — rung: 2 — why: `.c-chip-group` with `role="radiogroup"`
 - variants popup — family: modal-shell — rung: 2 — why: `app-modal-shell` with three `app-menu-preview` cards (plan 765)
 - description and refine boxes — family: form-field — rung: 1 — why: `app-form-field` + `textarea` (auto-grow)
@@ -264,13 +272,13 @@ line or file this plan names was removed, renamed or rewritten).
 
 These are the plan's milestones: a Worker does them in order and ticks each one after it is checked.
 
-- [ ] A1: Describe what the browser may send for a style reference or a refine request — the two request schemas and the image limits, exported from the schemas index; build:schemas — shared/schemas/ai-menu-design.schema.ts, shared/schemas/index.ts
-- [ ] A2: Write the instructions for the AI and the cleaning that keeps only valid designs — menuDesignPrompt, cleanDesignVariant, cleanRefinedDesign (no pictures from the AI, fixed texts kept, base fallback) with their own tests — server/utils/menu-design-ai.js, server/test/menu-design-ai-clean.test.js
-- [ ] A3: Add the two AI routes that turn a picture, link or description into designs and refine one in words — sub-router with module gate, limiter, size checks, isSafeUrl (export it from ai.js) and screenshotUrl, metered callGemini, mount line — server/routes/ai/menu-design.js, server/routes/ai.js, server/test/ai-menu-design.test.js
-- [ ] A4: Let the browser call the two routes with a shrunk image — MenuDesignAiService with the two-step downscale — src/app/core/services/menu-design-ai.service.ts (+ spec), src/app/core/services/http-storage.adapter.ts (only if API.ai needs nothing new, leave it)
-- [ ] A5: Put the AI panel into the designer with the three-variant choice, refine in words and one-step undo — panel component, popup of three previews, style-not-copy line, cap message, dictionary keys, icons — src/app/shared/menu-designer/**, public/assets/data/dictionary.json, src/app/app.config.ts
-- [ ] A6: Prove the panel in the running app with the model answers faked — e2e/ui/766-1.spec.ts, e2e/ui/766-2.spec.ts with page.route answers and module restore
-- [ ] A7: Record the new route, helpers and panel in the folder maps and the family registry — server/breadcrumbs.md, src/app/shared/breadcrumbs.md, src/app/core/services/breadcrumbs.md, docs/brain/component-families.md, docs/brain/inventory.md
+- [x] A1: Describe what the browser may send for a style reference or a refine request — the two request schemas and the image limits, exported from the schemas index; build:schemas — shared/schemas/ai-menu-design.schema.ts, shared/schemas/index.ts
+- [x] A2: Write the instructions for the AI and the cleaning that keeps only valid designs — menuDesignPrompt, cleanDesignVariant, cleanRefinedDesign (no pictures from the AI, fixed texts kept, base fallback) with their own tests — server/utils/menu-design-ai.js, server/test/menu-design-ai-clean.test.js
+- [x] A3: Add the two AI routes that turn a picture, link or description into designs and refine one in words — sub-router with module gate, limiter, size checks, isSafeUrl (export it from ai.js) and screenshotUrl, metered callGemini, mount line — server/routes/ai/menu-design.js, server/routes/ai.js, server/test/ai-menu-design.test.js
+- [x] A4: Let the browser call the two routes with a shrunk image — MenuDesignAiService with the two-step downscale — src/app/core/services/menu-design-ai.service.ts (+ spec), src/app/core/services/http-storage.adapter.ts (only if API.ai needs nothing new, leave it)
+- [x] A5: Put the AI panel into the designer with the three-variant choice, refine in words and one-step undo — panel component, popup of three previews, style-not-copy line, cap message, dictionary keys, icons — src/app/shared/menu-designer/**, public/assets/data/dictionary.json, src/app/app.config.ts
+- [x] A6: Prove the panel in the running app with the model answers faked — e2e/ui/766-1.spec.ts, e2e/ui/766-2.spec.ts with page.route answers and module restore
+- [x] A7: Record the new route, helpers and panel in the folder maps and the family registry — server/breadcrumbs.md, src/app/shared/breadcrumbs.md, src/app/core/services/breadcrumbs.md, docs/brain/component-families.md, docs/brain/inventory.md
 
 ## Technical Considerations
 - Dependencies: plan 764 (`menuDesignDraftSchema`, `MENU_FONTS`, `baseDesign`, the two AI feature keys), plan 765
@@ -305,3 +313,39 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
 - behaviour: undo goes back one AI step only.
 - behaviour: the AI routes need only the `menu_design` module (not `ai_create`).
 - behaviour: no `aiDrafts` trail for designs — there is nothing to learn from a style choice yet.
+
+### Builder (2026-11-28, run md-2a)
+
+- P1 not triggered: plan 767 recorded nothing about `screenshotUrl` being unavailable (its A8 measurement is still
+  open), so there is no `501 URL_REFERENCE_UNAVAILABLE` and «קישור» always shows.
+- The designer asks `ModuleService.modules_()` rather than `has('menu_design')`: the same answer, and the edit page's
+  spec (outside the scope) fakes a `BusinessService` without `loaded_`.
+- `http-storage.adapter.ts` and `app.config.ts` unchanged: `API.ai` and the four icons were already there.
+- The two `[ui]` specs are written and were not run.
+- behaviour: a failed call shows the toast and keeps the same message under the button with «נסו שוב» (the toast has no
+  action button). Reverse: remove the `role="alert"` block in the two ai-panel templates.
+- behaviour: a refine answer marked `fallback` shows «לא הצלחנו להחיל את השינוי» with «נסו שוב» and adds no undo step.
+  Reverse: emit the design whatever `fallback` says in `MenuDesignAiRefineComponent.onApply`.
+- behaviour: the variants popup has a «ביטול» button; it, Escape and a backdrop click drop the three designs.
+  Reverse: remove the `c-modal-actions` row in the panel template.
+- behaviour: «ביטול השינוי» restores the whole draft from before the last AI change, so hand edits made after that
+  change go too. Reverse: change `onAiUndo` in the designer.
+- behaviour: an AI change clears a half-typed color and a picked image kind that has no picture yet. Reverse: edit
+  `showDesign_` in the designer.
+- behaviour: a refined design is marked `origin: 'ai'`; the typed words stay in the box. Reverse: `withoutOwnValues`
+  in `server/utils/menu-design-ai.js`; clear `request_` after a success.
+- behaviour: a used-up model shows the general failure message; the designer offers no model switch. Reverse: use
+  `GeminiService.offerModelSwitch` in the two ai-panel components.
+- seen: `server/routes/ai.js:37-38` with `:64` — the private-address patterns `^fc` / `^fd` are also tested on host
+  names, so a public site such as `https://fdexample.com` is refused as a link (here and in the URL imports).
+
+#### Evidence (run on `ff621add`; the commit after it changes this file only)
+
+- `pnpm run build` -> exit 0; `pnpm run lint` -> exit 0 (0 errors, 69 warnings); `pnpm run lint:icons` -> exit 0.
+- `pnpm run test:ci` -> exit 0, `TOTAL: 2905 SUCCESS`.
+- `pnpm run test:server` -> exit 0, 157 files, 2127 tests passed (the two new server test files among them).
+- `scope-check.mjs --arch` -> `ARCH: ok INV-6, INV-4, INV-1`; `--reuse` -> `REUSE: ok`; kit
+  `scope-check.mjs --diff=origin/orch/md-2a` -> `SCOPE: ok`; kit `kit-checks.mjs` -> `KIT_CHECKS: ok (6 checks)`;
+  kit `kit-manifest-check.mjs` -> `KIT_MANIFEST: ok`.
+- `breadcrumbs-check.mjs` -> `BREADCRUMBS: clean`; `log-query.mjs --since=plan-start --level=error` ->
+  `SKIP: no database configured`.

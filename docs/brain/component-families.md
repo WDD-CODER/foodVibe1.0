@@ -355,6 +355,7 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
   `src/app/core/utils/recipe-match.util.ts`. Import through `@utils/*` (and pipes through `@pipes/*`).
 - Plan 765: `designFromForm` / `formFromDesign` in `src/app/core/utils/menu-design-form.util.ts` (menu-design-form) — the menu designer's form to a design the shared schema accepts, and back.
 - Plan 765: `menuFontsHref` in `src/app/core/utils/menu-fonts-link.util.ts` (menu-fonts-link) — one Google Fonts stylesheet address for the curated menu fonts.
+- Plan 766: `menuDesignPrompt`, `cleanDesignVariant`, `cleanRefinedDesign` in `server/utils/menu-design-ai.js` — the prompts of the menu designer's AI and the cleaning that keeps only valid designs.
 - the unit mapping after a pick (plan 653): `unitForSpoken` in `src/app/pages/inventory/components/stock-count/spoken-unit.ts` — the spoken unit mapped to
   the picked product's own units, same table as the server `resolveUnit`; none fits → flagged, not counted.
 - reading the unit word from the text (plan 654): `unitWordFromText` in `server/utils/stock-extract.js` — when the model
@@ -386,6 +387,7 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 - Use: `src/app/core/services/http-storage.adapter.ts`; auth header and errors: `src/app/core/interceptors/auth.interceptor.ts`.
 - When: any call to the server API; never a raw `fetch` or a hand-built `/api/v1` URL.
 - Plan 765: `BusinessService.setMenuDesignDefault` (`src/app/core/services/business.service.ts`) — one owner-only PUT through `API.business('menu-design-default')`; the stored menu settings go into `business_`.
+- Plan 766: `MenuDesignAiService` (`src/app/core/services/menu-design-ai.service.ts`) — two POSTs through `API.ai(...)` (menu design variants and refine); a reference picture is shrunk to the server's limit first.
 - `PlatformAdminService.updatePlatform` (`src/app/core/services/platform-admin.service.ts`): one PUT of a business's modules, monthly AI cap and private mode with a reason, then reloads the table (plan 620).
 - `PlatformAdminService.eraseLearnedData(businessId, reason)` (same file): one POST that erases what the platform learned from a business, returns the counts; `UserAdminService.deleteUser(userId, eraseLearned)` adds `?eraseLearned=true` (plan 639).
 - `PlatformAdminService.getPlatformHistory(businessId)` (same file): one GET of a business's change history, newest first, read each time the dialog's history panel opens (plan 638).
@@ -461,6 +463,7 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
   `business-access.schema.ts`, `diagnosis.schema.ts`, `stock-count.schema.ts`), each one `z.strictObject` registered in
   `SCHEMA_BY_COLLECTION` in `shared/schemas/entities/index.ts`; `shared/schemas/entities/menu-design.schema.ts`
   (plan 764) follows the same shape.
+- Plan 766: `menuDesignVariantsRequestSchema`, `menuDesignRefineRequestSchema` in `shared/schemas/ai-menu-design.schema.ts` — the requests of the menu designer's AI routes (nothing of them is stored).
 - When: a new stored collection needs a shape.
 - Known copies: none.
 
@@ -750,9 +753,21 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 - Use: `src/app/shared/menu-designer/` · `app-menu-designer` (`[(design)]` a design draft, `sampleDoc`, `(uploading)`).
   It holds the font, colour, background, frame, logo, layout and fixed-text controls beside the sample menu, and never
   saves: the host does. The form to design mapping is `src/app/core/utils/menu-design-form.util.ts`; the fonts link is
-  `src/app/core/utils/menu-fonts-link.util.ts`.
+  `src/app/core/utils/menu-fonts-link.util.ts`. Its AI tools are the family `menu-design-ai`.
 - Pieces: MenuDesignerComponent, designFromForm, formFromDesign, menuFontsHref.
 - When: a screen lets someone change how a menu looks; never a second look editor.
+- Known copies: none.
+
+### menu-design-ai — the AI proposes or changes a menu's look (plan 766)
+
+- Status: stable — plan 766
+- Use: `src/app/shared/menu-designer/ai-panel/` · `app-menu-design-ai-panel` (MenuDesignAiPanelComponent: a picture, link
+  or description → three designs, `(picked)`) and `app-menu-design-ai-refine` (MenuDesignAiRefineComponent: a change in
+  words, `(refined)`, `(undo)`); both are part of `app-menu-designer`, which shows them with the `menu_design` module and
+  holds the one step of undo. Calls: `src/app/core/services/menu-design-ai.service.ts`; server:
+  `server/routes/ai/menu-design.js` with `server/utils/menu-design-ai.js`.
+- Pieces: MenuDesignAiPanelComponent, MenuDesignAiRefineComponent, MenuDesignAiService, menuDesignAiErrorKey, menuDesignPrompt, cleanDesignVariant, cleanRefinedDesign.
+- When: the AI fills a menu design; it only fills the design schema, never HTML or CSS.
 - Known copies: none.
 
 ### menu-preview — a designed menu shown safely on screen (plan 765)

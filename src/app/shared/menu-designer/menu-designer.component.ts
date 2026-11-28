@@ -19,6 +19,7 @@ import { designCssVars } from '@schemas/menu-design/menu-template'
 import { MENU_TEXTURES, type MenuTextureId } from '@schemas/menu-design/menu-textures'
 import { CloudinaryService } from '@services/cloudinary.service'
 import { LoggingService } from '@services/logging.service'
+import { ModuleService } from '@services/module.service'
 import { TranslationService } from '@services/translation.service'
 import { UserMsgService } from '@services/user-msg.service'
 import { downscaleImage } from '@utils/downscale-image.util'
@@ -40,6 +41,8 @@ import { CounterComponent } from '../counter/counter.component'
 import { FormFieldComponent } from '../form-field/form-field.component'
 import { LoaderComponent } from '../loader/loader.component'
 import { MenuPreviewComponent } from '../menu-preview/menu-preview.component'
+import { MenuDesignAiPanelComponent } from './ai-panel/menu-design-ai-panel.component'
+import { MenuDesignAiRefineComponent } from './ai-panel/menu-design-ai-refine.component'
 
 /** The longest side of an uploaded picture, in pixels. */
 export const BACKGROUND_MAX_EDGE = 2400
@@ -80,7 +83,9 @@ let nextDesignerId = 0
     CounterComponent,
     FormFieldComponent,
     LoaderComponent,
-    MenuPreviewComponent
+    MenuPreviewComponent,
+    MenuDesignAiPanelComponent,
+    MenuDesignAiRefineComponent
   ],
   templateUrl: './menu-designer.component.html',
   styleUrl: './menu-designer.component.scss',
@@ -93,6 +98,7 @@ export class MenuDesignerComponent {
   private readonly translation = inject(TranslationService)
   private readonly logging = inject(LoggingService)
   private readonly document_ = inject(DOCUMENT)
+  private readonly modules = inject(ModuleService)
 
   // 2. INPUTS
   readonly design = model.required<MenuDesignDraft>()
@@ -119,9 +125,15 @@ export class MenuDesignerComponent {
   private readonly isAwaitingImage_ = signal(false)
   /** Colour texts that are not a colour (yet), by field: shown with an error and not applied. */
   private readonly hexDrafts_ = signal<Partial<Record<MenuColorKey, string>>>({})
+  /** The design from before the last AI change: one step back. */
+  private readonly beforeAi_ = signal<MenuDesignDraft | null>(null)
   private isDestroyed_ = false
 
   // 5. COMPUTED
+  /** The AI tools show only to a business with the menu design module (the server is the gate). */
+  protected readonly hasAi = computed(() => this.modules.modules_().includes('menu_design'))
+  protected readonly canUndoAi = computed(() => this.beforeAi_() !== null)
+
   protected readonly shownKind = computed(() => (this.isAwaitingImage_() ? 'image' : this.design().background.kind))
 
   protected readonly isBackgroundUploading = computed(() => this.uploads_().includes('background'))
@@ -293,6 +305,18 @@ export class MenuDesignerComponent {
     }
   }
 
+  protected onAiDesign(design: MenuDesignDraft): void {
+    this.beforeAi_.set(this.design())
+    this.showDesign_(design)
+  }
+
+  protected onAiUndo(): void {
+    const before = this.beforeAi_()
+    if (!before) return
+    this.beforeAi_.set(null)
+    this.showDesign_(before)
+  }
+
   protected onLogoRemove(): void {
     const { url: _url, ...logo } = this.design().logo
     this.update_({ logo })
@@ -335,6 +359,13 @@ export class MenuDesignerComponent {
   protected onTextInput(key: keyof MenuDesignDraft['fixedTexts'], event: Event): void {
     const value = (event.target as HTMLInputElement).value
     this.update_({ fixedTexts: { ...this.design().fixedTexts, [key]: value } })
+  }
+
+  /** A whole other design: what was half typed or half picked belonged to the old one. */
+  private showDesign_(design: MenuDesignDraft): void {
+    this.hexDrafts_.set({})
+    this.isAwaitingImage_.set(false)
+    this.design.set(design)
   }
 
   private applyColor_(key: MenuColorKey, value: string): void {

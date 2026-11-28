@@ -59,6 +59,8 @@
 | `scripts/repair-supplier-refs.js` | Plan 649: lists (dry run) or repairs (`--write`) product sources whose supplier is foreign, unknown or empty — map by `_masterId`, by trimmed name, or clear; prices never change; `--target` other than `local` needs `--confirm-remote` |
 | `scripts/seed-demo-business.js` | Fills a local database with one demo catering business (dry run by default; `--write`; local only) |
 | `scripts/menu-sample-html.js` | Plan 764: writes the sample menu in the four base designs to the OS temp folder and prints the paths; no database |
+| `routes/ai/menu-design.js` | Mounted at `/api/v1/ai/menu-design` (plan 766, C-AI): `POST /variants` (picture, link or description → three designs) and `POST /refine` (design + words → design); `menu_design` module, own limiter (`MENU_DESIGN_AI_LIMIT_MAX`), a link is checked with `isSafeUrl` then photographed by `screenshotUrl`; stores nothing |
+| `utils/menu-design-ai.js` | `menuDesignPrompt`, `cleanDesignVariant`, `cleanRefinedDesign` (plan 766): the AI never sets a picture or a fixed text; an invalid answer gives a base design, or the sent one, marked `fallback` |
 | `services/menu-pdf.js` | The one render service of the menu design program (plan 767, C-PDF): `renderPdf`, `renderPdfMeasured`, `screenshotUrl`, `embedFonts`; reads and writes no data, logs no HTML or address |
 | `services/menu-pdf/` | Its private helpers: `browser.js` (the one browser, queue, idle close, launch flags), `guard.js` (what a page may load), `memory.js`, `fonts.js`, `errors.js` |
 | `routes/menu-design.js` | Mounted at `/api/v1/menu-design` (plan 767): `GET /pdf-smoke?fonts=link\|embedded&download=1`, platform admin only — renders the sample menu and answers time and memory |

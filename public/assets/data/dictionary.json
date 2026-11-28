@@ -2809,6 +2809,27 @@
     "menu_design_dish_size": "גודל המנה",
     "menu_design_business_name": "שם העסק",
     "menu_design_contact_line": "שורת יצירת קשר",
-    "menu_design_preview_title": "תצוגה מקדימה של התפריט"
+    "menu_design_preview_title": "תצוגה מקדימה של התפריט",
+    "menu_design_ai_title": "עיצוב בעזרת AI",
+    "menu_design_ai_ref_image": "תמונה",
+    "menu_design_ai_ref_url": "קישור",
+    "menu_design_ai_ref_text": "תיאור",
+    "menu_design_ai_ref_image_hint": "תמונה של תפריט או של סגנון שאהבתם",
+    "menu_design_ai_ref_url_hint": "כתובת https של אתר שאהבתם את הסגנון שלו",
+    "menu_design_ai_ref_text_hint": "כמה מילים על הסגנון, למשל: אלגנטי, כהה, זהב",
+    "menu_design_ai_note_placeholder": "מה לקחת מהתמונה? (לא חובה)",
+    "menu_design_ai_style_not_copy": "העיצוב לוקח השראה מהדוגמה — צבעים, אופי הגופנים ואווירה — ולא מעתיק אותה",
+    "menu_design_ai_suggest": "הצעת עיצובים",
+    "menu_design_ai_variants_title": "בחרו עיצוב",
+    "menu_design_ai_pick": "בחירה",
+    "menu_design_ai_fallback": "עיצוב בסיס (ה-AI לא הצליח)",
+    "menu_design_ai_refine_label": "שינוי במילים",
+    "menu_design_ai_refine_apply": "החלה",
+    "menu_design_ai_undo": "ביטול השינוי",
+    "menu_design_ai_failed": "לא הצלחנו ליצור עיצובים",
+    "menu_design_ai_refine_failed": "לא הצלחנו להחיל את השינוי",
+    "menu_design_ai_url_not_allowed": "אי אפשר להשתמש בקישור הזה. צריך כתובת https של אתר ציבורי",
+    "menu_design_ai_url_failed": "לא הצלחנו לפתוח את הקישור",
+    "menu_design_ai_image_too_large": "התמונה גדולה מדי, בחרו תמונה קטנה יותר"
   }
 }
