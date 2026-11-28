@@ -138,6 +138,11 @@ src/app/core/services/breadcrumbs.md
 docs/brain/component-families.md
 docs/brain/inventory.md
 docs/menu-design/menu-design-map.md
+server/test/ai-known-metadata.test.js
+server/test/modules-registry.test.js
+server/test/price-list-prompt.test.js
+src/app/core/services/async-storage.service.spec.ts
+docs/workflow-kit/manifest.json
 ```
 
 ## Read Scope
