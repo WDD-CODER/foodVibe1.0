@@ -46,6 +46,7 @@ shared/schemas/menu-design/menu-fonts.ts
 server/test/menu-design-template.test.js
 e2e/ui/772-1.spec.ts
 docs/brain/gotchas.md
+docs/workflow-kit/manifest.json
 ```
 
 ## Read Scope
