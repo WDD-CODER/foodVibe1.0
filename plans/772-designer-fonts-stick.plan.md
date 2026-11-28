@@ -129,3 +129,9 @@ Runs only when `scope-check.mjs --drift` reports `REALITY: drift`.
   The designer's font code is the same as at plan 765.
 - Not tried: a physical phone, the remote link, a real backend.
 - Added guards only (they pass before any fix): the designer spec, the template test, `e2e/ui/772-1.spec.ts`.
+- Evidence on `3d5d9201`: `pnpm run build` → 0; `pnpm run lint` → 0 (0 errors); `pnpm run test:ci` → 0, 2906 SUCCESS;
+  `pnpm run test:server` → 0, 157 files / 2128 tests passed; manifest, scope, kit, override, icons, native-select,
+  ledger, breadcrumbs and ci-scope checks → 0; `log-query --since=plan-start --level=error` → 0, `SKIP: no database
+  configured`. `e2e/ui/772-1.spec.ts`: written, not run.
+- Open: A1–A3 stay unticked. Needed from the Human: phone and browser, how the app was opened, the starting design and
+  fonts picked, and a screen recording of the revert.
