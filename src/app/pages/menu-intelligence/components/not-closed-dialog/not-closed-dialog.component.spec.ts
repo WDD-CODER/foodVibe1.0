@@ -31,10 +31,10 @@ describe('NotClosedDialogComponent', () => {
   })
 
   it('keeps save disabled until a reason is chosen', () => {
-    expect(saveButton().disabled).toBeTrue()
+    expect(saveButton().getAttribute('aria-disabled')).toBe('true')
     el.querySelectorAll<HTMLInputElement>('input[type="radio"]')[0].click()
     fixture.detectChanges()
-    expect(saveButton().disabled).toBeFalse()
+    expect(saveButton().getAttribute('aria-disabled')).toBeNull()
   })
 
   it('emits the chosen reason and the trimmed text on save', () => {

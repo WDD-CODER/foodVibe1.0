@@ -120,7 +120,9 @@ describe('LoadingListComponent', () => {
   it('a finished event disables every box', async () => {
     store.set([event({ stage: 'finished' })])
     await create()
-    expect(boxes().every((b) => b.disabled)).toBeTrue()
+    expect(boxes().every((b) => b.getAttribute('aria-disabled') === 'true')).toBeTrue()
+    boxes()[0].click()
+    expect(pipeline.saveLoading).not.toHaveBeenCalled()
   })
 
   it('no rows: the empty state and a disabled print button', async () => {
@@ -128,7 +130,9 @@ describe('LoadingListComponent', () => {
     store.set([event({ siteLogistics: { answers: [] } })])
     await create()
     expect(el.querySelector('app-empty-state')).not.toBeNull()
-    expect(el.querySelector<HTMLButtonElement>('.loading-actions .c-btn-primary')!.disabled).toBeTrue()
+    expect(el.querySelector<HTMLButtonElement>('.loading-actions .c-btn-primary')!.getAttribute('aria-disabled')).toBe(
+      'true'
+    )
   })
 
   it('adds the print body class and removes it on destroy; the print button prints', async () => {

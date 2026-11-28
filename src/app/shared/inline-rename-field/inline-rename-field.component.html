@@ -15,7 +15,8 @@
 <button
   type="button"
   class="c-btn-primary irf-btn"
-  [disabled]="!canSave_() || isSaving_()"
+  [disabled]="isSaving_()"
+  [appDisabledWhy]="saveWhy_() ? (saveWhy_()! | translatePipe) : null"
   [attr.aria-busy]="isSaving_() || null"
   (click)="onSave()"
 >

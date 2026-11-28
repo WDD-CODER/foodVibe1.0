@@ -24,3 +24,4 @@ Facts from earlier runs of the builder role in this project, written by scripts 
 - 2026-11-10 run-522: fix round caused by: node scripts/breadcrumbs-check.mjs failed
 - 2026-11-18 mod-access-srv: fix round caused by: node scripts/reuse-lint.mjs --check-registry failed
 - 2026-11-18 mod-access-srv: escalated to the judgment tier at round 2: pnpm run test:ci
+- 2026-11-25 biz-numbers: parked: hand-off file

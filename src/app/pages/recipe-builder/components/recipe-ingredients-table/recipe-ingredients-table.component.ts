@@ -58,6 +58,7 @@ import { findProductByName } from 'src/app/core/utils/product-name-error.util'
 import { formatPct1 } from 'src/app/core/engine/rounding'
 import { NumberBoxDirective } from '@directives/number-box.directive'
 import { StepHoldDirective } from 'src/app/shared/counter/step-hold.directive'
+import { DisabledWhyDirective } from 'src/app/shared/tooltip/disabled-why.directive'
 import { PermissionService } from '@services/permission.service'
 import { SupplierPickerComponent } from 'src/app/shared/supplier-picker/supplier-picker.component'
 import { PHONE_QUERY } from '@utils/breakpoints'
@@ -93,7 +94,8 @@ const MAX_ROW_SUGGESTIONS = 5
     ClickOutSideDirective,
     NutritionBadgeComponent,
     PasteIngredientsDialogComponent,
-    SupplierPickerComponent
+    SupplierPickerComponent,
+    DisabledWhyDirective
   ],
   templateUrl: './recipe-ingredients-table.component.html',
   styleUrl: './recipe-ingredients-table.component.scss',

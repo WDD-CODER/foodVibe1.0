@@ -24,6 +24,11 @@
         <div class="ai-menu-usage-fill" [style.width.%]="usageFillPercent_()"></div>
       </div>
     </div>
+    @if (callsLeftLine_()) {
+      <div class="ai-menu-usage-bar">
+        <span class="ai-menu-usage-count" data-testid="ai-calls-left">{{ callsLeftLine_() }}</span>
+      </div>
+    }
 
     @if (modalService.mode() === 'edit') {
       <!-- ── Edit mode ── -->
@@ -66,7 +71,8 @@
               type="button"
               class="c-btn-primary"
               (click)="onEdit()"
-              [disabled]="isLoading_() || !instruction().trim()"
+              [disabled]="isLoading_()"
+              [appDisabledWhy]="!instruction().trim() ? ('why_write_first' | translatePipe) : null"
             >
               @if (isLoading_()) {
                 <app-loader size="small" [inline]="true" />
@@ -145,7 +151,8 @@
               type="button"
               class="c-btn-primary"
               (click)="onGenerate()"
-              [disabled]="isLoading_() || !prompt_().trim()"
+              [disabled]="isLoading_()"
+              [appDisabledWhy]="!prompt_().trim() ? ('why_write_first' | translatePipe) : null"
             >
               @if (isLoading_()) {
                 <app-loader size="small" [inline]="true" />

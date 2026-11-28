@@ -3,9 +3,24 @@ import { nameField } from '../base.schema'
 import { modulesFieldSchema, platformHistoryRowSchema } from '../modules'
 import { EVENT_STAGES } from './event-stage'
 import { LOGISTICS_LABEL_MAX } from './event-logistics'
+import { MONTH_TARGET_DEFAULTS } from '../month/month-rules'
 
 /** Plan 429: the three numbers that belong to the business. Defaults apply on read when a business has none stored. */
-export const BUSINESS_SETTINGS_DEFAULTS = { profitTargetPct: 25, safetyMarginPct: 10, overrunThresholdPct: 10, priceRiseAlertPct: 5 } as const
+export const BUSINESS_SETTINGS_DEFAULTS = { profitTargetPct: 25, safetyMarginPct: 10, overrunThresholdPct: 10, priceRiseAlertPct: 5, vatRatePct: 18, dealerType: 'murshe', monthTargets: MONTH_TARGET_DEFAULTS } as const
+
+/** Plan 723 (N-X1): עוסק מורשה counts costs net of VAT, עוסק פטור counts them gross. */
+export const DEALER_TYPES = ['murshe', 'patur'] as const
+export type DealerType = (typeof DEALER_TYPES)[number]
+
+/** Plan 727: the five targets of a month (percent of net revenue); the settings hold the copy a new month starts from. */
+export const monthTargetsSchema = z.strictObject({
+  foodPct: z.number().min(0).max(100),
+  labourPct: z.number().min(0).max(100),
+  primePct: z.number().min(0).max(100),
+  fixedPct: z.number().min(0).max(100),
+  profitPct: z.number().min(0).max(100)
+})
+export type MonthTargets = z.infer<typeof monthTargetsSchema>
 
 export const businessSettingsSchema = z.strictObject({
   /** Spec 03.2: a target of 100% or more is an error. */
@@ -14,10 +29,16 @@ export const businessSettingsSchema = z.strictObject({
   /** 0 would flag every supplier. */
   overrunThresholdPct: z.number().gt(0).max(100),
   /** Plan 615: a price rise at or above this percent is flagged. Absent on older documents; reads fill 5. */
-  priceRiseAlertPct: z.number().gt(0).max(100).optional()
+  priceRiseAlertPct: z.number().gt(0).max(100).optional(),
+  /** Plan 723 (N-X1): the business's one VAT rate in percent. Absent on older documents; reads fill 18. */
+  vatRatePct: z.number().min(0).max(100).optional(),
+  /** Plan 723 (N-X1): dealer type. Absent on older documents; reads fill 'murshe'. */
+  dealerType: z.enum(DEALER_TYPES).optional(),
+  /** Plan 727: the targets a new month is opened with. Absent on older documents; reads fill MONTH_TARGET_DEFAULTS. */
+  monthTargets: monthTargetsSchema.optional()
 })
 
-/** The four numbers the settings tab edits (plan 643: `priceRiseAlertPct` is optional on stored documents; reads fill 5). */
+/** The six settings the settings tab edits (plan 643: `priceRiseAlertPct` is optional on stored documents; reads fill 5). */
 export type BusinessSettings = z.infer<typeof businessSettingsSchema>
 
 /** Plan 472: the owner renames the business. Trimmed, 1–200 characters. */

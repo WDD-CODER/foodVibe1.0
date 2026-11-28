@@ -10,6 +10,7 @@ import {
   viewChild
 } from '@angular/core'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
+import { DisabledWhyDirective } from 'src/app/shared/tooltip/disabled-why.directive'
 
 /**
  * Plan 468 — one inline rename field with explicit Save and Cancel buttons. Enter saves, Escape
@@ -19,7 +20,7 @@ import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
 @Component({
   selector: 'app-inline-rename-field',
   standalone: true,
-  imports: [TranslatePipe],
+  imports: [TranslatePipe, DisabledWhyDirective],
   templateUrl: './inline-rename-field.component.html',
   styleUrl: './inline-rename-field.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -42,6 +43,12 @@ export class InlineRenameFieldComponent {
   protected readonly canSave_ = computed(() => {
     const t = this.text_().trim()
     return t !== '' && t !== this.value()
+  })
+  /** Why Save cannot be used (a translation key), or null when it can. A running save is not a reason. */
+  protected readonly saveWhy_ = computed<string | null>(() => {
+    const t = this.text_().trim()
+    if (t === '') return 'why_write_first'
+    return t === this.value() ? 'why_nothing_to_save' : null
   })
 
   private readonly field = viewChild.required<ElementRef<HTMLInputElement>>('field')

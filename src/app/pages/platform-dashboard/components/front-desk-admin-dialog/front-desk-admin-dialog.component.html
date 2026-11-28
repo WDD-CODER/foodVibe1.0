@@ -48,7 +48,8 @@
       type="button"
       class="c-btn-primary"
       data-testid="fd-admin-save"
-      [disabled]="isSaving_() || !hasChange_()"
+      [disabled]="isSaving_()"
+      [appDisabledWhy]="!hasChange_() ? ('why_nothing_to_save' | translatePipe) : null"
       [attr.aria-busy]="isSaving_()"
       (click)="save()"
     >

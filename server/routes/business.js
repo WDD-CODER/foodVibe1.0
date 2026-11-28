@@ -33,6 +33,9 @@ const teamLimiter = createRateLimiter({
   message: 'Too many team requests, please try again later',
 })
 
+/** Plan 723: settings keys older forms do not send; a PUT without one keeps the stored value. */
+const OPTIONAL_SETTINGS_KEYS = ['priceRiseAlertPct', 'vatRatePct', 'dealerType', 'monthTargets']
+
 // GET /api/v1/business — the business document of the signed-in user; `settings` always has the defaults filled in (nothing is written on read). Any member may read it.
 router.get('/', verifyToken, async (req, res) => {
   try {
@@ -55,11 +58,13 @@ router.put('/settings', verifyToken, async (req, res) => {
       req.log.info({ event: 'business.settings.failed', reason: 'validation' })
       return res.status(400).json({ error: 'Validation failed', issues: parsed.error.issues.map(i => ({ path: i.path.join('.'), code: i.code, message: i.message })) })
     }
-    // A body without priceRiseAlertPct keeps the stored one (the three-number form must not wipe it).
+    // A body without an optional key keeps the stored value (an older form must not wipe it).
     let settings = parsed.data
-    if (settings.priceRiseAlertPct === undefined) {
-      const stored = (await getBusiness(req.user.businessId))?.settings?.priceRiseAlertPct
-      if (stored !== undefined) settings = { ...settings, priceRiseAlertPct: stored }
+    if (OPTIONAL_SETTINGS_KEYS.some(key => settings[key] === undefined)) {
+      const storedSettings = (await getBusiness(req.user.businessId))?.settings ?? {}
+      for (const key of OPTIONAL_SETTINGS_KEYS) {
+        if (settings[key] === undefined && storedSettings[key] !== undefined) settings = { ...settings, [key]: storedSettings[key] }
+      }
     }
     const result = await setBusinessSettings(req.user.businessId, settings)
     if (!result.matchedCount) return res.status(404).json({ error: 'Business not found' })

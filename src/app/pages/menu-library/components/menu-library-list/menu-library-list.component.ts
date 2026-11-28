@@ -6,6 +6,7 @@ import { ActivatedRoute, Router } from '@angular/router'
 import { LucideAngularModule } from 'lucide-angular'
 import { DateFieldComponent } from 'src/app/shared/date-field/date-field.component'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
+import { DisabledWhyDirective } from 'src/app/shared/tooltip/disabled-why.directive'
 import { MenuEventDataService } from '@services/menu-event-data.service'
 import { MenuEvent } from '@models/menu-event.model'
 import { ConfirmModalService } from '@services/confirm-modal.service'
@@ -45,6 +46,7 @@ const StageFilterParam: ParamSerializer<string> = {
     FormsModule,
     LucideAngularModule,
     TranslatePipe,
+    DisabledWhyDirective,
     LoaderComponent,
     CustomSelectComponent,
     EmptyStateComponent,

@@ -113,6 +113,16 @@ describe('SupplierPickerComponent (plan 536)', () => {
     expect(picked).toEqual([])
   })
 
+  it('with a reason the rows stay reachable, say they are off, and a click emits nothing (plan 747)', () => {
+    setup(onion(), 'shuk', false)
+    fixture.componentRef.setInput('disabledWhy', 'only the owner')
+    openList()
+    expect(rows().every((r) => !r.disabled && r.getAttribute('aria-disabled') === 'true')).toBeTrue()
+    rows()[2].click()
+    expect(picked).toEqual([])
+    document.body.querySelectorAll('.c-tooltip').forEach((n) => n.remove())
+  })
+
   it('Escape closes the list, emits nothing, stops propagation and focuses the button', () => {
     setup(onion())
     openList()

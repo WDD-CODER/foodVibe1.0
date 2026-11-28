@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, ElementRef, inject, signal } from '@angular/core'
 import { LucideAngularModule } from 'lucide-angular'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
+import { DisabledWhyDirective } from 'src/app/shared/tooltip/disabled-why.directive'
 import { formatCoefficient, isValidCoefficient } from '../../../../core/engine/portions'
 import { ClickOutSideDirective } from '@directives/click-out-side'
 import { SelectOnFocusDirective } from '@directives/select-on-focus.directive'
@@ -45,7 +46,14 @@ const parseCoefficient = (text: string): number => Number(text.trim().replace(',
 @Component({
   selector: 'app-coefficient-manager',
   standalone: true,
-  imports: [NumberBoxDirective, LucideAngularModule, TranslatePipe, SelectOnFocusDirective, ClickOutSideDirective],
+  imports: [
+    NumberBoxDirective,
+    LucideAngularModule,
+    TranslatePipe,
+    SelectOnFocusDirective,
+    ClickOutSideDirective,
+    DisabledWhyDirective
+  ],
   templateUrl: './coefficient-manager.component.html',
   styleUrl: './coefficient-manager.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -94,6 +102,11 @@ export class CoefficientManagerComponent {
   protected readonly canSave = computed(
     () => this.isDirty() && !this.isSaving_() && this.changes().every((c) => c.isValid)
   )
+  /** Why «שמור» cannot be used (a translation key), or null when it can. A running save is not a reason. */
+  protected readonly saveWhy_ = computed<string | null>(() => {
+    if (!this.isDirty()) return 'why_nothing_to_save'
+    return this.changes().every((c) => c.isValid) ? null : 'coefficient_invalid'
+  })
   private readonly invalidRows = computed(
     () =>
       new Set(

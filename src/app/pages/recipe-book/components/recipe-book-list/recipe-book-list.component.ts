@@ -27,6 +27,7 @@ import { UserService } from '@services/user.service'
 import { PermissionService } from '@services/permission.service'
 import { DateFieldComponent } from 'src/app/shared/date-field/date-field.component'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
+import { DisabledWhyDirective } from 'src/app/shared/tooltip/disabled-why.directive'
 import { ClickOutSideDirective } from '@directives/click-out-side'
 import { Recipe } from '@models/recipe.model'
 import { Product } from '@models/product.model'
@@ -56,7 +57,9 @@ import { buildFilterOptionCounts, attachFilterCheckedState } from 'src/app/core/
 import { RatingStarsComponent } from 'src/app/shared/rating-stars/rating-stars.component'
 import { RowActionsMenuComponent } from 'src/app/shared/row-actions-menu/row-actions-menu.component'
 import { COLUMN_CAROUSEL } from 'src/app/shared/column-carousel'
+import type { ListColumn } from 'src/app/shared/list-shell/list-columns.util'
 import { InputClearComponent } from 'src/app/shared/input-clear/input-clear.component'
+import { TooltipDirective } from 'src/app/shared/tooltip/tooltip.directive'
 import {
   SortField,
   RECIPE_FILTER_CATEGORIES,
@@ -73,7 +76,6 @@ import {
   compareRecipes
 } from './utils/recipe-book-list.util'
 import { RecipeRowActionsService } from './services/recipe-row-actions.service'
-import { RecipeListTooltipsService } from './services/recipe-list-tooltips.service'
 import { useListControls, matchesSearch } from 'src/app/core/utils/list-controls.util'
 
 /** Ingredient-filter typeahead search (plan 301, Milestone 1) — same tuning as ingredient-search.component.ts. */
@@ -90,6 +92,7 @@ const INGREDIENT_SEARCH_DEBOUNCE_MS = 250
     FormsModule,
     LucideAngularModule,
     TranslatePipe,
+    DisabledWhyDirective,
     ClickOutSideDirective,
     LoaderComponent,
     SearchComboboxComponent,
@@ -100,14 +103,30 @@ const INGREDIENT_SEARCH_DEBOUNCE_MS = 250
     RatingStarsComponent,
     RowActionsMenuComponent,
     ...COLUMN_CAROUSEL,
-    InputClearComponent
+    InputClearComponent,
+    TooltipDirective
   ],
-  providers: [RecipeRowActionsService, RecipeListTooltipsService],
+  providers: [RecipeRowActionsService],
   templateUrl: './recipe-book-list.component.html',
   styleUrl: './recipe-book-list.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class RecipeBookListComponent implements OnInit, OnDestroy {
+  /**
+   * Declared columns (plans 746, 747): they fall into the switching column rating → labels → allergens → cost →
+   * type. Only the name and the actions stay. A one-line column's `min` is its content plus the cell padding.
+   */
+  protected readonly columns: readonly ListColumn[] = [
+    { id: 'name', track: '2fr', min: '12rem', phoneMin: '8rem', stay: true },
+    { id: 'type', track: '1fr', min: '5rem' },
+    { id: 'labels', track: '1fr', min: '7rem', fall: 2 },
+    { id: 'allergens', track: '0.8fr', min: '6rem', fall: 3 },
+    { id: 'rating', track: '0.7fr', min: '8.5rem', fall: 1 },
+    { id: 'cost', track: '0.85fr', min: '6rem', fall: 4 },
+    { id: 'actions', track: '80px', min: '80px', phoneTrack: '40px', phoneMin: '40px', stay: true },
+    { id: 'select', track: 'auto', min: '1.75rem', phoneTrack: '28px', phoneMin: '28px', hideOnTouchPhone: true }
+  ]
+
   // 1. INJECTED
   protected readonly kitchenState = inject(KitchenStateService)
   private readonly productData = inject(ProductDataService)
@@ -120,7 +139,6 @@ export class RecipeBookListComponent implements OnInit, OnDestroy {
   private readonly heroFab = inject(HeroFabService)
   private readonly aiRecipeModal = inject(AiRecipeModalService)
   protected readonly rowActions = inject(RecipeRowActionsService)
-  protected readonly tooltips = inject(RecipeListTooltipsService)
 
   // 4. SIGNALS & CONSTANTS
   protected readonly isLoggedIn = this.userService.isLoggedIn
@@ -363,16 +381,6 @@ export class RecipeBookListComponent implements OnInit, OnDestroy {
   )
 
   protected isEmptyList_ = computed(() => this.kitchenState.recipes_().length === 0)
-
-  protected activeCostTooltipRecipe_ = computed(() => {
-    const id = this.tooltips.costHoveredId() ?? this.tooltips.costTappedId()
-    return id ? (this.filteredRecipes_().find((r) => r._id === id) ?? null) : null
-  })
-
-  protected activeDateTooltipRecipe_ = computed(() => {
-    const id = this.tooltips.dateHoveredId()
-    return id ? (this.filteredRecipes_().find((r) => r._id === id) ?? null) : null
-  })
 
   protected hasActiveFilters_ = computed(
     () =>

@@ -1,0 +1,27 @@
+<div class="lc" data-testid="lc-card">
+  <div class="lc__field">
+    <span class="lc__label">{{ 'mp_labour_gross' | translatePipe }}</span>
+    <app-month-pair
+      labelKey="mp_labour_gross"
+      idPrefix="lc"
+      [plan]="group().plan"
+      [actual]="group().actual"
+      [disabled]="disabled()"
+      (planChange)="setAmount('plan', $event)"
+      (actualChange)="setAmount('actual', $event)"
+    />
+  </div>
+
+  <div class="lc__field">
+    <label class="lc__label" for="lc-factor">{{ 'mp_labour_factor' | translatePipe }}</label>
+    <!-- prettier-ignore -->
+    <div class="c-input-wrapper lc__box" appNumberBox><input type="number" inputmode="decimal" min="1" max="2" step="0.01" dir="ltr" id="lc-factor" data-testid="lc-factor" [disabled]="disabled()" [ngModel]="group().factor" (ngModelChange)="setFactor($event)" /></div>
+    @for (cost of employerCosts_(); track cost.side) {
+      <span class="lc__muted" [attr.data-testid]="'lc-employer-' + cost.side"
+        >{{ cost.sideKey | translatePipe }} · {{ cost.text }}</span
+      >
+    }
+  </div>
+
+  <p class="lc__muted" data-testid="lc-note">{{ 'mp_labour_note_gross' | translatePipe }}</p>
+</div>

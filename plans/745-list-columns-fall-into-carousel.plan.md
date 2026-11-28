@@ -120,6 +120,9 @@ append the path to the scope block above and retry.
 - `fitColumns` and the `ListColumn` type (`src/app/shared/list-shell/list-columns.util.ts`) — family: list-page — rung: 3 — why: the list container decides which columns fit; a pure function beside it, so it is tested without a browser.
 - `*appFallColumn` (`src/app/shared/column-carousel/fall-column.directive.ts`) — family: list-page — rung: 3 — why: a column the carousel components can render either as its own cell or inside the switching column; the existing `appColumnSlide` attribute cannot be moved between the two places.
 
+- `.column-carousel--measured`, `.cc-box`, `.cc-box--cell`, `.cc-box--header`, `.cc-fall` (`src/app/shared/column-carousel/column-carousel.component.scss`) — family: list-page — rung: 3 — why: the switching column inside a carousel host that is `display: contents`; the phone-only `:host(.column-carousel)` box cannot be reused because the host must stay transparent when other columns are their own cells.
+- `.dc-resizable` (`src/app/pages/dev-catalog/dev-catalog.page.scss`) — family: list-page — rung: 3 — why: the catalog's box the reader resizes to watch columns fall; no existing piece resizes.
+
 ## Defaults
 
 - app-list-container — applies — how: app-list-shell (src/app/shared/list-shell/) with app-page-header; this plan keeps every row on one line at every width by letting columns fall instead of squeezing them.
@@ -242,13 +245,13 @@ line or file this plan names was removed, renamed or rewritten).
 
 These are the plan's milestones: a Worker does them in order and ticks each one after it is checked.
 
-- [ ] A1: Work out which columns fit a given width, as a tested rule with no browser — the column type, the fit function and its spec — src/app/shared/list-shell/list-columns.util.ts, src/app/shared/list-shell/list-columns.util.spec.ts
-- [ ] A2: Let the list container measure itself and lay its columns out from the rule — the columns input, the resize and phone watchers, the grid variables, the collapsed ids handed to the carousel group — src/app/shared/list-shell/**, src/app/shared/column-carousel/column-carousel-group.directive.ts
-- [ ] A3: Let a column be shown either as its own cell or inside the switching column — the fall-column directive, the header and cell rendering, the carousel look and keys freed from the phone width — src/app/shared/column-carousel/**, src/styles.scss
-- [ ] A4: Make the product list declare its columns and their fall order instead of typing layouts — the columns list, the template, the spec — src/app/pages/inventory/components/inventory-product-list/**
-- [ ] A5: Show falling columns in the dev catalog and check three widths with a script — the catalog entry and its count spec, the three ui specs — src/app/pages/dev-catalog/**, e2e/ui/745-1.spec.ts, e2e/ui/745-2.spec.ts, e2e/ui/745-3.spec.ts
-- [ ] A6: Write the new behaviour into the house rules and where builders look — the column-carousel and recipe-list rules, the registry, the inventory, the proposed default's lines, the design system line — docs/agent/house-style.md, docs/brain/component-families.md, docs/brain/inventory.md, _shared/product-defaults.md, .interface-design/system.md
-- [ ] A7: Run every check of this plan and hand Dandan the six cards — outputs under Execution Notes — this plan file
+- [x] A1: Work out which columns fit a given width, as a tested rule with no browser — the column type, the fit function and its spec — src/app/shared/list-shell/list-columns.util.ts, src/app/shared/list-shell/list-columns.util.spec.ts
+- [x] A2: Let the list container measure itself and lay its columns out from the rule — the columns input, the resize and phone watchers, the grid variables, the collapsed ids handed to the carousel group — src/app/shared/list-shell/**, src/app/shared/column-carousel/column-carousel-group.directive.ts
+- [x] A3: Let a column be shown either as its own cell or inside the switching column — the fall-column directive, the header and cell rendering, the carousel look and keys freed from the phone width — src/app/shared/column-carousel/**, src/styles.scss
+- [x] A4: Make the product list declare its columns and their fall order instead of typing layouts — the columns list, the template, the spec — src/app/pages/inventory/components/inventory-product-list/**
+- [x] A5: Show falling columns in the dev catalog and check three widths with a script — the catalog entry and its count spec, the three ui specs — src/app/pages/dev-catalog/**, e2e/ui/745-1.spec.ts, e2e/ui/745-2.spec.ts, e2e/ui/745-3.spec.ts
+- [x] A6: Write the new behaviour into the house rules and where builders look — the column-carousel and recipe-list rules, the registry, the inventory, the proposed default's lines, the design system line — docs/agent/house-style.md, docs/brain/component-families.md, docs/brain/inventory.md, _shared/product-defaults.md, .interface-design/system.md
+- [x] A7: Run every check of this plan and hand Dandan the six cards — outputs under Execution Notes — this plan file
 
 ## Technical Considerations
 - Dependencies: `ListShellComponent`, the column-carousel family, `PHONE_QUERY` (`@utils/breakpoints`),
@@ -284,3 +287,7 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
 - Q: The product list's order? A: unit → supplier → allergens → category; name, price and actions always stay ("table approved", Dandan, 2026-11-25).
 
 ## Execution Notes
+- pnpm run build -> exit 0; pnpm run lint -> exit 0 (0 errors); pnpm run test:ci -> exit 0, TOTAL 2822 SUCCESS (incl. list-columns.util.spec.ts, carousel measured-mode specs, dev catalog 18 sections)
+- breadcrumbs-check, reuse-lint --check-registry, kit-manifest-check, plan-ledger-check, override-check, lint:icons, lint:no-native-select -> exit 0; scope-check --arch -> ARCH: ok
+- [ui] items: e2e/ui/745-1/2/3.spec.ts written, not run (no running app); [human] cards left for Dandan
+- src/styles.scss (append-only hotspot): one rule for the selected row's switching cell

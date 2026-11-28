@@ -7,10 +7,13 @@ import {
   inject,
   OnDestroy,
   OnInit,
+  input,
+  output,
   signal
 } from '@angular/core'
 import { Router } from '@angular/router'
 import { DatePipe } from '@angular/common'
+import { TooltipDirective } from 'src/app/shared/tooltip/tooltip.directive'
 import { LucideAngularModule } from 'lucide-angular'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
 import { formatMoney, formatPct1 } from 'src/app/core/engine/rounding'
@@ -25,7 +28,7 @@ import { UserService } from '@services/user.service'
 @Component({
   selector: 'app-notification-bell',
   standalone: true,
-  imports: [LucideAngularModule, TranslatePipe, DatePipe],
+  imports: [LucideAngularModule, TranslatePipe, DatePipe, TooltipDirective],
   templateUrl: './notification-bell.component.html',
   styleUrl: './notification-bell.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -37,17 +40,25 @@ export class NotificationBellComponent implements OnInit, OnDestroy {
   private readonly router = inject(Router)
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef)
 
+  /**
+   * `icon` is the top bar's bell. `menu` (plan 747) is the same bell as one entry of the phone's profile menu, with
+   * the same panel opening above it; it does not start or stop the poll (the top bar's bell does).
+   */
+  readonly variant = input<'icon' | 'menu'>('icon')
+  /** An alert was opened: the menu that holds this bell can close. */
+  readonly picked = output<void>()
+
   protected readonly isOpen_ = signal(false)
   protected readonly unread_ = this.notifications.unread_
   protected readonly rows_ = this.notifications.rows_
   private readonly activeBusinessId_ = computed(() => this.user.user_()?.businessId ?? null)
 
   ngOnInit(): void {
-    this.notifications.startPolling()
+    if (this.variant() === 'icon') this.notifications.startPolling()
   }
 
   ngOnDestroy(): void {
-    this.notifications.stopPolling()
+    if (this.variant() === 'icon') this.notifications.stopPolling()
   }
 
   @HostListener('document:click', ['$event'])
@@ -77,6 +88,7 @@ export class NotificationBellComponent implements OnInit, OnDestroy {
 
   protected async open(row: AlertRow): Promise<void> {
     this.isOpen_.set(false)
+    this.picked.emit()
     void this.notifications.markRead(row._id)
     if (row.businessId !== this.activeBusinessId_()) {
       await this.user.switchBusiness(row.businessId === this.user.homeBusinessId_() ? null : row.businessId)

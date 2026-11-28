@@ -113,7 +113,9 @@ describe('ConfirmModalComponent', () => {
     it('shows the box and the expected name, and locks confirm', () => {
       expect(box()).not.toBeNull()
       expect(fixture.nativeElement.querySelector('.confirm-modal-typed__expected').textContent).toContain('מטבח')
-      expect(confirmBtn().disabled).toBeTrue()
+      expect(confirmBtn().getAttribute('aria-disabled')).toBe('true')
+      confirmBtn().click()
+      expect(mockModalService.choose).not.toHaveBeenCalled()
     })
 
     it('reports typing to the service and unlocks confirm on a match', () => {
@@ -122,7 +124,7 @@ describe('ConfirmModalComponent', () => {
       expect(mockModalService.setTypedText).toHaveBeenCalledWith('מטבח')
       typedText.set('מטבח')
       fixture.detectChanges()
-      expect(confirmBtn().disabled).toBeFalse()
+      expect(confirmBtn().getAttribute('aria-disabled')).toBeNull()
     })
 
     it('Enter confirms only on a match', () => {

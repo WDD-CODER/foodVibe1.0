@@ -237,6 +237,51 @@ describe('InventoryProductListComponent', () => {
       expect((component as any).getSupplierName('')).toBe('')
     })
   })
+  describe('the nutrition leaf in one fixed spot (plan 763)', () => {
+    const product = (id: string, nameHebrew: string, withNutrition: boolean): Product =>
+      ({
+        _id: id,
+        nameHebrew,
+        categories: ['Pantry'],
+        sources: [{ supplierId: 'Supplier A', price: 5 }],
+        purchaseOptions: [],
+        allergens: [],
+        baseUnit: 'kg',
+        ...(withNutrition ? { nutritionPer100g: { proteinG: 3, fatG: 1 } } : {})
+      }) as unknown as Product
+
+    it('every name cell keeps a slot of one width, and every leaf sits at the same spot in it', () => {
+      const state = TestBed.inject(KitchenStateService) as unknown as {
+        products_: ReturnType<typeof signal<Product[]>>
+      }
+      state.products_.set([
+        product('a', 'מלח', true),
+        product('b', 'שמן זית כתית מעולה בכבישה קרה מהגליל העליון', true),
+        product('c', 'קמח', false)
+      ])
+      ;(component as any).searchQuery_.set('')
+      ;(component as any).activeFilters_.set({})
+      fixture.detectChanges()
+      const root = fixture.nativeElement as HTMLElement
+      const cells = Array.from(root.querySelectorAll<HTMLElement>('.col-name.c-list-body-cell'))
+      expect(cells.length).toBe(3)
+      const slots = cells.map((cell) =>
+        cell.querySelector<HTMLElement>(':scope > [data-testid="name-nutrition-slot"]')!
+      )
+      expect(slots.every((slot) => !!slot)).toBeTrue()
+      expect(new Set(slots.map((slot) => Math.round(slot.getBoundingClientRect().width))).size).toBe(1)
+      expect(root.querySelector('.name-text app-nutrition-badge')).toBeNull()
+      const leaves = cells.flatMap((cell) => {
+        const leaf = cell.querySelector<HTMLElement>('.nb-leaf')
+        if (!leaf) return []
+        const rect = leaf.getBoundingClientRect()
+        return [Math.round(rect.left + rect.width / 2 - cell.getBoundingClientRect().left)]
+      })
+      expect(leaves.length).toBe(2)
+      expect(new Set(leaves).size).toBe(1)
+    })
+  })
+
   describe('one status mark per row (plan 462)', () => {
     const base = {
       nameHebrew: 'Item',
@@ -256,15 +301,27 @@ describe('InventoryProductListComponent', () => {
       fixture.detectChanges()
     }
     const root = (): HTMLElement => fixture.nativeElement as HTMLElement
-    const chips = (): string[] =>
-      Array.from(root().querySelectorAll('.validation-tooltip .c-chip')).map((c) => c.textContent?.trim() ?? '')
+    const tip = (): HTMLElement | null => document.body.querySelector<HTMLElement>('.c-tooltip')
+    afterEach(() => document.body.querySelectorAll('.c-tooltip').forEach((n) => n.remove()))
+    /** The reasons in the shared tooltip: tap the mark to pin it open, read the chips, tap again to close. */
+    const chips = (): string[] => {
+      const btn = root().querySelector<HTMLButtonElement>('.row-status')
+      btn?.click()
+      fixture.detectChanges()
+      const found = Array.from(document.body.querySelectorAll('.c-tooltip .c-chip')).map(
+        (c) => c.textContent?.trim() ?? ''
+      )
+      btn?.click()
+      return found
+    }
 
-    it('three gaps (price, category, supplier) render one amber chip mark with three chips and no triangle', () => {
+    it('three gaps (price, category, supplier) render one triangle mark with three chips (plan 747)', () => {
       setProducts({ ...base, _id: 'a', categories: [], sources: [] })
       expect(root().querySelectorAll('.row-status').length).toBe(1)
       expect(root().querySelectorAll('.validation-badge--incomplete').length).toBe(0)
       expect(root().querySelectorAll('.validation-badge--unpriced').length).toBe(1)
-      expect(root().querySelector('.row-status .unpriced-badge')).not.toBeNull()
+      expect(root().querySelector('.row-status .unpriced-badge')).toBeNull()
+      expect(root().querySelectorAll('.row-status lucide-icon').length).toBe(1)
       expect(chips()).toEqual(['missing_price', 'missing_category', 'missing_supplier'])
     })
 
@@ -279,7 +336,7 @@ describe('InventoryProductListComponent', () => {
     it('a complete product renders no mark', () => {
       setProducts({ ...base, _id: 'c' })
       expect(root().querySelectorAll('.row-status').length).toBe(0)
-      expect(root().querySelectorAll('.validation-tooltip').length).toBe(0)
+      expect(tip()).toBeNull()
     })
 
     it('a product with no unit renders the red circle only, with a price chip when also unpriced', () => {
@@ -314,11 +371,12 @@ describe('InventoryProductListComponent', () => {
       const btn = root().querySelector<HTMLButtonElement>('.row-status') as HTMLButtonElement
       btn.click()
       fixture.detectChanges()
-      expect(btn.getAttribute('aria-expanded')).toBe('true')
+      expect(tip()).not.toBeNull()
+      expect(btn.getAttribute('aria-describedby')).toBe(tip()!.id)
       expect(mockRouter.navigate).not.toHaveBeenCalled()
       btn.click()
       fixture.detectChanges()
-      expect(btn.getAttribute('aria-expanded')).toBe('false')
+      expect(tip()).toBeNull()
       expect(mockRouter.navigate).not.toHaveBeenCalled()
     })
 
@@ -328,16 +386,15 @@ describe('InventoryProductListComponent', () => {
       const btn = root().querySelector<HTMLButtonElement>('.row-status') as HTMLButtonElement
       btn.click()
       fixture.detectChanges()
-      root().querySelector<HTMLElement>('.validation-tooltip')?.click()
+      tip()?.click()
       expect(mockRouter.navigate).not.toHaveBeenCalled()
-      document.body.click()
-      fixture.detectChanges()
-      expect(btn.getAttribute('aria-expanded')).toBe('false')
+      document.body.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true }))
+      expect(tip()).toBeNull()
       btn.click()
       fixture.detectChanges()
       btn.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }))
       fixture.detectChanges()
-      expect(btn.getAttribute('aria-expanded')).toBe('false')
+      expect(tip()).toBeNull()
     })
 
     it('a tap on the product name still opens the edit page', () => {

@@ -28,7 +28,8 @@ export const TAXONOMY_KINDS = [
   'equipmentCategory',
   'station',
   'logisticsItem',
-  'logisticsSection'
+  'logisticsSection',
+  'dishReturnReason'
 ] as const
 
 export type TaxonomyKind = (typeof TAXONOMY_KINDS)[number]
@@ -56,11 +57,11 @@ export const REGISTRY_KIND_BY_COLLECTION = {
  * Empty for kinds nothing references yet (protein/kosherType arrive in Phase 4; equipment
  * `category` is a fixed enum, so custom equipment categories are not stored on equipment).
  */
-export const TERM_REFERENCES: Record<TaxonomyKind, Partial<Record<'products' | 'recipes' | 'dishes' | 'menuEvents' | 'equipment', readonly string[]>>> = {
+export const TERM_REFERENCES: Record<TaxonomyKind, Partial<Record<'products' | 'recipes' | 'dishes' | 'menuEvents' | 'equipment' | 'menuDishes' | 'dishSalesMonths', readonly string[]>>> = {
   ingredientCategory: { products: ['categories[]'] },
   allergen: { products: ['allergens[]'] },
   label: { recipes: ['labels[]', 'autoLabels[]'], dishes: ['labels[]', 'autoLabels[]'] },
-  course: { recipes: ['course'], dishes: ['course'] },
+  course: { recipes: ['course'], dishes: ['course'], menuDishes: ['course'] },
   unit: {
     products: ['baseUnit', 'purchaseOptions.unitSymbol', 'purchaseOptions.uom'],
     recipes: ['ingredients.unit', 'yieldUnit', 'yieldConversions.unit', 'prepItems.unit', 'prepCategories.items.unit'],
@@ -85,7 +86,9 @@ export const TERM_REFERENCES: Record<TaxonomyKind, Partial<Record<'products' | '
   /** Plan 518: the answers on an event store the item's key as `siteLogistics.answers.itemKey`. */
   logisticsItem: { menuEvents: ['siteLogistics.answers.itemKey', 'siteLogistics.hiddenKeys[]'] },
   /** Plan 579: a business's own logistics section; nothing references it by key. */
-  logisticsSection: {}
+  logisticsSection: {},
+  /** Plan 724: a business's own return reason is stored on a month's dish rows as `reason`. */
+  dishReturnReason: { dishSalesMonths: ['rows.returnReasons.reason'] }
 }
 
 const DISH_FIELD_KEYS = ['sell_price', 'food_cost_money', 'food_cost_pct', 'serving_portions', 'serving_portions_pct'] as const
@@ -113,7 +116,8 @@ const plainKinds = [
   'sectionCategory',
   'equipmentCategory',
   'station',
-  'logisticsSection'
+  'logisticsSection',
+  'dishReturnReason'
 ] as const
 
 export const taxonomyTermSchema = z.discriminatedUnion('kind', [

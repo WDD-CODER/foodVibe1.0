@@ -9,8 +9,7 @@
         type="button"
         class="c-btn-primary"
         (click)="onEdit()"
-        [disabled]="!isLoggedIn()"
-        [attr.title]="!isLoggedIn() ? ('sign_in_to_use' | translatePipe) : null"
+        [appDisabledWhy]="!isLoggedIn() ? ('sign_in_to_use' | translatePipe) : null"
       >
         <lucide-icon name="pencil" [size]="16"></lucide-icon>
         {{ 'edit' | translatePipe }}
@@ -184,8 +183,8 @@
           type="button"
           class="c-btn-ghost video-upload-btn"
           (click)="videoInput.click()"
-          [disabled]="!isLoggedIn() || uploading_() !== null"
-          [attr.title]="!isLoggedIn() ? ('sign_in_to_use' | translatePipe) : null"
+          [disabled]="uploading_() !== null"
+          [appDisabledWhy]="!isLoggedIn() ? ('sign_in_to_use' | translatePipe) : null"
         >
           <lucide-icon name="upload" [size]="14"></lucide-icon>
           {{ 'venue_upload_video' | translatePipe }}

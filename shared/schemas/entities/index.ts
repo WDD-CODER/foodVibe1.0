@@ -23,6 +23,10 @@ import { businessAccessSchema } from './business-access.schema'
 import { diagnosisSchema } from './diagnosis.schema'
 import { stockCountSchema } from './stock-count.schema'
 import { notificationSchema } from './notification.schema'
+import { menuDishSchema } from './menu-dish.schema'
+import { dishSalesMonthSchema } from './dish-sales-month.schema'
+import { dishSalesAliasSchema } from './dish-sales-alias.schema'
+import { monthPlanSchema } from './month-plan.schema'
 
 export * from './invoice.schema'
 export * from './price-history.schema'
@@ -34,6 +38,10 @@ export * from './business-access.schema'
 export * from './diagnosis.schema'
 export * from './stock-count.schema'
 export * from './notification.schema'
+export * from './menu-dish.schema'
+export * from './dish-sales-month.schema'
+export * from './dish-sales-alias.schema'
+export * from './month-plan.schema'
 export * from './booking.schema'
 export * from './business.schema'
 export * from './client.schema'
@@ -74,7 +82,11 @@ export const SCHEMA_BY_COLLECTION = {
   businessAccess: businessAccessSchema,
   diagnoses: diagnosisSchema,
   stockCounts: stockCountSchema,
-  notifications: notificationSchema
+  notifications: notificationSchema,
+  menuDishes: menuDishSchema,
+  dishSalesMonths: dishSalesMonthSchema,
+  dishSalesAliases: dishSalesAliasSchema,
+  monthPlans: monthPlanSchema
 } as const
 
 export type SchemaCollection = keyof typeof SCHEMA_BY_COLLECTION

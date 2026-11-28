@@ -1,6 +1,7 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing'
+import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing'
+import { TOOLTIP_HOVER_DELAY_MS } from 'src/app/shared/tooltip/tooltip.directive'
 import { signal } from '@angular/core'
-import { of } from 'rxjs'
+import { of, throwError } from 'rxjs'
 import { LucideAngularModule } from 'lucide-angular'
 import { TEST_LUCIDE_ICONS } from 'src/testing/test-lucide-icons'
 import { UserManagementComponent } from './user-management.component'
@@ -45,7 +46,7 @@ describe('UserManagementComponent', () => {
   let msg: jasmine.SpyObj<UserMsgService>
 
   beforeEach(async () => {
-    admin = jasmine.createSpyObj<UserAdminService>('UserAdminService', ['getUsers', 'deleteUser'])
+    admin = jasmine.createSpyObj<UserAdminService>('UserAdminService', ['getUsers', 'deleteUser', 'setAiAllowance'])
     admin.getUsers.and.returnValue(of([MINE, OWNER, STAFF]))
     admin.deleteUser.and.returnValue(of({ ok: true, deletedBusiness: true, usersDeleted: 2 }))
     confirm = jasmine.createSpyObj<ConfirmModalService>('ConfirmModalService', ['open', 'openTernary'])
@@ -80,6 +81,19 @@ describe('UserManagementComponent', () => {
     expect(text).toContain('business_role_owner')
     expect(text).toContain('business_role_staff')
   })
+
+  it('the platform admin chip names itself with the shared tooltip, not the browser title', fakeAsync(() => {
+    const chip = (fixture.nativeElement as HTMLElement).querySelector<HTMLElement>(
+      '[data-testid="platform-admin-chip"]'
+    )!
+    expect(chip.getAttribute('title')).toBeNull()
+    expect(chip.getAttribute('aria-label')).toBe('platform_admin')
+    chip.dispatchEvent(new PointerEvent('pointerenter', { pointerType: 'mouse' }))
+    tick(TOOLTIP_HOVER_DELAY_MS)
+    expect(document.body.querySelector('.c-tooltip')?.textContent).toContain('platform_admin')
+    chip.dispatchEvent(new PointerEvent('pointerleave', { pointerType: 'mouse' }))
+    expect(document.body.querySelector('.c-tooltip')).toBeNull()
+  }))
 
   it('deleting an owner asks, then the learned-data question, then the final confirm; keep deletes with false', async () => {
     await component.onDeleteUser(OWNER)
@@ -155,7 +169,67 @@ describe('UserManagementComponent', () => {
     const buttons = Array.from(
       (fixture.nativeElement as HTMLElement).querySelectorAll<HTMLButtonElement>('.c-icon-btn.danger')
     )
-    expect(buttons.map((b) => b.disabled)).toEqual([true, false, false])
+    expect(buttons.map((b) => b.getAttribute('aria-disabled'))).toEqual(['true', null, null])
+    buttons[0].click()
+    expect(confirm.open).not.toHaveBeenCalled()
+    document.body.querySelectorAll('.c-tooltip').forEach((n) => n.remove())
+  })
+
+  describe('the AI allowance on a row (plan 736)', () => {
+    const rowOf = (i: number) =>
+      (fixture.nativeElement as HTMLElement).querySelectorAll<HTMLElement>('.list-item.group')[i]
+    const inputOf = (i: number) => rowOf(i).querySelector<HTMLInputElement>('[data-testid="ai-allowance-input"]')!
+    const saveOf = (i: number) => rowOf(i).querySelector<HTMLButtonElement>('[data-testid="ai-allowance-save"]')!
+    const type = (i: number, value: string) => {
+      const input = inputOf(i)
+      input.value = value
+      input.dispatchEvent(new Event('input'))
+      fixture.detectChanges()
+    }
+
+    it('shows the default 100 and the used count; save is off until the number changes', () => {
+      expect(inputOf(1).value).toBe('100')
+      expect(rowOf(1).textContent).toContain('admin_ai_allowance_used')
+      expect(saveOf(1).disabled).toBeTrue()
+      type(1, '100')
+      expect(saveOf(1).disabled).toBeTrue()
+    })
+
+    it('sends the PUT with the number and shows the saved numbers', () => {
+      admin.setAiAllowance.and.returnValue(of({ ok: true, aiAllowance: 2, aiCallsUsed: 1 }))
+      type(1, '2')
+      expect(saveOf(1).disabled).toBeFalse()
+      saveOf(1).click()
+      fixture.detectChanges()
+      expect(admin.setAiAllowance).toHaveBeenCalledOnceWith('o1', 2)
+      expect(msg.onSetSuccessMsg).toHaveBeenCalledWith('admin_ai_allowance_saved')
+      expect(inputOf(1).value).toBe('2')
+      expect(saveOf(1).disabled).toBeTrue()
+    })
+
+    it('a bad number shows the error line and never sends', () => {
+      for (const bad of ['-1', '1.5', '100001', '']) {
+        type(1, bad)
+        expect(saveOf(1).disabled).withContext(bad).toBeTrue()
+        expect(rowOf(1).querySelector('[data-testid="ai-allowance-error"]')?.textContent).toContain(
+          'admin_ai_allowance_invalid'
+        )
+        component.onSaveAllowance(OWNER)
+      }
+      expect(admin.setAiAllowance).not.toHaveBeenCalled()
+    })
+
+    it('a failed save shows server_error, keeps the saved number and lets the admin retry', () => {
+      admin.setAiAllowance.and.returnValue(throwError(() => new Error('down')))
+      type(1, '5')
+      saveOf(1).click()
+      fixture.detectChanges()
+      expect(msg.onSetErrorMsg).toHaveBeenCalledWith('server_error')
+      expect(rowOf(1).textContent).not.toContain('admin_ai_allowance_saved')
+      expect(saveOf(1).disabled).toBeFalse()
+      saveOf(1).click()
+      expect(admin.setAiAllowance).toHaveBeenCalledTimes(2)
+    })
   })
 
   // Plan 468 - the trash icon sits under the email, inside the card, never over it.

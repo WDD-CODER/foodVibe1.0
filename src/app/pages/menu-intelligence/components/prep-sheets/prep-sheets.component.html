@@ -26,7 +26,12 @@
         }
       </div>
       <div class="prep-bar-actions">
-        <button type="button" class="c-btn-primary prep-print" [disabled]="printedCount_() === 0" (click)="print()">
+        <button
+          type="button"
+          class="c-btn-primary prep-print"
+          [appDisabledWhy]="printedCount_() === 0 ? ('why_choose_first' | translatePipe) : null"
+          (click)="print()"
+        >
           <lucide-icon name="printer" [size]="16"></lucide-icon>
           {{ 'prep_sheets_print' | translatePipe }}
         </button>

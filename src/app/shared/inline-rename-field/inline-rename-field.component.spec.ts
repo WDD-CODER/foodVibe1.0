@@ -50,20 +50,20 @@ describe('InlineRenameFieldComponent', () => {
 
   it('disables Save and ignores Enter when the text is empty', () => {
     type('   ')
-    expect(buttons()[0].disabled).toBe(true)
+    expect(buttons()[0].getAttribute('aria-disabled')).toBe('true')
     buttons()[0].click()
     input().dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter' }))
     expect(saved).toEqual([])
   })
 
   it('disables Save and ignores Enter when the text is unchanged', () => {
-    expect(buttons()[0].disabled).toBe(true)
+    expect(buttons()[0].getAttribute('aria-disabled')).toBe('true')
     type(' old ')
-    expect(buttons()[0].disabled).toBe(true)
+    expect(buttons()[0].getAttribute('aria-disabled')).toBe('true')
     input().dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter' }))
     expect(saved).toEqual([])
     type('other')
-    expect(buttons()[0].disabled).toBe(false)
+    expect(buttons()[0].getAttribute('aria-disabled')).toBeNull()
   })
 
   it('emits cancelled on Cancel and on Escape, and no text', () => {

@@ -67,6 +67,7 @@ src/app/**/breadcrumbs.md
 docs/agent/house-style.md
 docs/brain/component-families.md
 docs/brain/inventory.md
+docs/workflow-kit/manifest.json
 ```
 
 ## Read Scope
@@ -85,8 +86,11 @@ append the path to the scope block above and retry.
 - INV-6: preserves — the scope glob `src/app/**/breadcrumbs.md` matches `*ai*` paths only by name; no AI call is touched.
 
 ## Reuse Check
-- none — changes inside the existing shared tooltip, `scroll-rail` and the stock count; the phone breakpoint comes from
-  the app's one breakpoint set.
+Changes inside the existing shared tooltip, `scroll-rail` and the stock count; the phone breakpoint comes from the
+app's one breakpoint set. The new classes:
+
+- `.stock-count__name-box`, `.stock-count__controls`, `.stock-count__head-name` — family: list-page — rung: 3 — why: page-local layout containers of the stock count row on the list shell.
+- `.sr-more__badge` — family: sideways-row — rung: 3 — why: the stronger look of the rail's sign of more.
 
 ## Defaults
 
@@ -130,10 +134,10 @@ line or file this plan names was removed, renamed or rewritten).
 
 These are the plan's milestones: a Worker does them in order and ticks each one after it is checked.
 
-- [ ] F1: Tooltip opens on tap only on phones and closes on any tap or scroll; hover-only elsewhere — src/app/shared/tooltip/tooltip.directive.ts
-- [ ] F2: Make the inside "more" sign clearly visible — src/app/shared/scroll-rail/scroll-rail.component.scss
-- [ ] F3: Stock count rows: name container above a controls container on phones — src/app/pages/inventory/components/stock-count/stock-count.component.html
-- [ ] F4: Run every automatic check and paste the outputs under Execution Notes — plans/762-house-style-grading-round-three.plan.md
+- [x] F1: Tooltip opens on tap only on phones and closes on any tap or scroll; hover-only elsewhere — src/app/shared/tooltip/tooltip.directive.ts
+- [x] F2: Make the inside "more" sign clearly visible — src/app/shared/scroll-rail/scroll-rail.component.scss
+- [x] F3: Stock count rows: name container above a controls container on phones — src/app/pages/inventory/components/stock-count/stock-count.component.html
+- [x] F4: Run every automatic check and paste the outputs under Execution Notes — plans/762-house-style-grading-round-three.plan.md
 
 ## What happens when
 - A laptop with a touch screen above the phone breakpoint: hover rules apply; a tap does not pin.
@@ -149,3 +153,25 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
 - none
 
 ## Execution Notes
+
+- `scope-check.mjs --drift` → `REALITY: clean` (Step 0 not run).
+- F1: tap mode is `TOOLTIP_TAP_QUERY` (phone width or no hover). A tap opens; the next press anywhere or any scroll
+  closes; above it a click or tap never opens or pins. `tooltipOnClick` now has no effect (still declared).
+- F2: `.sr-more__badge`, a solid round chevron in `--color-primary` on a wider fade.
+- F3: `.stock-count__name-box` + `.stock-count__controls`, `display: contents` above a phone, subgrid lines on a phone
+  (measured by a spec in the phone-width test window).
+- `behaviour:` the sign uses `--color-primary` (themed), not the unused purple `--color-accent` — reverse: swap the token
+  in `.sr-more__badge`.
+- `behaviour:` a mouse in a phone-width window still hovers as before (a finger never does); only a tap-opened box is
+  closed by a press on its own control — reverse: skip hover in tap mode in `canHover_`.
+- `behaviour:` focus that comes from a press opens nothing, text fields included (so a click or tap never opens above a
+  phone) — reverse: drop the `pressed_` guard in `onFocusIn`.
+- `behaviour:` on a phone the "product" column heading has its own line above the amount / unit / counted headings —
+  reverse: hide `.stock-count__head-name` in the phone block.
+- Checks (final code): `pnpm run build` → 0; `pnpm run lint` → 0 (0 errors, 69 warnings, none in changed files);
+  `pnpm run test:ci` → 0, `TOTAL: 3103 SUCCESS`; orch-state prepare → ok; kit-manifest-check → ok; `scope-check.mjs
+  --diff=origin/orch/biz-house2` → `SCOPE: ok` (the main folder's copy of the script reads the main folder, so the
+  worktree's copy was used); kit-checks → `KIT_CHECKS: ok (6 checks)`; override-check → ok; lint:icons → 0;
+  lint:no-native-select → 0; plan-ledger-check → OK; breadcrumbs-check → `BREADCRUMBS: clean`; ci-scope-check →
+  skipped; `scope-check.mjs --arch` → `ARCH: ok INV-none, INV-6`; inventory --check → `INVENTORY: ok`; log-query →
+  `SKIP: no database configured`.

@@ -69,7 +69,13 @@
 
     <div class="c-modal-actions">
       <button type="button" class="c-btn-ghost" (click)="resetAndClose()">{{ 'cancel' | translatePipe }}</button>
-      <button type="button" class="c-btn-primary" (click)="save()" [disabled]="!canSave_() || isSaving_()">
+      <button
+        type="button"
+        class="c-btn-primary"
+        (click)="save()"
+        [disabled]="isSaving_()"
+        [appDisabledWhy]="!canSave_() ? ('fill_required_fields' | translatePipe) : null"
+      >
         {{ 'approve_and_save_unit' | translatePipe }}
       </button>
     </div>

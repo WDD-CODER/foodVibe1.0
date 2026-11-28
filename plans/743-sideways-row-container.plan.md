@@ -107,6 +107,8 @@ src/app/shared/breadcrumbs.md
 src/app/core/breadcrumbs.md
 src/app/pages/breadcrumbs.md
 docs/workflow-kit/manifest.json
+src/app/appRoot/app.component.spec.ts
+src/app/pages/dashboard/dashboard.page.spec.ts
 ```
 
 `_shared/debt-baseline.json` and `docs/workflow-kit/manifest.json` are listed so a count that only goes down, or a
@@ -129,6 +131,8 @@ append the path to the scope block above and retry.
 
 ## Reuse Check
 - none — no new component, util, pipe, service or `.c-*` class: the existing `app-scroll-rail` (`src/app/shared/scroll-rail/`) gains a frame, new arrows and drag (rung 3, extend the piece). Its registry entry is written as a new family section `sideways-row` in `docs/brain/component-families.md` (the rail had none).
+- `.has-frame`, `.is-dragging` — family: sideways-row — rung: 3 — why: host state classes of `app-scroll-rail` beside its `is-overflowing`; no shared `.c-*` class.
+- `.dc-rail-box` — family: sideways-row — rung: 3 — why: the dev catalog's 20rem demo box, local to that page.
 
 ## Defaults
 
@@ -238,14 +242,14 @@ line or file this plan names was removed, renamed or rewritten).
 
 These are the plan's milestones: a Worker does them in order and ticks each one after it is checked.
 
-- [ ] A1: Give the sideways scroller a visible container and edge arrows that look like the scroll area turned sideways — the frame input, the new arrows, the removed mask and offset variables — src/app/shared/scroll-rail/**
-- [ ] A2: Let the row be grabbed and dragged with the mouse without pressing what is under it, and make the arrows signs only on a phone — the drag tracking, the swallowed click, the phone signal, the instant centring option, the spec cases — src/app/shared/scroll-rail/**
-- [ ] A3: Put the top bar's navigation in the container so it stops scrolling on its own with a scrollbar — the rail in the header, the removed box and overflow rules, the active link kept in view — src/app/core/components/header/**
-- [ ] A4: Fix the metadata row so its arrows sit inside the container and a chip press scrolls once — the removed offset and pill rules, the jumpTo order — src/app/pages/metadata-manager/metadata-manager.page.component.html, src/app/pages/metadata-manager/metadata-manager.page.component.scss, src/app/pages/metadata-manager/metadata-manager.page.component.ts, src/app/pages/metadata-manager/metadata-manager.page.component.spec.ts
-- [ ] A5: Give the tab chips, the settings tabs, the diagnosis tabs, the stage row and the dish row's field strip the same container — the default frame, the removed fighting rules — src/app/core/components/tab-chips/**, src/app/pages/settings/settings.page.html, src/app/pages/settings/settings.page.scss, src/app/pages/diagnosis/components/diagnosis-workspace/**, src/app/pages/menu-intelligence/components/event-stage-bar/**, src/app/pages/menu-intelligence/components/menu-dish-row/**
-- [ ] A6: Show the container in the dev catalog and check the two screens a script can check — the catalog entry and its count spec, the two ui specs — src/app/pages/dev-catalog/**, e2e/ui/743-1.spec.ts, e2e/ui/743-2.spec.ts
-- [ ] A7: Record the container where builders look and name it in the house rules — the sideways-row rule, the new registry family, the inventory, the proposed default's how line, the design system rows — docs/agent/house-style.md, docs/brain/component-families.md, docs/brain/inventory.md, _shared/product-defaults.md, .interface-design/system.md
-- [ ] A8: Run every check of this plan and hand Dandan the five cards — outputs under Execution Notes — this plan file
+- [x] A1: Give the sideways scroller a visible container and edge arrows that look like the scroll area turned sideways — the frame input, the new arrows, the removed mask and offset variables — src/app/shared/scroll-rail/**
+- [x] A2: Let the row be grabbed and dragged with the mouse without pressing what is under it, and make the arrows signs only on a phone — the drag tracking, the swallowed click, the phone signal, the instant centring option, the spec cases — src/app/shared/scroll-rail/**
+- [x] A3: Put the top bar's navigation in the container so it stops scrolling on its own with a scrollbar — the rail in the header, the removed box and overflow rules, the active link kept in view — src/app/core/components/header/**
+- [x] A4: Fix the metadata row so its arrows sit inside the container and a chip press scrolls once — the removed offset and pill rules, the jumpTo order — src/app/pages/metadata-manager/metadata-manager.page.component.html, src/app/pages/metadata-manager/metadata-manager.page.component.scss, src/app/pages/metadata-manager/metadata-manager.page.component.ts, src/app/pages/metadata-manager/metadata-manager.page.component.spec.ts
+- [x] A5: Give the tab chips, the settings tabs, the diagnosis tabs, the stage row and the dish row's field strip the same container — the default frame, the removed fighting rules — src/app/core/components/tab-chips/**, src/app/pages/settings/settings.page.html, src/app/pages/settings/settings.page.scss, src/app/pages/diagnosis/components/diagnosis-workspace/**, src/app/pages/menu-intelligence/components/event-stage-bar/**, src/app/pages/menu-intelligence/components/menu-dish-row/**
+- [x] A6: Show the container in the dev catalog and check the two screens a script can check — the catalog entry and its count spec, the two ui specs — src/app/pages/dev-catalog/**, e2e/ui/743-1.spec.ts, e2e/ui/743-2.spec.ts
+- [x] A7: Record the container where builders look and name it in the house rules — the sideways-row rule, the new registry family, the inventory, the proposed default's how line, the design system rows — docs/agent/house-style.md, docs/brain/component-families.md, docs/brain/inventory.md, _shared/product-defaults.md, .interface-design/system.md
+- [x] A8: Run every check of this plan and hand Dandan the five cards — outputs under Execution Notes — this plan file
 
 ## Technical Considerations
 - Dependencies: `ScrollRailComponent` and its six users; `HeaderComponent` (shown on every signed-in page at
@@ -276,3 +280,8 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
 - Q: Does every row get the visible container? A: yes — "a container, not just an invisible container", the top bar and the metadata row included (Dandan, 2026-11-25); the dish row's field strip in the menu builder too, although it is not chips (Dandan, 2026-11-25).
 
 ## Execution Notes
+- Evidence (after the last commit): `pnpm run build` → exit 0; `pnpm run lint` → exit 0 (0 errors); `pnpm run test:ci` → exit 0 (2794 SUCCESS); kit-checks (run base and origin/main) → ok; reuse-lint --check-registry, breadcrumbs-check, kit-manifest-check, scope-check --arch/--reuse/--diff, override-check, plan-ledger-check, lint:icons, lint:no-native-select → exit 0; log-query → SKIP: no database configured.
+- `needs:` line count in docs/agent/house-style.md: 3 on origin/orch/house-style-ui, 2 now; the sideways-row rule has no `- later check:` line.
+- Step 0: drift commit 711cd215 (plan 740, docs/rules only) → ok.
+- Reuse Check extended: the host state classes `.has-frame`, `.is-dragging` and the page-local `.dc-rail-box` are declared (kit-checks asked); the registry family names them.
+- The two [ui] specs (e2e/ui/743-1.spec.ts, 743-2.spec.ts) are written, not run. The five [human] cards are for Dandan.

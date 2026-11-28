@@ -11,18 +11,19 @@ App-wide building blocks: layout components (header, footer, FAB, auth modal, us
 | `components/` | Header, footer, hero FAB, auth modal, user-msg | → see components/breadcrumbs.md |
 | `services/` | Data, state, modals, logging, export, backup | → see services/breadcrumbs.md |
 | `models/` | Domain types and interfaces | → see models/breadcrumbs.md |
-| `interceptors/` | HTTP auth header injection | authInterceptor |
+| `interceptors/` | HTTP auth header injection; the shared refusal toasts (data 429, 403 `no_permission`, plan 736: the 402 `AI_BUDGET_EXHAUSTED` with the contact email) | authInterceptor |
+| `utils/ai-error.util.ts` | AI refusals the screens read: the monthly cap and (plan 736) the user's own AI allowance — short inline key, toast text with the email | aiCapErrorKey, isAiBudgetExhausted, aiBudgetMessage, AI_BUDGET_CONTACT_EMAIL |
 | `guards/` | Route activation and pending changes | authGuard, pendingChangesGuard |
 | `guards/welcome.guard.ts` | Sends a signed-in user from `/welcome` to `/dashboard` | welcomeGuard |
 | `resolvers/` | Entity fetch for edit routes | productResolver, recipeResolver, equipmentResolver, venueResolver, supplierResolver |
 | `pipes/` | Translation and quantity formatting | TranslatePipe, FormatQuantityPipe |
 | `directives/` | Focus, scroll, arrow-key reorder, click-outside, textarea grow | SelectOnFocusDirective, FocusByRowDirective, ClickOutSideDirective, ScrollIndicatorsDirective, ReorderKeysDirective, TextareaAutoGrowDirective |
 | `validators/item.validators.ts` | Duplicate-name checks for forms | duplicateNameValidator, duplicateEntityNameValidator |
-| `engine/` | Pure quantity and cost engine for event lists (plan 433): raw/prep lines, dish and event cost, rounding helpers; its shared 04.1 test fixture lives in the testing folder | computeEventPlan, EventPlanService, chooseSupplier, roundPortions, formatQty, formatMoney, computePortions |
+| `engine/` | Pure quantity and cost engine for event lists (plan 433): raw/prep lines, dish and event cost, rounding helpers; its shared 04.1 test fixture lives in the testing folder | computeEventPlan, EventPlanService, chooseSupplier, roundPortions, formatQty, formatMoney, computePortions; engine/month-plan.ts is the monthly counterpart of C-PRICING (the event pricing engine): monthFigures, monthInputOf, breakEven, dishPrice, bandOf (plan 728) |
 | `utils/returning-visitor.util.ts` | `fv_returning` device mark: has someone signed in here before (set on sign-in, cleared on logout) | markReturningVisitor, clearReturningVisitor, isReturningVisitor |
-| `utils/breakpoints.ts` | The one breakpoint set for the browser code (plan 656): phone ≤767, tablet ≤1023, desktop ≥1024 | PHONE_MAX, TABLET_MAX, PHONE_QUERY, TABLET_DOWN_QUERY, DESKTOP_QUERY |
-| `styles/` | Sass partials component styles `@use` (plan 656): `styles/_breakpoints.scss`, the same four names as the top of `src/styles.scss` | $break-phone-max, $break-tablet-min, $break-tablet-max, $break-desktop-min |
-| `utils/` | Pure helpers: auth, export, lists, quantities | require-auth.util, auth-crypto, export.util, list-state.util, panel-preference.util, quantity-step.util, filter-starts-with.util, saving-state.util, unsaved-changes, event-stage-ui.util, logistics-summary.util (plan 521: client summary text, open items), product-name-match.util (plan 463: plural/spelling-forgiving product lookup) |
+| `utils/breakpoints.ts` | The one breakpoint set for the browser code (plan 656): phone ≤767, tablet ≤1023, desktop ≥1024; one narrow phone step ≤419 (plan 763) | PHONE_MAX, TABLET_MAX, PHONE_QUERY, TABLET_DOWN_QUERY, DESKTOP_QUERY, PHONE_NARROW_MAX, PHONE_NARROW_QUERY |
+| `styles/` | Sass partials component styles `@use` (plan 656): `styles/_breakpoints.scss`, the same names as the top of `src/styles.scss` | $break-phone-narrow-max, $break-phone-max, $break-tablet-min, $break-tablet-max, $break-desktop-min |
+| `utils/` | Pure helpers: auth, export, lists, quantities | require-auth.util, auth-crypto, export.util, list-state.util, panel-preference.util, quantity-step.util, filter-starts-with.util, saving-state.util, unsaved-changes, event-stage-ui.util, logistics-summary.util (plan 521: client summary text, open items), product-name-match.util (plan 463: plural/spelling-forgiving product lookup), month-key.util (plan 726: `YYYY-MM` current / shift / check / Hebrew label) |
 
 ## Architecture Context
 

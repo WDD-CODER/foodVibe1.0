@@ -60,7 +60,10 @@ describe('CounterComponent', () => {
     host.min = 1
     fixture.detectChanges()
     const minusBtn = fixture.nativeElement.querySelector('.ctrl-btn:first-of-type') as HTMLButtonElement
-    expect(minusBtn.disabled).toBeTrue()
+    expect(minusBtn.getAttribute('aria-disabled')).toBe('true')
+    minusBtn.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, cancelable: true, pointerType: 'touch' }))
+    fixture.detectChanges()
+    expect(host.captured).toBeUndefined()
   })
 
   it('should respect max and disable plus when value equals max', () => {
@@ -68,7 +71,48 @@ describe('CounterComponent', () => {
     host.max = 10
     fixture.detectChanges()
     const plusBtn = fixture.nativeElement.querySelector('.ctrl-btn:last-of-type') as HTMLButtonElement
-    expect(plusBtn.disabled).toBeTrue()
+    expect(plusBtn.getAttribute('aria-disabled')).toBe('true')
+    plusBtn.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, cancelable: true, pointerType: 'touch' }))
+    fixture.detectChanges()
+    expect(host.captured).toBeUndefined()
+  })
+
+  describe('a button at its limit says why (plan 747)', () => {
+    const tip = (): string | undefined => document.body.querySelector('.c-tooltip')?.textContent?.trim()
+
+    afterEach(() => document.body.querySelectorAll('.c-tooltip').forEach((n) => n.remove()))
+
+    it('minus at the minimum is not natively disabled and a click shows why_at_min', () => {
+      host.value = 1
+      host.min = 1
+      fixture.detectChanges()
+      const minusBtn = fixture.nativeElement.querySelector('.ctrl-btn:first-of-type') as HTMLButtonElement
+      expect(minusBtn.disabled).toBeFalse()
+      expect(minusBtn.classList).toContain('is-disabled')
+      minusBtn.click()
+      expect(tip()).toBe('why_at_min')
+      expect(host.captured).toBeUndefined()
+    })
+
+    it('plus at the maximum is not natively disabled and a click shows why_at_max', () => {
+      host.value = 10
+      host.max = 10
+      fixture.detectChanges()
+      const plusBtn = fixture.nativeElement.querySelector('.ctrl-btn:last-of-type') as HTMLButtonElement
+      expect(plusBtn.disabled).toBeFalse()
+      plusBtn.click()
+      expect(tip()).toBe('why_at_max')
+      expect(host.captured).toBeUndefined()
+    })
+
+    it('away from the limits neither button carries a reason', () => {
+      host.value = 5
+      host.min = 1
+      host.max = 10
+      fixture.detectChanges()
+      const buttons = fixture.nativeElement.querySelectorAll('.ctrl-btn') as NodeListOf<HTMLButtonElement>
+      buttons.forEach((b) => expect(b.hasAttribute('aria-disabled')).toBeFalse())
+    })
   })
 
   it('should clamp emitted value to min when user enters value below min', () => {
@@ -125,7 +169,7 @@ describe('CounterComponent', () => {
       fixture.detectChanges()
     }
     expect(host.value).toBe(0)
-    expect(btn('first').disabled).toBeTrue()
+    expect(btn('first').getAttribute('aria-disabled')).toBe('true')
     const count = host.emits.length
     tick(1000)
     expect(host.emits.length).toBe(count)

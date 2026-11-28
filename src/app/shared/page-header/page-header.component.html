@@ -19,7 +19,7 @@
     @if (count() !== null) {
       <!-- Re-created per value so the pop animation replays on every change (P1). -->
       @for (c of [count()]; track c) {
-        <span class="ph-count" [attr.aria-label]="countLabel()" [attr.title]="countLabel()">{{ c }}</span>
+        <span class="ph-count" [attr.aria-label]="countLabel()" [appTooltip]="countLabel()">{{ c }}</span>
       }
     }
   </div>

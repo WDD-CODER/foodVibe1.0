@@ -2,9 +2,10 @@ import { FrontDeskBadgeService } from '@services/front-desk-badge.service'
 import { ComponentFixture, TestBed } from '@angular/core/testing'
 import { HttpClientTestingModule } from '@angular/common/http/testing'
 import { HeaderComponent } from './header.component'
-import { provideRouter, RouterLinkWithHref } from '@angular/router'
+import { provideRouter, Router, RouterLinkWithHref, RouterOutlet } from '@angular/router'
 import { By } from '@angular/platform-browser'
-import { ArrowLeftRight, Bell, LucideAngularModule, Stethoscope } from 'lucide-angular'
+import { ArrowLeftRight, Bell, LucideAngularModule, Stethoscope, Utensils } from 'lucide-angular'
+import { PermissionService } from '@services/permission.service'
 import { TEST_LUCIDE_ICONS } from 'src/testing/test-lucide-icons'
 import { Component, signal } from '@angular/core'
 import { LoaderComponent } from 'src/app/shared/loader/loader.component'
@@ -16,9 +17,10 @@ import { UserMsgService } from '@services/user-msg.service'
 import type { ModuleKey } from '@schemas/modules-pure'
 import { ModuleService } from '@services/module.service'
 import { PHONE_QUERY } from '@utils/breakpoints'
+import { authGuard } from '../../guards/auth.guard'
 
 /** Plan 646: the header now holds the bell and the diagnosis entry. */
-const HEADER_ICONS = { ...TEST_LUCIDE_ICONS, Bell, Stethoscope }
+const HEADER_ICONS = { ...TEST_LUCIDE_ICONS, Bell, Stethoscope, Utensils }
 
 /** Plan 620: every module on by default; a case sets `modulesOn` to turn some off. */
 const ALL_MODULES: ModuleKey[] = ['events', 'event_logistics', 'frontdesk', 'ai_create']
@@ -27,7 +29,13 @@ const moduleStub = {
   provide: ModuleService,
   useValue: { has: (keys: ModuleKey | readonly ModuleKey[]) => [keys].flat().some((key) => modulesOn().includes(key)) }
 }
-beforeEach(() => modulesOn.set(ALL_MODULES))
+/** Plan 725: who has the owner's rights (the owner or an acting consultant); staff and guests do not. */
+const ownerRights = signal(false)
+const permissionStub = { provide: PermissionService, useValue: { isOwner_: ownerRights.asReadonly() } }
+beforeEach(() => {
+  modulesOn.set(ALL_MODULES)
+  ownerRights.set(false)
+})
 
 describe('HeaderComponent', () => {
   let component: HeaderComponent
@@ -38,6 +46,7 @@ describe('HeaderComponent', () => {
       imports: [HeaderComponent, HttpClientTestingModule, LucideAngularModule.pick(HEADER_ICONS)],
       providers: [
         moduleStub,
+        permissionStub,
         // מספקים נתיבים ריקים כדי לאפשר ל-RouterLink לעבוד בבדיקה
         provideRouter([
           { path: 'dashboard', redirectTo: '' },
@@ -126,6 +135,30 @@ describe('HeaderComponent', () => {
       modulesOn.set(ALL_MODULES)
       fixture.detectChanges()
       expect(diag().length).toBe(0)
+    })
+
+    it('shows «תפריט המסעדה» only to the owner of a business with dish_analysis, in the pills and the phone bar (plan 725)', () => {
+      const pills = () => fixture.nativeElement.querySelectorAll('.nav-pills a[href="/restaurant-menu"]').length
+      const bar = () => fixture.nativeElement.querySelectorAll('.bottom-nav a[href="/restaurant-menu"]').length
+      // module on, not an owner (staff or guest): hidden
+      modulesOn.set([...ALL_MODULES, 'dish_analysis'])
+      fixture.detectChanges()
+      expect(pills()).toBe(0)
+      expect(bar()).toBe(0)
+      // owner, module off: hidden
+      ownerRights.set(true)
+      modulesOn.set(ALL_MODULES)
+      fixture.detectChanges()
+      expect(pills()).toBe(0)
+      expect(bar()).toBe(0)
+      // owner, module on: shown in both
+      modulesOn.set([...ALL_MODULES, 'dish_analysis'])
+      fixture.detectChanges()
+      expect(pills()).toBe(1)
+      expect(bar()).toBe(1)
+      expect(fixture.nativeElement.querySelector('.bottom-nav a[href="/restaurant-menu"]').textContent).toContain(
+        'restaurant_menu'
+      )
     })
 
     it('shows the diagnosis entry in the phone bottom bar too (plan 651)', () => {
@@ -516,5 +549,95 @@ describe('HeaderComponent above the route-loading overlay (plan 645)', () => {
     expect(hit === avatar || avatar.contains(hit)).toBeTrue()
     ;(hit as HTMLElement).click()
     expect(logout).toHaveBeenCalledTimes(1)
+  })
+})
+
+@Component({ standalone: true, template: '' })
+class StubPageComponent {}
+
+/** The outlet is needed: the router runs a reused route's canDeactivate only for an activated outlet. */
+@Component({
+  standalone: true,
+  imports: [HeaderComponent, RouterOutlet],
+  template: '<app-header /><router-outlet />'
+})
+class ShellWithOutletComponent {}
+
+describe('HeaderComponent sign-out on a protected page (plan 750)', () => {
+  let fixture: ComponentFixture<ShellWithOutletComponent>
+  let router: Router
+  let allowLeave = true
+  const logout = jasmine.createSpy('logout')
+
+  beforeEach(async () => {
+    allowLeave = true
+    logout.calls.reset()
+    logout.and.returnValue(of(null))
+    await TestBed.configureTestingModule({
+      imports: [ShellWithOutletComponent, HttpClientTestingModule, LucideAngularModule.pick(HEADER_ICONS)],
+      providers: [
+        moduleStub,
+        permissionStub,
+        provideRouter([
+          {
+            path: 'dashboard',
+            component: StubPageComponent,
+            canActivate: [authGuard],
+            canDeactivate: [() => allowLeave],
+            runGuardsAndResolvers: 'paramsOrQueryParamsChange'
+          },
+          { path: 'inventory', component: StubPageComponent, canActivate: [authGuard] }
+        ]),
+        {
+          provide: UserService,
+          useValue: {
+            isLoggedIn: () => true,
+            user_: signal({ _id: 'u1', name: 'dana' }),
+            isPlatformAdmin_: signal(false),
+            isOwner_: signal(false),
+            acting_: signal(null),
+            homeBusinessId_: signal(null),
+            consumeAccessEndedNotice: () => false,
+            logout
+          }
+        }
+      ]
+    }).compileComponents()
+    router = TestBed.inject(Router)
+    fixture = TestBed.createComponent(ShellWithOutletComponent)
+    fixture.detectChanges()
+  })
+
+  /** Presses the name button and waits for the router and the handler to settle. */
+  const pressSignOut = async () => {
+    fixture.detectChanges()
+    ;(fixture.nativeElement as HTMLElement).querySelector<HTMLButtonElement>('.auth-username-btn')!.click()
+    await new Promise<void>((resolve) => setTimeout(resolve, 50))
+  }
+
+  it('signs out from the bare dashboard', async () => {
+    await router.navigateByUrl('/dashboard')
+    await pressSignOut()
+    expect(logout).toHaveBeenCalledTimes(1)
+  })
+
+  it('goes to the dashboard from another protected page, then signs out', async () => {
+    let urlAtLogout = ''
+    logout.and.callFake(() => {
+      urlAtLogout = router.url
+      return of(null)
+    })
+    await router.navigateByUrl('/inventory')
+    await pressSignOut()
+    expect(logout).toHaveBeenCalledTimes(1)
+    expect(urlAtLogout).toBe('/dashboard')
+  })
+
+  it('stays signed in when the dashboard tab refuses to be left', async () => {
+    await router.navigateByUrl('/dashboard?tab=metadata')
+    allowLeave = false
+    await pressSignOut()
+    expect(logout).not.toHaveBeenCalled()
+    expect(router.url).toBe('/dashboard?tab=metadata')
   })
 })

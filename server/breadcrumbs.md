@@ -6,8 +6,8 @@
 | `index.js` | Express app entry — middleware, route mounting, static file serving, error handler |
 | `db.js` | MongoDB connection via Mongoose; target chosen by `utils/db-target.js` (local by default; Atlas only via git-ignored `server/.env.live` or Render's env) |
 | `models/entity.model.js` | Generic entity schema: `_id` (string), `entityType`, `data` (Mixed) |
-| `routes/generic.js` | Full CRUD at `/api/v1/data/:type` — mirrors Angular's `StorageService` |
-| `routes/business.js` | The caller's business at `/api/v1/business` (plan 425; owner-only sub-routes arrive with plans 427-431; plan 579: `PUT /logistics-hidden`, the business's hidden logistics questions with their dates) |
+| `routes/generic.js` | Full CRUD at `/api/v1/data/:type` — mirrors Angular's `StorageService`; plan 724: dish month (`MONTH_CLOSED`, `MONTH_EXISTS`) and alias (`nameKey`, `ALIAS_EXISTS`) rules |
+| `routes/business.js` | The caller's business at `/api/v1/business` (plan 425; owner-only sub-routes arrive with plans 427-431; plan 579: `PUT /logistics-hidden`, the business's hidden logistics questions with their dates; plan 723: the business settings hold the VAT rate `vatRatePct` and the dealer type `dealerType`, kept when an older form saves without them) |
 | `routes/auth.js` | Login, signup, refresh, logout, accept-terms at `/api/v1/auth` — JWT + rate limiting; signup needs the current terms version (plan 584); plan 631: `signAccess` signs the active business from `resolveSession`, `POST /switch-business` |
 | `routes/clients.js` | Client actions at `/api/v1/clients` (plan 551): merge a duplicate into another client, set or clear do-not-contact; the only writer of `mergedInto` and `doNotContact` |
 | `routes/knowledge.js` | `PUT /api/v1/knowledge/approve` (plan 554): bulk-approve the caller business's draft knowledge items in one `updateMany` |
@@ -19,7 +19,8 @@
 | `routes/notifications.js` | In-app alerts at `/api/v1/notifications` (plan 646): `GET ?limit` → `{ rows, unread }`, `POST /:id/read`, `POST /read-all`; scoped to the caller and to a live grant for other businesses |
 | `routes/geocode.js` | Venue address from a saved spot at `/api/v1/geocode/reverse?lat&lng` → `{ address }` (plan 373): calls OpenStreetMap Nominatim from the server (one call per second, 20 per user per minute, no CSP change); only the two numbers leave our server; a failure answers `{ address: null }` |
 | `services/notifications.js` | `createPriceChangeAlerts(db, business, rows)` (plan 646): one alert per recipient (owner + live consultants) per row at or beyond `priceRiseAlertPct`; called by the invoice apply; a failure logs `notifications.write_failed` and never fails the apply; keeps 200 per user |
-| `routes/diag.js` | Diagnosis record at `/api/v1/diag` (plan 633); the only writer of `diagnoses`; gate reads the home business |
+| `routes/diag.js` | Diagnosis record at `/api/v1/diag` (plan 633); the only writer of `diagnoses`; gate reads the home business; a new diagnosis takes the business's VAT rate (plan 723) |
+| `routes/month-plans.js` | Monthly plan at `/api/v1/month-plans` (plan 727): list, get, open (`POST`, targets and VAT copied from the business settings) and change (`PUT`) a month; plan 729: also writes the groups `fixed`, `labour`, `purchases` (seeded on open, replaced as sent, logs carry the line count only); the only reader and writer of the server-only `monthPlans` (unique index `month_plans_business_month`); module `monthly_plan`, `editMoney` (owner and consultant, never staff) |
 | `routes/ai/diag.js` | `POST /api/v1/ai/diag/menu`: a pasted menu → names and prices (plan 633) |
 | `routes/bookings.js` | Booking status moves at `/api/v1/bookings` (plan 549); the only writer of `bookings` |
 | `routes/ai.js` | Gemini AI proxy at `/api/v1/ai` — generate + parse-text; plan 600: recipe examples are saved `pending` and confirmed on recipe save (`POST /shots/confirm`), prompts add the shared pool after the business's own |
@@ -38,6 +39,7 @@
 | `utils/request-create.js` | `createRequest`, `runQualify` (plan 555): the one request-creation path of the manual route and the public route |
 | `utils/redact-url.js` | `redactUrl` (plan 555): masks a guest's token in a logged URL; used by the pino-http `req` serializer |
 | `scripts/set-front-desk-status.js` | `--slug --status [--target]` (plan 555): sets one profile's status until plan 557's admin switch; prints `FRONT_DESK_STATUS: <slug> <old> → <new>` |
+| `scripts/set-platform-admin.js` | `--target --email [--off] [--confirm-host] [--db] [--write]` (plan 737): the only way to set or clear one user's `isPlatformAdmin`; dry run by default; prints `PLATFORM_ADMIN: <userId> <from> → <to>` |
 | `services/ai-usage.js` | The AI ledger (plan 566): `recordAiUsage` (one `aiUsage` row per Gemini call, fire-and-forget), `estimateCostUsd`, `aggregateAiUsage`, `trackAiOutcome`, `markAiUsageRejected` (plan 580: marks refused answers) |
 | `services/file-store.js` | The private file store (plan 619, C-FILES): `putPrivateFile`, `keepStoredFile`, `signedFileUrl`, `deleteStoredFile`, `readUploadedFile`, `setFileStoreForTests`, `createMemoryFileStore`; only writer of `storedFiles` |
 | `services/cloudinary-requests.js` | Pure request builders for the file store (plan 619): `signParams`, `uploadRequest`, `downloadUrl`, `destroyRequest` |
@@ -47,6 +49,7 @@
 | `routes/admin.js` (platform history) | `GET /api/v1/admin/businesses/:id/platform-history` → `{ rows }` newest first (plan 638); `PUT …/platform` stores `changes` (`platformChangesOf`) |
 | `utils/learning-stats.js` | `weekStart`, `buildLearningStats` (plan 630): pure grouping of AI drafts into flow x model x Sunday-week with the average closeness |
 | `services/ai-cap.js` | The monthly AI cap per business (plan 617, C-AICAP): `capState` (cap vs this Israel month's ledger tokens, 60 s cache), `monthTokensByBusiness`, `clearCapCache`; read by `callGemini` and the platform table |
+| `services/ai-allowance.js` | Each user's lifetime AI allowance (plan 736): `reserveAiCall` (one atomic `findOneAndUpdate` on `users`), `refundAiCall`, `allowanceOf` (missing = 100 / 0), `trackAiAllowance` (AI router middleware: one holder per request, refund on a 4xx/5xx); reserved by `callGemini`, read by `/ai/usage` and the admin user list |
 | `services/ai-drafts.js` | The draft trail (plan 618, C-AIDRAFT): `saveAiDraft` (stores what the model suggested, never throws, keeps the newest 500 per business and feature) and `confirmAiDraft` (what was saved and the closeness score); the only writer of `aiDrafts`, returns only ids |
 | `utils/ai-learning.js` | `mayLearnFrom(business)` (plan 618, C-LEARN): the one consent test before the platform copies or lists a business's AI material — true unless `aiPrivate` |
 | `constants/ai-features.js` | `AI_FEATURES` closed list of AI feature keys, `isAiFeature` (plan 566) |

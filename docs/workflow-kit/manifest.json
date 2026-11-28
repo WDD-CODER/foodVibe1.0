@@ -4178,6 +4178,17 @@
       "notes": "Plan 656 (default one-breakpoint-set): the three copies of the breakpoint names stay equal; no typed width in any @media or .ts file."
     },
     {
+      "path": "scripts/test/disabled-why-scss.test.mjs",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [
+        "src/styles.scss",
+        "src/app/shared/tooltip/disabled-why.directive.ts"
+      ],
+      "notes": "Plan 758 (default disabled-explains-why): a stylesheet that styles a control carrying appDisabledWhy gives the blocked state the same look as :disabled."
+    },
+    {
       "path": "scripts/test/plan-close.test.mjs",
       "tier": "project",
       "action": "stay",
@@ -4972,6 +4983,14 @@
       "params": [],
       "refs": [],
       "notes": "FoodVibe ADR 0034 (one menu template in shared/schemas/menu-design for browser and server; one menu engine boundary for outside callers; plan 764)."
+    },
+    {
+      "path": "docs/brain/decisions/0035-salary-lines-owner-only.md",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "FoodVibe ADR 0035 (per-employee pay lines are the owner's alone; everyone else gets server-computed totals; INV-1 amended; plan 722)."
     },
     {
       "path": "scripts/decision-log.mjs",

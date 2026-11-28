@@ -1,4 +1,12 @@
-import { DESKTOP_QUERY, PHONE_MAX, PHONE_QUERY, TABLET_DOWN_QUERY, TABLET_MAX } from './breakpoints'
+import {
+  DESKTOP_QUERY,
+  PHONE_MAX,
+  PHONE_NARROW_MAX,
+  PHONE_NARROW_QUERY,
+  PHONE_QUERY,
+  TABLET_DOWN_QUERY,
+  TABLET_MAX
+} from './breakpoints'
 
 /** A breakpoint from src/styles.scss, which the test build loads: it exposes its Sass names as `--bp-*` on :root. */
 function stylesPx(name: string): number {
@@ -27,5 +35,12 @@ describe('breakpoints (plan 656)', () => {
     expect(PHONE_QUERY).toBe(`(max-width: ${phoneMax}px)`)
     expect(TABLET_DOWN_QUERY).toBe(`(max-width: ${tabletMax}px)`)
     expect(DESKTOP_QUERY).toBe(`(min-width: ${desktopMin}px)`)
+  })
+
+  it('holds the narrow phone step, equal to src/styles.scss (plan 763)', () => {
+    const narrowMax = stylesPx('phone-narrow-max')
+    expect(narrowMax).toBe(419)
+    expect(PHONE_NARROW_MAX).toBe(narrowMax)
+    expect(PHONE_NARROW_QUERY).toBe(`(max-width: ${narrowMax}px)`)
   })
 })

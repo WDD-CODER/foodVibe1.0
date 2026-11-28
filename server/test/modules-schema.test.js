@@ -34,9 +34,25 @@ describe('modulesOf / hasModule / MODULE_OF_TYPE', () => {
     expect(S.hasModule({ modules: ['consultant_diag'] }, 'consultant_diag')).toBe(true)
   })
 
-  it('MODULE_OF_TYPE has exactly the eight types of the C-MODULES table', () => {
-    expect(Object.keys(S.MODULE_OF_TYPE).sort()).toEqual(['bookings', 'clients', 'frontDeskProfiles', 'knowledgeItems', 'menuDesigns', 'menuEvents', 'requests', 'venues'])
+  it('MODULE_OF_TYPE has exactly the eleven types of the C-MODULES table', () => {
+    expect(Object.keys(S.MODULE_OF_TYPE).sort()).toEqual(['bookings', 'clients', 'dishSalesAliases', 'dishSalesMonths', 'frontDeskProfiles', 'knowledgeItems', 'menuDesigns', 'menuDishes', 'menuEvents', 'requests', 'venues'])
     expect(S.MODULE_OF_TYPE.clients).toEqual(['events', 'frontdesk'])
+  })
+
+  it('plan 724: dish_analysis is the sixth key, not a default, and gates the three dish types', () => {
+    expect(S.MODULE_KEYS.slice(0, 6)).toEqual(['events', 'event_logistics', 'frontdesk', 'ai_create', 'consultant_diag', 'dish_analysis'])
+    expect(S.DEFAULT_MODULES).not.toContain('dish_analysis')
+    for (const t of ['menuDishes', 'dishSalesMonths', 'dishSalesAliases']) expect(S.MODULE_OF_TYPE[t]).toEqual(['dish_analysis'])
+    expect(S.modulesFieldSchema.safeParse(S.MODULE_KEYS).success).toBe(true)
+  })
+
+  it('plan 727: monthly_plan is the seventh key, off by default, gates no generic type and the max follows the key count', () => {
+    expect(S.MODULE_KEYS[6]).toBe('monthly_plan')
+    expect(S.MODULE_KEYS).toHaveLength(8)
+    expect(S.DEFAULT_MODULES).not.toContain('monthly_plan')
+    expect(S.MODULE_OF_TYPE.monthPlans).toBeUndefined()
+    expect(S.modulesFieldSchema.safeParse(S.MODULE_KEYS).success).toBe(true)
+    expect(S.modulesFieldSchema.safeParse([...S.MODULE_KEYS, 'events']).success).toBe(false)
   })
 
   it('menu_design is a module, not a default one, and gates menuDesigns (plan 764)', () => {
@@ -68,7 +84,7 @@ describe('businessSchema new optional fields', () => {
   })
 
   it.each([
-    ['a seventh module', { modules: ['events', 'event_logistics', 'frontdesk', 'ai_create', 'consultant_diag', 'menu_design', 'events'] }],
+    ['a ninth module', { modules: ['events', 'event_logistics', 'frontdesk', 'ai_create', 'consultant_diag', 'dish_analysis', 'monthly_plan', 'menu_design', 'events'] }],
     ['a repeated module', { modules: ['events', 'events'] }],
     ['a 51st history row', { platformHistory: Array.from({ length: 51 }, (_, i) => row(i)) }],
     ['a cap of -1', { aiMonthlyTokenCap: -1 }],
@@ -84,6 +100,16 @@ describe('businessSchema new optional fields', () => {
     expect(S.businessSettingsSchema.safeParse({ ...s, priceRiseAlertPct: 0 }).success).toBe(false)
     expect(S.businessSettingsSchema.safeParse({ ...s, priceRiseAlertPct: 101 }).success).toBe(false)
     expect(S.BUSINESS_SETTINGS_DEFAULTS.priceRiseAlertPct).toBe(5)
+  })
+
+  it('settings: vatRatePct 0, 18 and 100 are valid, 101 and -1 refused; dealerType is murshe or patur; defaults 18 and murshe (plan 723)', () => {
+    const s = { profitTargetPct: 25, safetyMarginPct: 10, overrunThresholdPct: 10 }
+    for (const v of [0, 18, 100]) expect(S.businessSettingsSchema.safeParse({ ...s, vatRatePct: v }).success).toBe(true)
+    for (const v of [101, -1]) expect(S.businessSettingsSchema.safeParse({ ...s, vatRatePct: v }).success).toBe(false)
+    expect(S.businessSettingsSchema.safeParse({ ...s, dealerType: 'patur' }).success).toBe(true)
+    expect(S.businessSettingsSchema.safeParse({ ...s, dealerType: 'other' }).success).toBe(false)
+    expect(S.BUSINESS_SETTINGS_DEFAULTS.vatRatePct).toBe(18)
+    expect(S.BUSINESS_SETTINGS_DEFAULTS.dealerType).toBe('murshe')
   })
 })
 

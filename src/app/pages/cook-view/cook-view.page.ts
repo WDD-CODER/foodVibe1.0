@@ -27,6 +27,7 @@ import { ExportPreviewComponent } from '../../shared/export-preview/export-previ
 import { ApproveStampComponent } from 'src/app/shared/approve-stamp/approve-stamp.component'
 import { FormsModule } from '@angular/forms'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
+import { DisabledWhyDirective } from 'src/app/shared/tooltip/disabled-why.directive'
 import { RecipeWorkflowComponent } from '@pages/recipe-builder/components/recipe-workflow/recipe-workflow.component'
 import { LoaderComponent } from 'src/app/shared/loader/loader.component'
 import { CustomSelectComponent } from 'src/app/shared/custom-select/custom-select.component'
@@ -65,6 +66,7 @@ const MULTIPLIER_CHIPS = [
     RouterLink,
     LucideAngularModule,
     TranslatePipe,
+    DisabledWhyDirective,
     RecipeWorkflowComponent,
     LoaderComponent,
     CustomSelectComponent,

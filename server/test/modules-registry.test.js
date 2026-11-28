@@ -113,6 +113,7 @@ describe('indexes', () => {
     expect(await names('invoices')).toContain('invoices_business_created')
     expect(await names('diagnoses')).toContain('diagnoses_business_created')
     expect(await names('stockCounts')).toContain('stock_counts_business_status_counted')
+    expect(await names('monthPlans')).toContain('month_plans_business_month')
   })
 
   it('own aliases with the same keys collide; shared rows differing in masterProductId do not; own and shared do not', async () => {

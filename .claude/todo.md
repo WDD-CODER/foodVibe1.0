@@ -708,20 +708,20 @@ Every batch's plans depend only on plans in earlier batches, so the batches are 
 - [ ] D6: Run every automatic check and paste the outputs under Execution Notes — plans/760-assistant-admin-edits-engine-numbers.plan.md
 
 ### Plan 761 — The all-users AI budget bar shows only to the platform admin
-- [ ] E1: Write the spec for admin and non-admin bars — src/app/shared/ai-recipe-modal/ai-recipe-modal.component.spec.ts
-- [ ] E2: Show the all-users bar only to the platform admin — src/app/shared/ai-recipe-modal/ai-recipe-modal.component.html
-- [ ] E3: Run every automatic check and paste the outputs under Execution Notes — plans/761-ai-daily-budget-bar-admin-only.plan.md
+- [x] E1: Write the spec for admin and non-admin bars — src/app/shared/ai-recipe-modal/ai-recipe-modal.component.spec.ts
+- [x] E2: Show the all-users bar only to the platform admin — src/app/shared/ai-recipe-modal/ai-recipe-modal.component.html
+- [x] E3: Run every automatic check and paste the outputs under Execution Notes — plans/761-ai-daily-budget-bar-admin-only.plan.md
 
 ### Plan 762 — A clearer "more" sign, the stock count's name above its controls on phones, tooltips that tap-and-go
-- [ ] F1: Tooltip opens on tap only on phones and closes on any tap or scroll; hover-only elsewhere — src/app/shared/tooltip/tooltip.directive.ts
-- [ ] F2: Make the inside "more" sign clearly visible — src/app/shared/scroll-rail/scroll-rail.component.scss
-- [ ] F3: Stock count rows: name container above a controls container on phones — src/app/pages/inventory/components/stock-count/stock-count.component.html
-- [ ] F4: Run every automatic check and paste the outputs under Execution Notes — plans/762-house-style-grading-round-three.plan.md
+- [x] F1: Tooltip opens on tap only on phones and closes on any tap or scroll; hover-only elsewhere — src/app/shared/tooltip/tooltip.directive.ts
+- [x] F2: Make the inside "more" sign clearly visible — src/app/shared/scroll-rail/scroll-rail.component.scss
+- [x] F3: Stock count rows: name container above a controls container on phones — src/app/pages/inventory/components/stock-count/stock-count.component.html
+- [x] F4: Run every automatic check and paste the outputs under Execution Notes — plans/762-house-style-grading-round-three.plan.md
 
 ### Plan 763 — The stock count's two-line rows only on narrow phones; the leaf's nutrition box always in the same place
-- [ ] G1: Add the narrow-phone breakpoint and move the stock count's two-line rule to it — src/app/pages/inventory/components/stock-count/stock-count.component.scss
-- [ ] G2: The leaf's box opens in the same place every time, like the triangle's — src/app/shared/nutrition-badge/nutrition-badge.component.ts
-- [ ] G3: Run every automatic check and paste the outputs under Execution Notes — plans/763-stock-count-narrow-breakpoint-and-leaf-box-placement.plan.md
+- [x] G1: Add the narrow-phone breakpoint and move the stock count's two-line rule to it — src/app/pages/inventory/components/stock-count/stock-count.component.scss
+- [x] G2: The leaf's box opens in the same place every time, like the triangle's — src/app/shared/nutrition-badge/nutrition-badge.component.ts
+- [x] G3: Run every automatic check and paste the outputs under Execution Notes — plans/763-stock-count-narrow-breakpoint-and-leaf-box-placement.plan.md
 
 ### Plan 766 — AI in the designer: three variants from a picture, link or description, then refine in words
 - [ ] A1: Describe what the browser may send for a style reference or a refine request — the two request schemas and the image limits, exported from the schemas index; build:schemas — shared/schemas/ai-menu-design.schema.ts, shared/schemas/index.ts

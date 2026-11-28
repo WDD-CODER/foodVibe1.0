@@ -148,7 +148,7 @@
               type="button"
               class="qty-btn minus"
               tabindex="-1"
-              [disabled]="(group.get('amount_net')?.value ?? 0) <= 0"
+              [appDisabledWhy]="(group.get('amount_net')?.value ?? 0) <= 0 ? ('why_at_min' | translatePipe) : null"
               appStepHold
               (stepHold)="decrementAmount(group, $index, $event)"
               [stepHoldStop]="(group.get('amount_net')?.value ?? 0) <= 0"
@@ -197,6 +197,7 @@
               [product]="getProductForGroup(group)"
               [value]="group.get('supplierId')?.value ?? null"
               [canEdit]="canPickSupplier_()"
+              [disabledWhy]="canPickSupplier_() ? null : ('money_locked_hint' | translatePipe)"
               (picked)="onSupplierPicked(group, $event)"
             />
           }

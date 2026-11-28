@@ -44,12 +44,16 @@
     border-radius: var(--radius-sm);
     cursor: pointer;
 
-    &:hover:not(:disabled) {
+    &:hover:not(:disabled):not([aria-disabled='true']) {
       background: var(--bg-hover);
     }
 
     &:disabled {
       cursor: default;
+    }
+
+    &[aria-disabled='true'] {
+      cursor: not-allowed;
     }
   }
 

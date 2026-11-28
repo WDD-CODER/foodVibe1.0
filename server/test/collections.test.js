@@ -47,6 +47,21 @@ describe('server/constants/collections.js', () => {
     expect(ROUTER_WRITE_TYPES).toEqual(['requests', 'bookings', 'invoices', 'diagnoses', 'stockCounts']);
   });
 
+  it('plan 724: the three dish analysis types are plain userData, not cloneable, backed up, written through the generic API', () => {
+    for (const name of ['menuDishes', 'dishSalesMonths', 'dishSalesAliases']) {
+      expect(COLLECTIONS.find(c => c.name === name)).toEqual({ name, userData: true, cloneable: false, backup: true, searchable: false, softDelete: false });
+      expect(ALL_USER_ENTITY_TYPES).toContain(name);
+      expect(ROUTER_WRITE_TYPES).not.toContain(name);
+    }
+  });
+
+  it('plan 727: monthPlans is server-only money data: no generic API, no clone, no backup', () => {
+    expect(COLLECTIONS.find(c => c.name === 'monthPlans')).toEqual({ name: 'monthPlans', userData: false, cloneable: false, backup: false, searchable: false, softDelete: false });
+    expect(ALL_USER_ENTITY_TYPES).not.toContain('monthPlans');
+    expect(CLONEABLE_TYPES).not.toContain('monthPlans');
+    expect(BACKUP_ENTITY_TYPES).not.toContain('monthPlans');
+  });
+
   it('suppliers precedes products in CLONEABLE_TYPES (supplierIdMap ordering)', () => {
     expect(CLONEABLE_TYPES.indexOf('suppliers')).toBeLessThan(CLONEABLE_TYPES.indexOf('products'));
   });

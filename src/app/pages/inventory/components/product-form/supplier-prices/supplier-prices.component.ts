@@ -4,6 +4,7 @@ import { SelectOnFocusDirective } from '@directives/select-on-focus.directive'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
 import { PermissionService } from '@services/permission.service'
 import { FormFieldComponent } from 'src/app/shared/form-field/form-field.component'
+import { DisabledWhyDirective } from 'src/app/shared/tooltip/disabled-why.directive'
 import { fillSupplierPrices, type SupplierPrices } from './supplier-prices.util'
 
 /**
@@ -13,7 +14,7 @@ import { fillSupplierPrices, type SupplierPrices } from './supplier-prices.util'
 @Component({
   selector: 'app-supplier-prices',
   standalone: true,
-  imports: [NumberBoxDirective, SelectOnFocusDirective, TranslatePipe, FormFieldComponent],
+  imports: [NumberBoxDirective, SelectOnFocusDirective, TranslatePipe, FormFieldComponent, DisabledWhyDirective],
   templateUrl: './supplier-prices.component.html',
   styleUrl: './supplier-prices.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -28,14 +29,16 @@ export class SupplierPricesComponent {
   /** The product's existing price: where the first row starts. */
   readonly seed = input(0)
   readonly baseUnit = input('')
-  /** The whole form is read-only. */
-  readonly disabled = input(false)
+  /** The whole form is read-only (staff on a product another member created). */
+  readonly viewOnly = input(false)
   readonly pricesChange = output<SupplierPrices>()
 
-  /** Staff: prices are the owner's job. */
-  protected readonly locked_ = computed(
-    () => this.disabled() || (this.permission.isStaff_() && !this.permission.can('editMoney', { type: 'products' }))
-  )
+  /** Why a price cannot be typed (a dictionary key), null when it can. Staff: prices are the owner's job. */
+  protected readonly lockWhy_ = computed<string | null>(() => {
+    if (this.viewOnly()) return 'view_only_not_yours'
+    const moneyLocked = this.permission.isStaff_() && !this.permission.can('editMoney', { type: 'products' })
+    return moneyLocked ? 'prices_locked_owner_only' : null
+  })
 
   constructor() {
     // Rows follow the supplier chips: a new supplier gets a row, a removed one loses it.
@@ -53,6 +56,7 @@ export class SupplierPricesComponent {
   }
 
   protected setPrice_(id: string, event: Event): void {
+    if (this.lockWhy_()) return
     const raw = (event.target as HTMLInputElement).value
     const value = raw === '' ? null : Number(raw)
     this.pricesChange.emit({

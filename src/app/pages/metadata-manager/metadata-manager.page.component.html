@@ -90,8 +90,7 @@
         type="button"
         class="c-btn-primary"
         (click)="onAddMenuType()"
-        [disabled]="!isLoggedIn()"
-        [attr.title]="!isLoggedIn() ? ('sign_in_to_use' | translatePipe) : null"
+        [appDisabledWhy]="!isLoggedIn() ? ('sign_in_to_use' | translatePipe) : null"
       >
         {{ 'metadata_add_menu_type' | translatePipe }}
       </button>
@@ -132,7 +131,13 @@
                       <input
                         type="checkbox"
                         [checked]="def.fields.includes(f.key)"
-                        [disabled]="!isLoggedIn() || !canEditTerm('menuType', def.key)"
+                        [appDisabledWhy]="
+                          !isLoggedIn()
+                            ? ('sign_in_to_use' | translatePipe)
+                            : !canEditTerm('menuType', def.key)
+                              ? ('taxonomy_shared_admin_only' | translatePipe)
+                              : null
+                        "
                         (change)="onToggleMenuTypeField(def.key, f.key)"
                       />
                       <span>{{ f.labelKey | translatePipe }}</span>

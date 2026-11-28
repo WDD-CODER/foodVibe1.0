@@ -18,10 +18,12 @@ import {
   getGeminiUsage,
   geminiModelAvailability,
   geminiUsageStatus,
-  geminiBudgetUsedPercent
+  geminiBudgetUsedPercent,
+  aiCallsLeftLine
 } from '../../core/utils/gemini-usage.util'
 import type { AiProductDraft, AiProductPatch } from '@models/ai-product-draft.model'
 import { ModalShellComponent } from '../modal-shell/modal-shell.component'
+import { DisabledWhyDirective } from '../tooltip/disabled-why.directive'
 import { CustomSelectComponent } from '../custom-select/custom-select.component'
 import { SelectOnFocusDirective } from '@directives/select-on-focus.directive'
 import { NumberBoxDirective } from '@directives/number-box.directive'
@@ -55,7 +57,8 @@ const CANONICAL_UNITS = [
     TranslatePipe,
     LoaderComponent,
     ModalShellComponent,
-    SelectOnFocusDirective
+    SelectOnFocusDirective,
+    DisabledWhyDirective
   ],
   templateUrl: './ai-product-modal.component.html',
   styleUrl: './ai-product-modal.component.scss',
@@ -102,6 +105,8 @@ export class AiProductModalComponent implements OnInit {
     const offer = this.gemini_.modelSwitch()
     return offer ? this.translation_.translate('ai_model_switch_to').replace('{model}', offer.to) : ''
   })
+  /** Plan 736: «נשארו לך X מתוך Y קריאות AI» (or the unlimited line) under the daily bar; '' when signed out. */
+  protected readonly callsLeftLine_ = computed(() => aiCallsLeftLine(this.geminiUsage_(), this.translation_))
   /** "נותרו X" — calls left today across the model chain (shared by all users). */
   protected readonly budgetLeftLabel_ = computed(() =>
     this.translation_.translate('ai_budget_left').replace('{n}', String(this.geminiUsage_().remaining))
@@ -119,6 +124,11 @@ export class AiProductModalComponent implements OnInit {
   protected readonly canGenerate_ = computed(() =>
     this.inputMode_() === 'image' ? !!this.imageFile_() : !!this.prompt_().trim()
   )
+  /** Why the create button cannot be used (a translation key), or null when it can. */
+  protected readonly generateWhy_ = computed<string | null>(() => {
+    if (this.canGenerate_()) return null
+    return this.inputMode_() === 'image' ? 'why_ai_photo_first' : 'why_write_first'
+  })
 
   protected readonly diffEntries_ = computed(() => {
     const patch = this.patch_()

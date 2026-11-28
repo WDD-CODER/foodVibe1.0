@@ -31,6 +31,9 @@ Singleton services for data, state, modals, HTTP concerns, logging, export, and 
 | `menu-design-data.service.ts` | Menu designs CRUD (on BaseEntityDataService; loads on `ensureLoaded()` only, plan 764); plan 765: duplicate, the default design, a remembered load failure and the route resolver | MenuDesignDataService, menuDesignsEnsureLoadedResolver |
 | `access.service.ts` | The businesses the user may enter, and the consultant grants of a business: load, create, remove (plan 632; `canSwitch_` drives the header switcher) | AccessService |
 | `client-data.service.ts` | Clients CRUD (on BaseEntityDataService; owner writes, staff read name + phone) | ClientDataService |
+| `menu-dish-data.service.ts` | Standing-menu dishes (`menuDishes`) load / add / update; leaving the menu is `active: false` (plan 725) | MenuDishDataService |
+| `menu-dish-cost.service.ts` | One cost rule of a menu dish: recipe, bought product, typed cost or units only; net price; what is left per dish (plan 725) | MenuDishCostService |
+| `dish-sales-month-data.service.ts` | Typed monthly dish sales (`dishSalesMonths`): load, `monthOf(key)`, `saveMonth` (POST or PUT, one request, retries once on 409 MONTH_EXISTS; plan 726) | DishSalesMonthDataService |
 | `knowledge-item-data.service.ts` | Knowledge items CRUD plus `importDrafts` (AI import) and `approve` (bulk), on BaseEntityDataService (plan 554) | KnowledgeItemDataService |
 | `front-desk-profile-data.service.ts` | Front desk profile CRUD, one per business (owner writes; createFromTemplate) | FrontDeskProfileDataService |
 | `menu-intelligence.service.ts` | Menu intelligence logic | MenuIntelligenceService |
@@ -71,7 +74,7 @@ Singleton services for data, state, modals, HTTP concerns, logging, export, and 
 | `gemini.service.ts` | Gemini AI calls (proxied via server/routes/ai.js) | GeminiService |
 | `product-name-matcher.service.ts` | Links a typed or pasted product name to an existing product: exact + plural/spelling variants in the browser, then one AI call for the rest (plan 463) | ProductNameMatcherService |
 | `gemini-shots.service.ts` | Gemini image/shot capture flow | GeminiShotsService |
-| `http-storage.adapter.ts` | HTTP-backed storage adapter | HttpStorageAdapter |
+| `http-storage.adapter.ts` | HTTP-backed storage adapter; its path map also names the month plan routes (plan 727; client in pages/monthly-plan/services) | HttpStorageAdapter |
 | `master-push.service.ts` | Push local entity to master/global | MasterPushService |
 | `menu-event-type.service.ts` | Menu event type registry | MenuEventTypeService |
 | `event-pipeline.service.ts` | Client of the events API routes (`API` in `http-storage.adapter`): stage moves and notes; writes the returned event into the store (plan 443) | EventPipelineService |
@@ -88,7 +91,7 @@ Singleton services for data, state, modals, HTTP concerns, logging, export, and 
 | `platform-admin.service.ts` | Cross-business counts for the platform admin; the server refuses everyone else (plan 448); plan 600: `getAiShots`, `promoteAiShot`, `removeSharedAiShot` | PlatformAdminService, BusinessRow |
 | `product-import.service.ts` | Supplier price-list import: cleaned rows from the server, then apply (plan 432) | ProductImportService, ImportRow, ApplyRow, ApplyResult |
 | `unlinked-ingredient-link.service.ts` | Turns a free-text ingredient into a product-linked one in the stored recipes and dishes (plan 466) | UnlinkedIngredientLinkService, LinkUnlinkedRequest |
-| `user-admin.service.ts` | User admin management | UserAdminService |
+| `user-admin.service.ts` | User admin management: list, delete, plan 736 `setAiAllowance` | UserAdminService |
 | `loading.service.ts` | Global loading indicator state | LoadingService |
 | `request-data.service.ts` | Customer requests through the server routes (plan 549) | RequestDataService |
 | `terms.service.ts` | Loads the terms file, posts the acceptance (plan 584) | TermsService |

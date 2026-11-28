@@ -47,6 +47,14 @@ describe('create and gate', () => {
     const token = signTestToken({ userId: 'u_s', businessId: OTHER, businessRole: 'staff' })
     expect((await create({ name: 'Job' }, token)).status).toBe(403)
   })
+  it('a new diagnosis starts with the business VAT rate; a body vatPct wins; an old one is unchanged (plan 723)', async () => {
+    const old = await create()
+    expect(old.body.vatPct).toBe(18)
+    await db('businesses').updateOne({ _id: CLIENT }, { $set: { settings: { profitTargetPct: 25, safetyMarginPct: 10, overrunThresholdPct: 10, vatRatePct: 17 } } })
+    expect((await create()).body.vatPct).toBe(17)
+    expect((await create({ name: 'Job', vatPct: 16 })).body.vatPct).toBe(16)
+    expect((await db('diagnoses').findOne({ _id: old.body._id })).vatPct).toBe(18)
+  })
   it('keeps the VAT fields named at creation and refuses vatPct 101', async () => {
     const res = await create({ name: 'Job', pricesIncludeVat: false, vatPct: 17 })
     expect(res.body).toMatchObject({ pricesIncludeVat: false, vatPct: 17 })

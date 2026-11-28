@@ -91,7 +91,8 @@
 
     text-align: center;
 
-    &:disabled {
+    &:disabled,
+    &[aria-disabled='true'] {
       opacity: 0.6;
     }
   }

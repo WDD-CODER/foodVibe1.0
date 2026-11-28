@@ -22,6 +22,7 @@ import { devCatalogRoutes } from './pages/dev-catalog/dev-catalog.routes'
 import { clientsEnsureLoadedResolver } from './core/resolvers/clients-ensure-loaded.resolver'
 import { moduleGuard } from './core/guards/module.guard'
 import { diagnosisGuard } from './pages/diagnosis/diagnosis.guard'
+import { monthlyPlanGuard } from './pages/monthly-plan/monthly-plan.guard'
 import { KnowledgeItemDataService } from './core/services/knowledge-item-data.service'
 import { menuDesignsEnsureLoadedResolver } from '@services/menu-design-data.service'
 
@@ -330,6 +331,22 @@ export const routes: Routes = [
     canActivate: [authGuard, platformAdminGuard],
   },
   { path: 'welcome', loadComponent: () => import('./pages/welcome/welcome.page').then(m => m.WelcomePage), canActivate: [welcomeGuard] },
+  // Plan 726: the typed monthly dish sales (module dish_analysis; `?month=YYYY-MM`; the server is the real gate).
+  {
+    path: 'restaurant-menu/sales',
+    loadComponent: () => import('./pages/restaurant-menu/dish-sales/dish-sales.page').then(m => m.DishSalesPage),
+    canActivate: [authGuard, moduleGuard(['dish_analysis'])],
+    canDeactivate: [pendingChangesGuard],
+    runGuardsAndResolvers: 'paramsOrQueryParamsChange',
+    resolve: { kitchenLoaded: kitchenDataEnsureLoadedResolver },
+  },
+  // Plan 725: the restaurant's standing menu (module dish_analysis; the server is the real gate).
+  {
+    path: 'restaurant-menu',
+    loadComponent: () => import('./pages/restaurant-menu/restaurant-menu.page').then(m => m.RestaurantMenuPage),
+    canActivate: [authGuard, moduleGuard(['dish_analysis'])],
+    resolve: { kitchenLoaded: kitchenDataEnsureLoadedResolver },
+  },
   { path: 'report', loadComponent: () => import('./pages/report/report.page').then(m => m.ReportPage), canActivate: [authGuard] },
   // Plan 634: the consultant's diagnosis (home module consultant_diag; the server is the real gate).
   {
@@ -345,6 +362,15 @@ export const routes: Routes = [
     resolve: { kitchenLoaded: kitchenDataEnsureLoadedResolver },
     canDeactivate: [pendingChangesGuard],
     // A ?tab= change asks the leave question too, since it drops the open tab.
+    runGuardsAndResolvers: 'paramsOrQueryParamsChange',
+  },
+  // Plan 727: the monthly plan (module monthly_plan; staff never; the server is the real gate).
+  {
+    path: 'monthly-plan',
+    loadComponent: () => import('./pages/monthly-plan/monthly-plan.page').then(m => m.MonthlyPlanPage),
+    canActivate: [authGuard, monthlyPlanGuard],
+    canDeactivate: [pendingChangesGuard],
+    // A ?month= change asks the leave question too, since it drops the typed values.
     runGuardsAndResolvers: 'paramsOrQueryParamsChange',
   },
   // Plan 535: dev-only catalog; empty in production, remote and gh-pages builds.

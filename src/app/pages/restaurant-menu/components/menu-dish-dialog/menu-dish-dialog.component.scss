@@ -1,0 +1,38 @@
+@layer components {
+  :host {
+    display: contents;
+  }
+
+  .rm-row__form {
+    display: flex;
+    flex-direction: column;
+    gap: 0.875rem;
+    min-inline-size: 0;
+  }
+
+  .rm-row__pair {
+    display: grid;
+    gap: var(--space-3);
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 12rem), 1fr));
+  }
+
+  .rm-row__sources {
+    margin: 0;
+    padding: 0;
+    border: 0;
+
+    legend {
+      margin-block-end: 0.25rem;
+      font-size: var(--fs-base);
+    }
+  }
+
+  .rm-row__live {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 1rem;
+    margin: 0;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+  }
+}

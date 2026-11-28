@@ -3,7 +3,12 @@
     <div class="loading-bar no-print">
       <span class="loading-progress">{{ progress_() }}</span>
       <div class="loading-actions">
-        <button type="button" class="c-btn-primary" [disabled]="rows_().length === 0" (click)="print()">
+        <button
+          type="button"
+          class="c-btn-primary"
+          [appDisabledWhy]="rows_().length === 0 ? ('why_list_empty' | translatePipe) : null"
+          (click)="print()"
+        >
           <lucide-icon name="printer" [size]="16"></lucide-icon>
           {{ 'prep_sheets_print' | translatePipe }}
         </button>
@@ -43,7 +48,8 @@
                     <input
                       type="checkbox"
                       [checked]="isLoaded(row.key)"
-                      [disabled]="finished_() || isPending(row.key)"
+                      [disabled]="isPending(row.key)"
+                      [appDisabledWhy]="finished_() ? ('why_menu_event_finished' | translatePipe) : null"
                       [attr.aria-label]="('loading_list_mark_loaded' | translatePipe) + ' ' + row.label"
                       (change)="tick(row, $event)"
                     />

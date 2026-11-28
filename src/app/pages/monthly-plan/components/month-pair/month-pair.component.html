@@ -1,0 +1,29 @@
+<div class="mpp" role="group" [attr.aria-label]="rowName_()">
+  @for (side of views_(); track side.key) {
+    <div class="mpp__side">
+      <!-- The press keeps the focus where it is: a box closing on mousedown would move the chip before the click. -->
+      <button
+        #chip
+        type="button"
+        class="c-chip c-chip--tap mpp__chip"
+        [class.teal]="side.value !== null"
+        [class.is-locked]="disabled()"
+        [disabled]="disabled()"
+        [attr.data-testid]="idPrefix() + '-' + side.key + '-chip'"
+        [attr.aria-expanded]="side.open"
+        [attr.aria-label]="side.chipLabel"
+        (mousedown)="$event.preventDefault()"
+        (click)="toggle(side.key, chip)"
+      >
+        {{ side.chipText }}
+      </button>
+      @if (side.open) {
+        <!-- prettier-ignore -->
+        <div class="c-input-wrapper mpp__box" appNumberBox><input type="number" inputmode="decimal" min="0" step="any" dir="ltr" [id]="idPrefix() + '-' + side.key" [attr.data-testid]="idPrefix() + '-' + side.key" [attr.aria-label]="side.boxLabel" [attr.title]="side.hint" [attr.aria-describedby]="side.hint ? idPrefix() + '-' + side.key + '-hint' : null" [placeholder]="side.placeholder" [ngModel]="side.value" (ngModelChange)="setValue(side.key, $event)" (blur)="leave(side.key)" (keydown.enter)="finish(side.key, chip, $event)" (keydown.escape)="finish(side.key, chip, $event)" /><span class="mpp__suffix" aria-hidden="true">₪</span></div>
+        @if (side.hint) {
+          <span class="visually-hidden" [id]="idPrefix() + '-' + side.key + '-hint'">{{ side.hint }}</span>
+        }
+      }
+    </div>
+  }
+</div>

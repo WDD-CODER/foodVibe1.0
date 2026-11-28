@@ -48,4 +48,17 @@ describe('SupplierPricesComponent', () => {
     inputs[1].dispatchEvent(new Event('change'))
     expect(emitted.at(-1)).toEqual({ a: 4, b: 6 })
   })
+
+  it('a read-only form: the price box says why, is read-only and a change emits nothing (plan 747)', () => {
+    fixture.componentRef.setInput('viewOnly', true)
+    setup(['a'], { a: 4 })
+    const box = fixture.nativeElement.querySelector('input') as HTMLInputElement
+    expect(box.getAttribute('aria-disabled')).toBe('true')
+    expect(box.readOnly).toBeTrue()
+    expect(box.disabled).toBeFalse()
+    const before = emitted.length
+    box.value = '9'
+    box.dispatchEvent(new Event('change'))
+    expect(emitted.length).toBe(before)
+  })
 })

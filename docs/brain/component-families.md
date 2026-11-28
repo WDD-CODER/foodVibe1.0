@@ -130,11 +130,18 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 - Plan 651 page-local pieces of the stock count page: the move-counted button row (`.stock-count__toolbar`), the one-line name cut (`.stock-count__name`), the unit warning line (`.stock-count__unit-note`), the phone base-column head (`.stock-count__base-head`), the past-counts row (`.stock-count__past`).
 - Plan 655 page-local pieces of the stock count page: the draft line's question row (`.stock-ai__question`), the base-amount control (`.stock-count__base-btn`) and its popover (`.stock-count__base-pop`).
 - Plan 658: the stock count shows a unit by its saved Hebrew name (`unitName_` → `TranslationService.translate`, the key when none). `.stock-count__base-pop` is one measured `popover="manual"` box at every width: `max-content` wide, placed by `placeInViewport` below its control (above when no room), re-placed on resize, closed by an outside tap, a scroll or a second tap. `app-modal-shell [light]` (plan 657) is removed. `app-list-row-checkbox` reads `--row-checkbox-size` (default unchanged); the count page sets it per breakpoint.
+- Plan 747: the stock count's base hint now uses the shared tooltip (family `tooltip`: `[appTooltip]` on `.stock-count__base-btn`, hover and keyboard focus above a phone, a tap on touch); the custom `.stock-count__base-pop` box and its placement code are removed.
+- Plan 762: a stock count row holds the name in `.stock-count__name-box` and every control in `.stock-count__controls`. Above a phone both are `display: contents` (one line); on a phone each spans the list, the controls as a subgrid under their headings, and the name sits on top (`.stock-count__head-name` is its heading).
 - Plan 651: the past-counts list on the stock count page reads `GET /api/v1/stock/counts?status=all` through `PastCountsService` (`src/app/pages/inventory/components/stock-count/past-counts.service.ts`).
 - Users today (6): client list, equipment, inventory products, recipe book, suppliers, the knowledge page (`src/app/pages/frontdesk/knowledge/`, plan 554).
 - Known copies (4 list pages not on the shell): `src/app/pages/menu-library/components/menu-library-list/`,
   `src/app/pages/venues/components/venue-list/`, `src/app/pages/trash/`, `src/app/pages/metadata-manager/`
   (card grids need a `layout: 'cards'` first).
+- Plan 745: `app-list-shell` takes `[columns]` (`ListColumn[]`, `src/app/shared/list-shell/list-columns.util.ts`); it measures its own width with a ResizeObserver and `fitColumns()` decides which columns still fit as their own cell and which fall into the carousel column (two the first time, then one by one, in each column's `fall` order). The column carousel renders a fall column either way through `*appFallColumn` (`fall-column.directive.ts`); `ColumnCarouselGroupDirective.collapsed` carries the fallen ids. Lists without `columns` keep `gridTemplate` / `mobileGridTemplate` and the phone-only carousel.
+- Plan 747: `ListColumn.stay` (the name and the actions never fall; a column with no `fall` falls after the ranked ones, from the end), `fitColumns()` writes a plain `fr` track as `minmax(<min>, <fr>)` so a cell is never narrower than its `min` (one-line cells set it to their content: rating 8.5rem, phone 9rem, cost and price 6rem, date 7rem, count 4.5rem) and reports `dropped` (the checkbox column, dropped when there is no room; the host then gets `.fit-no-select`). Shared cell helpers: `.cell-nowrap` and `.cell-line` (one line with an ellipsis) from `app-list-shell`. The switching cell no longer draws a label above its value.
+- Plan 745 pieces: `.column-carousel--measured`, `.cc-box`, `.cc-box--cell`, `.cc-box--header`, `.cc-fall` (the switching column inside a measured carousel host) and `.dc-resizable` (the dev catalog box the reader resizes).
+- Design changes: 2026-11-25 plan 745 — columns fall into the carousel by measured width — base — re-checked: products (the other lists keep the old mode)
+- Design changes: 2026-11-26 plan 746 — the five other lists declare columns that fall — base — re-checked: recipe book, suppliers, equipment, clients, invoices
 - Recipes: recipe-list, recipe-detail, recipe-form, recipe-settings, recipe-board
 
 ### list-logic — search / sort / filter state of a list
@@ -184,6 +191,7 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 - Status: stable — plan 499 built `appNumberBox`; pricing meter, counter, product form, recipe quantity, cook view, settings, event dialogs and the AI / quick-add / unit modals are on it
 - Use: `src/app/core/directives/number-box.directive.ts` · `appNumberBox` on the container of ONE `input[type=number]` (label, suffix, padding); it focuses the number and `SelectOnFocusDirective` selects all. Buttons, chips, other fields, disabled / read-only numbers and an already-focused number are left alone.
 - When: a box whose only content is an editable number. Not for rows that mix free text and numbers.
+- Plan 749: `app-month-pair` (`src/app/pages/monthly-plan/components/month-pair/`, page-local) is a user: a forecast / actual pair as `.c-chip--tap` chips (`.teal` when filled) that each open one short `appNumberBox` box, closed again on blur, Enter or Escape (plan 759); classes `.mpp`, `.mpp__side`, `.mpp__chip`, `.mpp__box`, `.mpp__suffix` are layout only. The seven-digit width of its box, the labour factor box and the target boxes is one mixin, `seven-digit-box` (`src/app/pages/monthly-plan/_seven-digit-box.scss`).
 - Known copies: none for boxes. Left without it on purpose (outside plan 499 scope): `event-stage-bar` deposit amount, `menu-dish-row` inline prices, equipment / supplier / venue forms (`app-form-field` rows), `product-import` purchase qty (shares a row with a text field), `ai-draft-editor` ingredient rows.
 
 ### stepper — the + / − buttons around a number
@@ -251,6 +259,23 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 - When: a cost is shown that may be missing prices.
 - Known copies: none.
 
+### month-figures — a month's plan versus actual figures
+
+- Status: stable (plan 728)
+- Use: `src/app/shared/month-figures/` · `app-month-figures` (inputs `figures` from `monthFigures`, `targets`, optional `fixedHint`): «לא הוזן», «חלקי», «לפי היעד», band tags and the completeness badge.
+- Plan 749: the monthly plan page feeds it the month as typed (`liveMonthOf`, unsaved values included); each «חלקי» tag and the badge carry what is missing as a hover hint.
+- Plan 759: once any actual is typed, `monthFigures` fills each empty actual (each fixed line on its own) from its forecast and lists those figures in the actual column's `fromForecast`; the table fades them (`.mf__money--forecast`, the placeholder colour) and explains with `[appTooltip]`. «חלקי» stays only for an input with neither number; the badge counts typed actuals.
+- When: any month or dish screen that shows plan against actual money; never rebuild the table.
+- Known copies: none.
+
+### menu-dish-cost — the cost of a standing-menu dish
+
+- Status: stable (plan 725)
+- Use: `src/app/core/services/menu-dish-cost.service.ts` · `MenuDishCostService` (`costOf`, `netPrice`, `leftPerDish`).
+- When: any screen that shows what a menu dish costs or leaves (the menu page, the sales page, the later analysis). Never compute a menu dish's cost twice.
+- Plan 748: the month sales page no longer shows a cost, so today only the menu page and the dish popup show one.
+- Known copies: none.
+
 ### supplier-picker — pick one of a product's suppliers for a line
 
 - Status: stable (plan 536)
@@ -275,6 +300,27 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 - Inputs / variants: `maxBlockSize` (a CSS length; empty = fills its parent).
 - Known copies: `src/app/shared/list-shell/` keeps its own arrows (same look); 9 page `.scss` files still make their own `overflow: auto` area (see `docs/agent/house-style.md`, rule `scroll`).
 
+### sideways-row — one framed, draggable row of chips, tabs or buttons that scrolls sideways
+
+- Status: stable (plan 743)
+- Use: `src/app/shared/scroll-rail/` · `app-scroll-rail` (the visible frame as wide as its items, round arrow buttons outside it, grab and drag; `centerChild(el, { instant? })` slides a child to the middle). Users: `src/app/core/components/header/header.component.html` (the top bar), `src/app/core/components/tab-chips/tab-chips.component.html`, `src/app/pages/settings/settings.page.html`, `src/app/pages/diagnosis/components/diagnosis-workspace/diagnosis-workspace.component.html`, `src/app/pages/menu-intelligence/components/event-stage-bar/event-stage-bar.component.html`, `src/app/pages/menu-intelligence/components/menu-dish-row/menu-dish-row.component.html`, `src/app/pages/metadata-manager/metadata-manager.page.component.html`, `src/app/pages/dev-catalog/dev-catalog.page.html`.
+- When: a row of several chips, tabs or buttons that can outgrow its width. Not a data table that scrolls sideways.
+- Inputs / variants: `frame` (`'box'` default draws the container, `'none'` draws no surface), `snap` (`none` / `proximity` / `mandatory`), `arrows` (`auto` / `always` / `never`), `step` (px or `'page'`). Arrows are round buttons outside the container on a computer; on a phone (≤767px) or with `arrows="never"` they are not rendered and the sign of more inside the container shows instead (plan 747 round two, stronger since plan 762): a fade and a solid round chevron (`.sr-more__badge`, primary colour) over the edge of the side that has more, not pressable, hidden from assistive tech. Every user of the rail gets it with no change of its own.
+- Page-local state classes (plans 743, 747): `.is-dragging` is a host class of `app-scroll-rail`, beside `is-overflowing`; `.sr-frame` (with `.has-frame`, `.has-prev`, `.has-next`) is the container inside it; `.sr-more` (`.sr-more--prev`, `.sr-more--next`, shown with `.is-shown`, each with its `.sr-more__badge`) is the sign of more inside the frame; `.dc-rail-box` is the dev catalog's 20rem demo box.
+- Known copies: none.
+
+### tooltip — one small box for every hint
+
+- Status: stable (plan 744)
+- Use: `src/app/shared/tooltip/` · `[appTooltip]` (`TooltipDirective`; the box is `TooltipBoxComponent`); engine `.c-tooltip` in `src/styles.scss`; placed by `placeInViewport`. Users: the product list's warning badge, the recipe book list's cost and date, the notification bell, the page header's count, the taxonomy kind manager's icon buttons, the user list's platform-admin chip (plan 763), the dev catalog, the restaurant menu's net-price title and cells and the month picture's from-forecast figures (plan 759).
+- When: a short explanation of a control, shown on hover, keyboard focus or tap — never the browser's `title`.
+- Inputs / variants: `appTooltip` (an already translated string, or a template for rich content; empty = no tooltip), `tooltipPlacement` (`'above'` default / `'below'`), `tooltipOnClick` (no effect since plan 762; still declared because templates bind it). Plan 762: above a phone it opens on hover and keyboard focus only — a click or a tap never opens or pins it; on a phone or a device with no hover (`TOOLTIP_TAP_QUERY`) a tap opens it, and the next press anywhere (the same control too) or any scroll closes it; a finger never hovers. The box is clamped inside the viewport with a margin on both sides. Put no `[appTooltip]` on a natively disabled control (it gets no hover or focus): a control that is disabled for a reason uses `[appDisabledWhy]` below. Users added in plan 747: the product list's price and cut-off text cells, the stage row's lock reasons, the six lists' one-line cells.
+- A disabled control says why (plan 747 round two, default `disabled-explains-why`): `src/app/shared/tooltip/disabled-why.directive.ts` · `[appDisabledWhy]="reason"` (`DisabledWhyDirective`; it composes `TooltipDirective` through `hostDirectives`, so the host must not also carry `[appTooltip]`). The reason is an already translated string; `null` or empty = the control works. With a reason: `aria-disabled="true"` and the class `.is-disabled` (the disabled look, in `src/styles.scss`), never the native `disabled`; the control stays focusable; `click` and Enter / Space are swallowed in the capture phase, so its action never runs; the reason shows on hover and keyboard focus, and by tap where the tooltip works by tap (plan 762). On an `<input>` / `<textarea>` it also sets `readOnly` and swallows every key but Tab / Escape (copy stays); on a `<select>`, a checkbox, a radio, a range, a colour or a file input it swallows `mousedown` and the keys. Other inputs: `disabledWhyTip` (the control's ordinary hint, shown while it works), `tooltipPlacement`. Keep `[disabled]` only for "its own action is running" (saving, loading), next to `[appDisabledWhy]` when both apply. Reason keys: `sign_in_to_use`, `no_permission`, `money_locked_hint`, `fill_required_fields`, and the generic `why_*` keys in `public/assets/data/dictionary.json` (`why_nothing_to_save`, `why_write_first`, `why_choose_first`, `why_first_in_list`, `why_last_in_list`, `why_at_min`, `why_at_max`, `why_nothing_counted`, `why_list_empty`, `why_demo_only`).
+- Shared controls that are disabled by their caller take the reason as `disabledWhy` (a translated string or `null`) and hand it to their inner control; a non-empty `disabledWhy` blocks the control by itself, `disabled` with no reason stays native: `app-counter` (both buttons and the value field), `app-date-field`, `app-time-field`, `app-custom-select`, `app-custom-multi-select`, `app-approve-stamp`, `app-rating-stars`, `app-list-row-checkbox`, `app-voice-note`, `app-supplier-picker`; `app-empty-state` takes it as `ctaDisabledWhy` for its call-to-action button. A shared control's own inner limit gives its own reason when the caller gave none: `app-counter` minus at the minimum (`why_at_min`) and plus at the maximum (`why_at_max`), `app-voice-note` send with nothing recorded or written (`why_voice_note_empty`).
+- A blocked checkbox or radio inside a `<label>` (a `.c-chip--toggle` chip hides the input): the directive also opens the reason when the label is hovered and places the box against the label (`TooltipDirective.anchorTo`); the chip's dimmed look is the engine rule `.c-chip--toggle:has(> input.is-disabled)` in `src/styles.scss`. A component stylesheet that styles its own blocked control keys on `[aria-disabled='true']` next to `:disabled`, never on a second `.is-disabled` definition.
+- Users of `[appDisabledWhy]` (plan 747): the signed-out actions of the product, recipe, supplier, equipment, venue and menu lists, the dashboard's add-product link, the metadata manager's add buttons, the venue page's edit and upload buttons, the cook view's edit and approve controls, the pricing meter's locked money fields (on their wrapper: the fields themselves stay disabled by the form), the dev catalog's sample.
+- Known copies: the browser `title` hints that remain (51 in 27 templates, the `house-tooltip` lint) and the `[disabled]` bindings that stay (151 in 72 templates, the `house-disabled-why` lint: own-action ones and the shared controls' `disabled() && !disabledWhy()` pass-through) — both counted by the `reuse-copy.tooltip` debt baseline (202); the nutrition box (`src/app/shared/nutrition-badge/`) keeps its own look.
+
 ### engine-classes — shared `.c-*` CSS engines
 
 - Status: stable (plan 458 sweeps the copies)
@@ -283,7 +329,12 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 - Saving state (plan 502): a save button is `[disabled]` and `[attr.aria-busy]` while it runs, shows the `saving` label, and the signal is named `isSaving_` (`.c-btn-primary[aria-busy='true']` in `src/styles.scss`). Older flags (`isLoading_`, `isBusy_`, `isSubmitting_`) stay on their screens until touched.
 - Pass theme (plan 572): `.c-num` gives a number tabular digits (prices, quantities, totals); `.c-pass-line` draws the amber lamp line under what is ready to go out (one per screen area).
 - Plan 698: `.video-upload-btn`, `.video-progress` (page-local layout in `venue-detail.component.scss`) sit on top of `.c-btn-ghost`; no new `.c-*` class.
+- Plan 725: `.rm-row__notice`, `.rm-row__state`, `.rm-row__cell`, `.rm-row__cell--name`, `.rm-row__num`, `.rm-row__ellipsis`, `.rm-row__wide`, `.rm-row__form`, `.rm-row__pair`, `.rm-row__sources`, `.rm-row__live` (page-local cell spacing and form layout of `restaurant-menu.page.scss` and the menu dish popup) sit on top of `.c-list-row`, `.c-list-body-cell` and `.c-input-wrapper`; no new `.c-*` class.
+- Plan 726: `.ds-row__notice`, `.ds-row__actions` (plan 748: the one wrapper of the header actions), `.ds-row__month`, `.ds-row__intro`, `.ds-row__progress`, `.ds-row__banner`, `.ds-row__state`, `.ds-row__cell`, `.ds-row__cell--name`, `.ds-row__ellipsis`, `.ds-row__removed`, `.ds-row__reasons--over`, `.ds-row__skipped`, `.ds-row__skipped-list`, `.ds-row__wide` (page-local spacing and column rules of `dish-sales.page.scss`, on top of `.c-list-row`; the number column uses `.c-num`) and `.rr-dialog`, `.rr-dialog__title`, `.rr-dialog__list`, `.rr-dialog__row`, `.rr-dialog__label`, `.rr-dialog__note`, `.rr-dialog__error`, `.rr-dialog__given`, `.rr-dialog__given--over` (layout inside the reasons popup); no new `.c-*` class.
+- Plan 727: `.monthly-plan-page`, `.mp-page`, `.mp-new`, `.mp-picker`, `.mp-card`, `.mp-error`, `.mp-card__title`, `.mp-grid`, `.mp-field`, `.mp-field__label`, `.mp-muted`, `.mp-suffix`, `.mp-check` (page-local layout of `monthly-plan.page.scss`, on top of `.c-glass-panel`, `.c-input-wrapper` and `.c-chip`) and `.business-group`, `.business-group__title` (the month targets group of the business settings tab); no new `.c-*` class.
+- Plan 749: `.mp-body`, `.mp-inputs`, `.mp-picture`, `.mp-field__row`, `.mp-box`, `.mp-checks` (the dense two-side grid and the short target boxes of `monthly-plan.page.scss`) and `.lc__box` (the labour card's short factor box).
 - Plan 742: `.c-drag-list`, `.c-drag-item`, `.c-drag-handle` (the shared drag look, family `drag-reorder`); `.c-scroll-area`, `.c-scroll-arrow` (family `scroll-area`); plus one zero-specificity `:where(…):focus-visible` keyboard ring for every button, link and `role` / `tabindex` control.
+- Plan 744: `.c-tooltip`, `.c-tooltip--below` (the shared tooltip box, family `tooltip`).
 - Known copies: 15 component `.scss` files start a selector with a `.c-*` class (define or restyle an engine locally).
 
 ### motion-tokens — how long things move and with which curve
@@ -344,6 +395,7 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 - Use: route resolvers `src/app/core/resolvers/*-ensure-loaded.resolver.ts`; the consultant's entry check `diagnosisGuard` in `src/app/pages/diagnosis/diagnosis.guard.ts` (plan 634: home modules while acting, `moduleGuard` at home).
 - When: a route needs its collection loaded first, or a screen opens only for the consultant's own module.
 - Known copies: none.
+- `monthlyPlanGuard` (`src/app/pages/monthly-plan/monthly-plan.guard.ts`, plan 727): staff go to `/dashboard`, everyone else passes `moduleGuard(['monthly_plan'])`; the server stays the real gate.
 - Recipes: recipe-form
 - Plan 651 (leave-and-return): `ReturnToService` in `src/app/core/services/return-to.service.ts` — a page that sends the person away passes `?returnUrl=` (an in-app path, checked by `safeUrl`) and keeps the line it came from with `setPending`; the product form returns there with `?addedProduct=<id>`; the stock count takes the line back with `takePending`.
 
@@ -363,6 +415,14 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 - the browser breakpoint constants (plan 656): `breakpoints` in `src/app/core/utils/breakpoints.ts` — `PHONE_MAX`,
   `TABLET_MAX`, `PHONE_QUERY`, `TABLET_DOWN_QUERY`, `DESKTOP_QUERY` (phone ≤767, tablet ≤1023, desktop ≥1024); the
   only `.ts` file that types a media width. Styles use the same names from `src/app/core/styles/_breakpoints.scss`.
+  Plan 763 adds one narrow step inside the phone range: `PHONE_NARROW_MAX` / `PHONE_NARROW_QUERY` in the browser code,
+  `$break-phone-narrow-max` (≤419) in the styles — the stock count's two-line rows.
+- the net price of a dish (plan 724): `netPriceOf` in `shared/schemas/dish-analysis/net-price.ts` — the price without VAT
+  by the business VAT rate and dealer type (`patur` = unchanged); the menu page, the month close and the analysis use it.
+- the month key (plan 726): `month-key.util` in `src/app/core/utils/month-key.util.ts` — `currentMonthKey`, `shiftMonthKey`, `isMonthKey`, `monthKeyLabel` for a `YYYY-MM` month; the monthly plan page (727) uses it too.
+- the month and target rules (plan 727): `month-rules` in `shared/schemas/month/month-rules.ts` — `MONTH_KEY_PATTERN`, `monthKeyOf` (the Asia/Jerusalem month), `shiftMonth`, `monthLabel`, `MONTH_TARGET_KEYS`, `MONTH_TARGET_DEFAULTS`, `MONTH_TARGET_BANDS`; no zod; `month-key.util` wraps it so there is one month rule.
+- starter fixed lines and default groups (FIXED_STARTER_KEYS, defaultFixed, defaultLabour, LABOUR_FACTOR_DEFAULT) (plan 729), in the same `month-rules.ts` — `FIXED_STARTER_KEYS`, `FIXED_LINES_MAX`, `LABOUR_FACTOR_DEFAULT`, `defaultFixed()`, `defaultLabour()`; the server's new month and the browser's older month start from the same lines.
+- the monthly plan's draft and hint helpers (plan 749), beside the page in `src/app/pages/monthly-plan/`: `month-draft.ts` — `draftOf` (a stored employer total read back as gross pay), `liveMonthOf` (the month as typed, fed to `monthInputOf` / `monthFigures`); `month-hints.ts` — `missingHint`, `unenteredLinesHint` (the «חלקי» hover texts, also used by `app-month-figures`).
 - When: any pure helper (time, number, text). Never page-local.
 - Known copies: time / date / percent / debounce helpers copied page-locally (audit; not recounted).
 - `describePlatformChange` (`src/app/pages/platform-dashboard/components/platform-business-dialog/platform-business-dialog.component.ts`): one stored platform change `{ field, from, to }` as a Hebrew line (plan 638).
@@ -385,6 +445,7 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 - Status: stable
 - Use: `src/app/core/services/http-storage.adapter.ts`; auth header and errors: `src/app/core/interceptors/auth.interceptor.ts`.
 - When: any call to the server API; never a raw `fetch` or a hand-built `/api/v1` URL.
+- `MonthPlanService` (`src/app/pages/monthly-plan/services/month-plan.service.ts`, plan 727): page-scoped client of the server-only `monthPlans` through `API.monthPlans`: `list`, `get`, `create`, `update`; throws the `HttpErrorResponse`.
 - Plan 765: `BusinessService.setMenuDesignDefault` (`src/app/core/services/business.service.ts`) — one owner-only PUT through `API.business('menu-design-default')`; the stored menu settings go into `business_`.
 - `PlatformAdminService.updatePlatform` (`src/app/core/services/platform-admin.service.ts`): one PUT of a business's modules, monthly AI cap and private mode with a reason, then reloads the table (plan 620).
 - `PlatformAdminService.eraseLearnedData(businessId, reason)` (same file): one POST that erases what the platform learned from a business, returns the counts; `UserAdminService.deleteUser(userId, eraseLearned)` adds `?eraseLearned=true` (plan 639).
@@ -415,7 +476,8 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 
 - Status: stable (MVP)
 - Use: `src/app/core/engine/event-plan.engine.ts` with `src/app/core/engine/event-plan.service.ts`; units:
-  `src/app/core/engine/units.ts` (plan 635: re-exports the one rule in `shared/schemas/units/to-base.ts` — `toBase`, `normalizeUnit`, `unitFamily`, `convertWithinFamily`, `optionRateInBase`, the unit constants, `unitRatesFrom`); portions: `src/app/core/engine/portions.ts`.
+  `src/app/core/engine/units.ts` (plan 635: re-exports the one rule in `shared/schemas/units/to-base.ts` — `toBase`, `normalizeUnit`, `unitFamily`, `convertWithinFamily`, `optionRateInBase`, the unit constants, `unitRatesFrom`); portions: `src/app/core/engine/portions.ts`; the month engine `src/app/core/engine/month-plan.ts` (plan 728: `monthFigures`, `breakEven`, `dishPrice`, `bandOf`) is the monthly counterpart of C-PRICING.
+- monthInputOf fixed, labour and purchases mapping (plan 729): `fixedInputOf`, lines vs rough, gross × factor as an estimate, purchases as actual food cost; it lives in `month-plan.ts`.
 - When: anything that computes quantities, costs or prices for an event.
 - Known copies: none.
 
@@ -452,6 +514,7 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
   the first bundle).
 - When: a link, chip, screen, button or request belongs to a module. The server is the gate; the browser only hides.
 - Known copies: none.
+- The TabChip.money flag (`src/app/core/components/tab-chips/tab-chips.component.ts`, plan 727): a chip with `money: true` shows only when `PermissionService.can('editMoney')` (owner, consultant), beside `modules`.
 
 ### entity-schemas — one stored shape per file
 
@@ -459,6 +522,11 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 - Use: the nine new entity schema files under `shared/schemas/entities/` (`invoice.schema.ts`, `price-history.schema.ts`,
   `invoice-alias.schema.ts`, `supplier-profile.schema.ts`, `ai-draft.schema.ts`, `stored-file.schema.ts`,
   `business-access.schema.ts`, `diagnosis.schema.ts`, `stock-count.schema.ts`), each one `z.strictObject` registered in
+  `SCHEMA_BY_COLLECTION` in `shared/schemas/entities/index.ts`. A request body that is not an entity sits beside them
+  in `shared/schemas/` — e.g. plan 736's `shared/schemas/ai-allowance.schema.ts` (`aiAllowanceUpdateSchema`,
+  `AI_DEFAULT_ALLOWANCE`, `AI_ALLOWANCE_MAX`), read by the admin route and the user list.
+- plan 724 adds `menu-dish.schema.ts`, `dish-sales-month.schema.ts` and `dish-sales-alias.schema.ts` (dish analysis store).
+- plan 727 adds `month-plan.schema.ts` (`monthPlans`, server-only; `null` = not entered, 0 = a real zero) and the pure month and target rules in `shared/schemas/month/month-rules.ts` (`MONTH_KEY_PATTERN`, `monthKeyOf` in Asia/Jerusalem, `shiftMonth`, `monthLabel`, `MONTH_TARGET_KEYS`, `MONTH_TARGET_DEFAULTS`, `MONTH_TARGET_BANDS`); `src/app/core/utils/month-key.util.ts` is a thin wrapper over them, so there is one month rule. The chip flag `TabChip.money` (tab-chips) hides a chip from a role that cannot `editMoney`.
   `SCHEMA_BY_COLLECTION` in `shared/schemas/entities/index.ts`; `shared/schemas/entities/menu-design.schema.ts`
   (plan 764) follows the same shape.
 - When: a new stored collection needs a shape.
@@ -468,7 +536,9 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 
 - Status: stable — plan 617
 - Use: `server/services/ai-cap.js` — `capState`, `monthTokensByBusiness`, `clearCapCache`; checked before the model call
-  in `server/services/gemini-client.js`.
+  in `server/services/gemini-client.js`. Plan 736: its per-user twin `server/services/ai-allowance.js` (`reserveAiCall`,
+  `refundAiCall`, `allowanceOf`, `trackAiAllowance`) counts each user's lifetime AI requests at the same point; the
+  browser reads the 402 `AI_BUDGET_EXHAUSTED` through `aiCapErrorKey` / `isAiBudgetExhausted` (`src/app/core/utils/ai-error.util.ts`).
 - When: a server path calls the model and must refuse once the business has used its monthly cap.
 - Known copies: none.
 
@@ -771,3 +841,11 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 - Pieces: addStyledTableSheet, uniqueSheetName, addRecipeInfoSheet, HOUSE_PAGE_SETUP, buildRecipeInfoWorkbook, buildShoppingListWorkbook, buildMenuInfoWorkbook, buildAllTogetherMenuWorkbook.
 - When: any new Excel sheet. Sheet names, headers and fallbacks come from `dictionary.json` through `TranslationService`, never an English literal.
 - Known copies: none (no other file in `src/app` calls `addWorksheet`, checked 2026-11-22).
+
+### platform-admin-script — the one-off script that sets `isPlatformAdmin` (plan 737)
+
+- Status: stable — plan 737
+- Use: `server/scripts/set-platform-admin.js` — an operator script beside `set-front-desk-status.js`: `--target` required, Atlas only with `--confirm-host`, dry run by default and `--write` to apply; it changes one `users` document by `_id` and `--off` undoes it.
+- Pieces: set-platform-admin.js, parseArgs, planChange, applyChange.
+- When: the Human sets or clears the platform admin on a live database (runbook in `docs/security-go-live.md`); never a build step, never a route.
+- Known copies: none.

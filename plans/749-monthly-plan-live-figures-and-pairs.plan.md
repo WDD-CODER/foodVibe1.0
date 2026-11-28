@@ -126,6 +126,7 @@ server/test/month-plans.test.js
 src/app/pages/breadcrumbs.md
 src/app/shared/breadcrumbs.md
 docs/brain/component-families.md
+docs/workflow-kit/manifest.json
 ```
 
 ## Read Scope
@@ -156,7 +157,9 @@ append the path to the scope block above and retry.
 - `month-pair` (`src/app/pages/monthly-plan/components/month-pair/`) — family: number-box — rung: 2 — why: one forecast/actual pair as two `.c-chip--tap` chips (`.c-chip.teal` when filled) that each open one short `appNumberBox` box; used by the revenue, purchases, fixed and labour rows of this page only, so page-local, not shared
 - `month-draft.ts` (`draftOf` with the labour migration, `liveMonthOf`) — family: helpers — rung: 3 — why: the page's draft-to-month mapping moved out of `monthly-plan.page.ts` so it can be tested; feeds the existing `monthInputOf` / `monthFigures` (family event-plan), no new engine
 - `month-hints.ts` (missing-input and unentered-line hint texts) — family: helpers — rung: 3 — why: pure text builders for the «חלקי» hints, shared by the page flag and `app-month-figures`
-- card-local classes `.mpp`, `.mpp__chip`, `.mpp__box`, `.mpp__suffix` — family: chip — rung: 2 — why: layout of the chip-and-box pair only; the chip look is `.c-chip.c-chip--tap` (+ `.teal`), no new `.c-*` class
+- card-local classes `.mpp`, `.mpp__side`, `.mpp__chip`, `.mpp__box`, `.mpp__suffix`, `.teal` — family: chip — rung: 2 — why: layout of the chip-and-box pair only; the chip look is `.c-chip.c-chip--tap` (+ `.teal`, restated only so a filled chip stays teal while open or hovered), no new `.c-*` class
+- page-local classes `.mp-body`, `.mp-inputs`, `.mp-picture`, `.mp-field__row`, `.mp-box`, `.mp-checks`, `.lc__box` — family: engine-classes — rung: 2 — why: layout of the dense two-side grid and of the short boxes only, on top of the `.c-*` engines; no new `.c-*` class
+- `_seven-digit-box.scss` (`src/app/pages/monthly-plan/_seven-digit-box.scss`, mixin `seven-digit-box`) — family: number-box — rung: 2 — why: one width rule for the three short amount boxes of this page instead of three copies
 
 ## Defaults
 
@@ -270,15 +273,15 @@ line or file this plan names was removed, renamed or rewritten).
 
 These are the plan's milestones: a Worker does them in order and ticks each one after it is checked.
 
-- [ ] A1: Move the draft mapping out of the page and add the live month and the staff-cost migration — draftOf, liveMonthOf, empty target falls back to saved; spec — src/app/pages/monthly-plan/month-draft.ts, src/app/pages/monthly-plan/month-draft.spec.ts
-- [ ] A2: Build the forecast/actual chip pair with the faded forecast in an empty actual — open/close, teal when filled, placeholder not counted; spec — src/app/pages/monthly-plan/components/month-pair/**
-- [ ] A3: Feed the month picture from what is typed and put the pair on the revenue and purchases rows — live computed, flags, targets and dish calculator from the live month; page spec cases (a)–(e) replace the saved-only case — src/app/pages/monthly-plan/monthly-plan.page.ts, src/app/pages/monthly-plan/monthly-plan.page.html, src/app/pages/monthly-plan/monthly-plan.page.spec.ts
-- [ ] A4: Put the pair, the trash icon and the new mode names on the fixed costs card — three-column rows, renamed modes and notes; spec — src/app/pages/monthly-plan/components/fixed-costs-card/**
-- [ ] A5: Make staff cost gross pay times the factor, always shown, and start new months that way — drop the mode radios, employer cost beside each side, default gross; card and server tests — src/app/pages/monthly-plan/components/labour-card/**, shared/schemas/month/month-rules.ts, server/test/month-rules.test.js, server/test/month-plans.test.js
-- [ ] A6: Let «חלקי» say what is missing — hint texts, the hint on the figure cells and the fixed flag; specs — src/app/pages/monthly-plan/month-hints.ts, src/app/pages/monthly-plan/month-hints.spec.ts, src/app/shared/month-figures/**
-- [ ] A7: Turn the target norms into hover hints and lay the page out as a dense grid — band title on the box, short boxes, two-side grid with the picture beside the inputs — src/app/pages/monthly-plan/monthly-plan.page.html, src/app/pages/monthly-plan/monthly-plan.page.scss
-- [ ] A8: Add the Hebrew words and check the page end to end in its spec — the keys of UI/UX Notes; page spec: no inline norm, band title present — public/assets/data/dictionary.json, src/app/pages/monthly-plan/monthly-plan.page.spec.ts
-- [ ] A9: Record the changes in the maps and run every automatic check — paste outputs under Execution Notes — src/app/pages/breadcrumbs.md, src/app/shared/breadcrumbs.md, docs/brain/component-families.md
+- [x] A1: Move the draft mapping out of the page and add the live month and the staff-cost migration — draftOf, liveMonthOf, empty target falls back to saved; spec — src/app/pages/monthly-plan/month-draft.ts, src/app/pages/monthly-plan/month-draft.spec.ts
+- [x] A2: Build the forecast/actual chip pair with the faded forecast in an empty actual — open/close, teal when filled, placeholder not counted; spec — src/app/pages/monthly-plan/components/month-pair/**
+- [x] A3: Feed the month picture from what is typed and put the pair on the revenue and purchases rows — live computed, flags, targets and dish calculator from the live month; page spec cases (a)–(e) replace the saved-only case — src/app/pages/monthly-plan/monthly-plan.page.ts, src/app/pages/monthly-plan/monthly-plan.page.html, src/app/pages/monthly-plan/monthly-plan.page.spec.ts
+- [x] A4: Put the pair, the trash icon and the new mode names on the fixed costs card — three-column rows, renamed modes and notes; spec — src/app/pages/monthly-plan/components/fixed-costs-card/**
+- [x] A5: Make staff cost gross pay times the factor, always shown, and start new months that way — drop the mode radios, employer cost beside each side, default gross; card and server tests — src/app/pages/monthly-plan/components/labour-card/**, shared/schemas/month/month-rules.ts, server/test/month-rules.test.js, server/test/month-plans.test.js
+- [x] A6: Let «חלקי» say what is missing — hint texts, the hint on the figure cells and the fixed flag; specs — src/app/pages/monthly-plan/month-hints.ts, src/app/pages/monthly-plan/month-hints.spec.ts, src/app/shared/month-figures/**
+- [x] A7: Turn the target norms into hover hints and lay the page out as a dense grid — band title on the box, short boxes, two-side grid with the picture beside the inputs — src/app/pages/monthly-plan/monthly-plan.page.html, src/app/pages/monthly-plan/monthly-plan.page.scss
+- [x] A8: Add the Hebrew words and check the page end to end in its spec — the keys of UI/UX Notes; page spec: no inline norm, band title present — public/assets/data/dictionary.json, src/app/pages/monthly-plan/monthly-plan.page.spec.ts
+- [x] A9: Record the changes in the maps and run every automatic check — paste outputs under Execution Notes — src/app/pages/breadcrumbs.md, src/app/shared/breadcrumbs.md, docs/brain/component-families.md
 
 ## What happens when
 - The owner types in a box with «הסכום כולל מע״מ» ticked: the figures follow the typed (gross) number until he leaves
@@ -329,3 +332,26 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
 
 ## Execution Notes
 - Planner 2026-11-26: written from Dandan's grading of run biz-numbers
+- Builder 2026-11-26: Step 0 — `711cd215` ok, `a34fc0e3` ok (neither is an ancestor of this branch; they touch
+  `component-families.md`, the dictionary and `styles.scss` elsewhere and remove nothing this plan names).
+- Builder: an earlier, interrupted session left most of the work uncommitted in the worktree; it was reviewed and
+  finished (commit `25422ce6` plus the style clean-up after it).
+- Evidence: `pnpm run build` → exit 0. `pnpm run lint` → exit 0 (0 errors, 69 warnings). `pnpm run test:ci` → exit 0,
+  `TOTAL: 2965 SUCCESS`. The first run had 5 failures: 2 page specs that typed before the box's first write (fixed with
+  `openBox`), and `UserService` signup (2) and `downscaleImage` (1), which passed on the two later runs.
+- Evidence: `pnpm run test:server` → exit 0, `Test Files 153 passed (153)`, `Tests 2094 passed (2094)`.
+- Evidence: `scope-check --arch` → `ARCH: ok INV-4, INV-1, INV-6, INV-none`; `--reuse` → `REUSE: ok`;
+  `breadcrumbs-check` → `BREADCRUMBS: clean`; `kit-checks` → `KIT_CHECKS: ok (6 checks)`;
+  `log-query --since=plan-start --level=error` → `SKIP: no database configured`.
+- Builder choices for Dandan to grade:
+  - `behaviour:` the two «הסכום כולל מע״מ» ticks sit in one row under the revenue pair, each starting with its side
+    («תחזית: …», «בפועל: …») — reverse: one tick inside each side of the pair.
+  - `behaviour:` each employer-cost line starts with its side («תחזית · עלות מעביד (הערכה): …») — reverse: drop the side.
+  - `behaviour:` in the estimated mode the «הוצאות קבועות: חלקי» flag says «חסר: הוצאות קבועות בפועל», as there are no
+    lines to name — reverse: no hint in that mode.
+  - `behaviour:` a filled chip keeps its teal background while it is open or hovered — reverse: drop the
+    `.mpp__chip.teal` rule.
+- Builder 2026-11-26 (fix round 1, `rev-1`): an opened filled box now selects its value again after NgModel writes it
+  (`month-pair.component.ts`, `toggle()`), so typing replaces the amount. New pair spec case «opening a filled box
+  selects its value»: before the fix → `Expected '030000' to be '30000'`, 1 FAILED, 13 SUCCESS; after it,
+  `ng test --include="src/app/pages/monthly-plan/**/*.spec.ts"` → exit 0, `TOTAL: 79 SUCCESS`.

@@ -9,6 +9,7 @@ import { TranslationService } from '@services/translation.service'
 import { ModalShellComponent } from 'src/app/shared/modal-shell/modal-shell.component'
 import { PartialCostBadgeComponent } from 'src/app/shared/partial-cost-badge/partial-cost-badge.component'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
+import { DisabledWhyDirective } from 'src/app/shared/tooltip/disabled-why.directive'
 import type { EventPlan } from '../../../../core/engine/event-plan.types'
 import { computeEventPricing, DEFAULT_PRICING_SETTINGS, toPricingEvent } from '../../../../core/engine/event-pricing'
 import { formatMoney, formatPct1 } from '../../../../core/engine/rounding'
@@ -33,6 +34,7 @@ import { NumberBoxDirective } from '@directives/number-box.directive'
     ReactiveFormsModule,
     LucideAngularModule,
     TranslatePipe,
+    DisabledWhyDirective,
     ModalShellComponent,
     PartialCostBadgeComponent
   ],

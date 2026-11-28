@@ -1,9 +1,13 @@
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core'
+import { DOCUMENT } from '@angular/common'
 import { FormsModule } from '@angular/forms'
 import { CdkDrag, CdkDragDrop, CdkDragHandle, CdkDropList, moveItemInArray } from '@angular/cdk/drag-drop'
 import { LucideAngularModule } from 'lucide-angular'
 import { ScrollAreaComponent } from 'src/app/shared/scroll-area/scroll-area.component'
+import { ScrollRailComponent } from 'src/app/shared/scroll-rail/scroll-rail.component'
 import { ReorderKeysDirective } from 'src/app/core/directives/reorder-keys.directive'
+import { TooltipDirective } from 'src/app/shared/tooltip/tooltip.directive'
+import { DisabledWhyDirective } from 'src/app/shared/tooltip/disabled-why.directive'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
 import { UserMsgService } from '@services/user-msg.service'
 import { MissingItem } from 'src/app/core/engine/event-plan.types'
@@ -15,6 +19,8 @@ import { CustomMultiSelectComponent } from 'src/app/shared/custom-multi-select/c
 import { ModalShellComponent } from 'src/app/shared/modal-shell/modal-shell.component'
 import { PageHeaderComponent } from 'src/app/shared/page-header/page-header.component'
 import { ListShellComponent } from 'src/app/shared/list-shell/list-shell.component'
+import { COLUMN_CAROUSEL } from 'src/app/shared/column-carousel'
+import type { ListColumn } from 'src/app/shared/list-shell/list-columns.util'
 import { EmptyStateComponent } from 'src/app/shared/empty-state/empty-state.component'
 import { FormFieldComponent } from 'src/app/shared/form-field/form-field.component'
 import { DateFieldComponent } from 'src/app/shared/date-field/date-field.component'
@@ -47,6 +53,7 @@ interface SampleOption {
     ModalShellComponent,
     PageHeaderComponent,
     ListShellComponent,
+    ...COLUMN_CAROUSEL,
     EmptyStateComponent,
     FormFieldComponent,
     DateFieldComponent,
@@ -56,10 +63,13 @@ interface SampleOption {
     EditGateComponent,
     PartialCostBadgeComponent,
     ScrollAreaComponent,
+    ScrollRailComponent,
     CdkDropList,
     CdkDrag,
     CdkDragHandle,
     ReorderKeysDirective,
+    TooltipDirective,
+    DisabledWhyDirective,
     LucideAngularModule
   ],
   templateUrl: './dev-catalog.page.html',
@@ -68,6 +78,7 @@ interface SampleOption {
 })
 export class DevCatalogPage {
   private readonly userMsg_ = inject(UserMsgService)
+  private readonly document_ = inject(DOCUMENT)
 
   /** The family ids, in page order (the link bar and the section headings). */
   protected readonly families_ = [
@@ -75,6 +86,7 @@ export class DevCatalogPage {
     'multi-pick',
     'modal-shell',
     'list-page',
+    'falling-columns',
     'empty-state',
     'form-field',
     'number-box',
@@ -84,7 +96,9 @@ export class DevCatalogPage {
     'edit-gate',
     'cost-badge',
     'scroll-area',
+    'sideways-row',
     'drag-list',
+    'tooltip',
     'engine-classes'
   ] as const
 
@@ -100,6 +114,15 @@ export class DevCatalogPage {
   ]
   protected readonly labelOf_ = (o: SampleOption): string => o.label
   protected readonly keyOf_ = (o: SampleOption): string => o.value
+
+  // falling-columns (plan 745)
+  protected readonly fallColumns_: readonly ListColumn[] = [
+    { id: 'name', track: '1fr', min: '6rem', stay: true },
+    { id: 'a', track: '1fr', min: '5rem', fall: 3 },
+    { id: 'b', track: '1fr', min: '5rem', fall: 2 },
+    { id: 'c', track: '1fr', min: '5rem', fall: 1 },
+    { id: 'price', track: '4rem', min: '4rem' }
+  ]
 
   // search-combobox
   protected readonly queryEmpty_ = signal('')
@@ -130,8 +153,32 @@ export class DevCatalogPage {
   // scroll-area
   protected readonly lines_ = Array.from({ length: 20 }, (_, i) => `line ${i + 1}`)
 
+  // sideways-row (plan 743)
+  protected readonly chips_ = Array.from({ length: 12 }, (_, i) => `chip ${i + 1}`)
+
   // drag-list
   protected readonly dragRows_ = signal(['first', 'second', 'third', 'fourth'])
+
+  // tooltip: disabled with a reason (plan 747) — the counter would go up if the blocked click ran.
+  protected readonly disabledClicks_ = signal(0)
+
+  protected countDisabledClick(): void {
+    this.disabledClicks_.update((n) => n + 1)
+  }
+
+  /**
+   * A top chip scrolls the page to its section and moves focus to the section's heading. It is not a link: with
+   * the app's `<base href>` a `#id` link would leave the catalog.
+   */
+  protected jumpTo(id: string): void {
+    const section = this.document_.getElementById(id)
+    if (!section) return
+    const view = this.document_.defaultView
+    const reduced =
+      !!view && typeof view.matchMedia === 'function' && view.matchMedia('(prefers-reduced-motion: reduce)').matches
+    section.scrollIntoView({ block: 'start', behavior: reduced ? 'auto' : 'smooth' })
+    section.querySelector<HTMLElement>('h2')?.focus({ preventScroll: true })
+  }
 
   protected onDrop(event: CdkDragDrop<string[]>): void {
     this.moveRow_(event.previousIndex, event.currentIndex)

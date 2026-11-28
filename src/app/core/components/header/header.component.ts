@@ -3,17 +3,23 @@ import {
   Component,
   computed,
   effect,
+  ElementRef,
   inject,
   linkedSignal,
   signal,
-  untracked
+  untracked,
+  viewChild
 } from '@angular/core'
 import { FormsModule } from '@angular/forms'
-import { ActivatedRouteSnapshot, Router, RouterLink, RouterLinkActive } from '@angular/router'
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop'
+import { ActivatedRouteSnapshot, NavigationEnd, Router, RouterLink, RouterLinkActive } from '@angular/router'
+import { filter } from 'rxjs'
+import { ScrollRailComponent } from '../../../shared/scroll-rail/scroll-rail.component'
 import { LucideAngularModule } from 'lucide-angular'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
 import { UserService } from '@services/user.service'
 import { ModuleService } from '@services/module.service'
+import { PermissionService } from '@services/permission.service'
 import { BusinessService } from '@services/business.service'
 import { AuthModalService, AuthMode } from '@services/auth-modal.service'
 import { FrontDeskBadgeService } from '@services/front-desk-badge.service'
@@ -34,6 +40,8 @@ const NAV_LINKS = [
 ]
 /** Plan 646: the consultant's tool, shown with the consultant_diag module (the home module while acting). */
 const DIAGNOSIS_LINK = { path: '/diagnosis', key: 'diagnosis', icon: 'stethoscope' }
+/** Plan 725: the restaurant's standing menu, for the owner (or acting consultant) of a business with dish_analysis. */
+const RESTAURANT_MENU_LINK = { path: '/restaurant-menu', key: 'restaurant_menu', icon: 'utensils' }
 /** Only the business owner gets this one (plan 428). */
 const SETTINGS_LINK = { path: '/settings', key: 'settings', icon: 'sliders-vertical' }
 /** Only the platform admin gets this one (plan 448). */
@@ -49,7 +57,8 @@ const PLATFORM_LINK = { path: '/platform', key: 'platform_dashboard', icon: 'act
     TranslatePipe,
     FormsModule,
     CustomSelectComponent,
-    NotificationBellComponent
+    NotificationBellComponent,
+    ScrollRailComponent
   ],
   templateUrl: './header.component.html',
   styleUrl: './header.component.scss',
@@ -59,11 +68,14 @@ export class HeaderComponent {
   private readonly userService = inject(UserService)
   private readonly businessService = inject(BusinessService)
   private readonly modules = inject(ModuleService)
+  private readonly permission = inject(PermissionService)
   private readonly authModal = inject(AuthModalService)
   private readonly router = inject(Router)
   private readonly translation = inject(TranslationService)
   private readonly access = inject(AccessService)
   private readonly userMsg = inject(UserMsgService)
+  private readonly navRail = viewChild(ScrollRailComponent)
+  private readonly host = inject<ElementRef<HTMLElement>>(ElementRef)
 
   isMobileMenuOpen = signal(false)
   isMobileAvatarOpen = signal(false)
@@ -86,12 +98,17 @@ export class HeaderComponent {
       ? this.userService.homeModules_().includes('consultant_diag')
       : this.modules.has('consultant_diag')
   )
+  /** Plan 725: owner-only (the owner or an acting consultant) and only with dish analysis switched on. */
+  protected readonly showRestaurantMenu_ = computed(
+    () => this.modules.has('dish_analysis') && this.permission.isOwner_()
+  )
   protected readonly navLinks_ = computed(() => [
     ...NAV_LINKS.filter(
       (link) =>
         (link.path !== '/menu-library' || this.showEvents_()) && (link.path !== '/clients' || this.showClients_())
     ),
     ...(this.showDiagnosis_() ? [DIAGNOSIS_LINK] : []),
+    ...(this.showRestaurantMenu_() ? [RESTAURANT_MENU_LINK] : []),
     ...(this.isOwner_() ? [SETTINGS_LINK] : []),
     ...(this.isPlatformAdmin_() ? [PLATFORM_LINK] : [])
   ])
@@ -130,6 +147,21 @@ export class HeaderComponent {
     effect(() => {
       if (userId_()) untracked(() => void this.access.loadBusinesses())
     })
+    // Plan 743: the active link is brought into view in the sideways row after each navigation.
+    this.router.events
+      .pipe(
+        filter((e) => e instanceof NavigationEnd),
+        takeUntilDestroyed()
+      )
+      .subscribe(() => {
+        // routerLinkActive sets `.active` after the same event; look once it has.
+        setTimeout(() => {
+          const active = (this.host.nativeElement as HTMLElement).querySelector<HTMLElement>(
+            '.nav-pills a.nav-pill.active'
+          )
+          if (active) this.navRail()?.centerChild(active, { instant: true })
+        })
+      })
     if (this.userService.consumeAccessEndedNotice()) {
       this.userMsg.onSetSuccessMsg(this.translation.translate('access_ended'))
     }
@@ -169,10 +201,8 @@ export class HeaderComponent {
   protected async logout(): Promise<void> {
     this.isMobileAvatarOpen.set(false)
     this.closeMobileMenu()
-    if (this._isCurrentRouteProtected()) {
-      // Navigate to a public page first so Angular can run canDeactivate guards.
-      // If the user has unsaved changes, pendingChangesGuard shows the save/discard dialog.
-      // navigate() returns false if a guard cancelled the navigation — abort logout.
+    if (this._isCurrentRouteProtected() && this.router.url !== '/dashboard') {
+      // Navigating lets unsaved-changes guards ask (false = stay signed in); a same-URL navigation resolves false without running any guard, so it is skipped.
       const navigated = await this.router.navigate(['/dashboard'])
       if (navigated === false) return
     }

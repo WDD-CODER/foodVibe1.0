@@ -64,6 +64,10 @@ const COLLECTIONS = [
   { name: 'invoices',                 userData: true , cloneable: false, backup: true , searchable: false, softDelete: false, routerWrites: true }, // C-INVOICE, filled by plan 625
   { name: 'diagnoses',                userData: true , cloneable: false, backup: true , searchable: false, softDelete: false, routerWrites: true }, // C-DIAG, filled by plan 633
   { name: 'stockCounts',              userData: true , cloneable: false, backup: true , searchable: false, softDelete: false, routerWrites: true }, // C-STOCK, filled by plan 635
+  // Plan 724: the dish analysis store, written through the generic API (owner and consultant).
+  { name: 'menuDishes',               userData: true , cloneable: false, backup: true , searchable: false, softDelete: false },
+  { name: 'dishSalesMonths',          userData: true , cloneable: false, backup: true , searchable: false, softDelete: false },
+  { name: 'dishSalesAliases',         userData: true , cloneable: false, backup: true , searchable: false, softDelete: false },
   // Server-only (no generic API).
   { name: 'priceHistory',             userData: false, cloneable: false, backup: false, searchable: false, softDelete: false }, // C-INVOICE, plan 625
   { name: 'invoiceAliases',           userData: false, cloneable: false, backup: false, searchable: false, softDelete: false }, // C-ALIAS, plan 627
@@ -71,7 +75,8 @@ const COLLECTIONS = [
   { name: 'aiDrafts',                 userData: false, cloneable: false, backup: false, searchable: false, softDelete: false }, // C-AIDRAFT, plan 618
   { name: 'storedFiles',              userData: false, cloneable: false, backup: false, searchable: false, softDelete: false }, // C-FILES, plan 619
   { name: 'businessAccess',           userData: false, cloneable: false, backup: false, searchable: false, softDelete: false }, // C-ACCESS, plan 631
-  { name: 'notifications',             userData: false, cloneable: false, backup: false, searchable: false, softDelete: false }, // C-NOTIFY, plan 646
+  { name: 'monthPlans',               userData: false, cloneable: false, backup: false, searchable: false, softDelete: false }, // plan 727, written only by routes/month-plans.js
+  { name: 'notifications',            userData: false, cloneable: false, backup: false, searchable: false, softDelete: false }, // C-NOTIFY, plan 646
 ]
 
 const ALL_USER_ENTITY_TYPES = COLLECTIONS.filter(c => c.userData).map(c => c.name)

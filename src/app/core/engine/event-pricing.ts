@@ -1,7 +1,7 @@
 import type { MenuEvent } from '@models/menu-event.model'
 import type { EventPlan } from './event-plan.types'
 
-/** Contract C-PRICING (plan 445): the only place profit, profit %, minimum price and safety margin are computed. */
+/** Contract C-PRICING (plan 445): the only place profit, profit %, minimum price and safety margin are computed. Its monthly counterpart is `month-plan.ts` (plan 728): a month's profit, prime cost and break-even are computed there, never here or in a component. */
 export interface PricingEvent {
   guestCount: number
   pricePerGuest?: number

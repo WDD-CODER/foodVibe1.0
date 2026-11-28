@@ -11,6 +11,7 @@ import { BusinessService } from '@services/business.service'
 import { ModuleService } from '@services/module.service'
 import { PermissionService } from '@services/permission.service'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
+import { DisabledWhyDirective } from 'src/app/shared/tooltip/disabled-why.directive'
 import { ActivityLogService, ActivityEntry, ActivityChange, ActivityEntityType } from '@services/activity-log.service'
 import { TranslationService } from '@services/translation.service'
 import { ScrollIndicatorsDirective } from '@directives/scroll-indicators.directive'
@@ -45,6 +46,7 @@ interface ActivityDayGroup {
     CommonModule,
     LucideAngularModule,
     TranslatePipe,
+    DisabledWhyDirective,
     ActivityValuePipe,
     ScrollIndicatorsDirective,
     PageHeaderComponent,

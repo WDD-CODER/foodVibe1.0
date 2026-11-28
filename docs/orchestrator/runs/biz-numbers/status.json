@@ -1,0 +1,2315 @@
+{
+  "run": "biz-numbers",
+  "branch": "orch/biz-numbers",
+  "base": "main",
+  "startedAt": "2026-11-25T09:01:46.707Z",
+  "mainShaAtStart": "236b9787115dbc91304a932dd85d17b54a293e3d",
+  "plans": {
+    "722": {
+      "nnn": "722",
+      "title": "Record the dish and month research, Dandan's updated decisions and the salary-privacy change to INV-1",
+      "branch": "feat/722-dish-month-decisions-and",
+      "state": "parked",
+      "round": 2,
+      "tier": "judgment",
+      "models": {
+        "builder": {
+          "model": "opus",
+          "tier": "judgment",
+          "at": "2026-11-25T10:46:06.262Z"
+        },
+        "builder fix": {
+          "model": "opus",
+          "tier": "judgment",
+          "at": "2026-11-25T11:52:47.055Z"
+        }
+      },
+      "humanItems": [
+        "Dandan reads section 9 of both reports and says each row's chosen option is what he approved (\"all recommended\").",
+        "Dandan reads the new INV-1 sentence (UI/UX Notes below, as written into `docs/brain/invariants.md`) and says it is the change he approved: per-employee pay lines are the owner's alone; a consultant, a platform admin acting in the business and every other non-owner see labour totals only."
+      ],
+      "history": [
+        {
+          "at": "2026-11-25T09:09:31.842Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-25T09:09:32.397Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-25T09:27:53.320Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-25T10:05:15.540Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-25T10:05:17.183Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-25T10:05:17.592Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-25T10:06:24.508Z",
+          "state": "parked",
+          "round": 0
+        },
+        {
+          "at": "2026-11-25T10:08:42.706Z",
+          "state": "asking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-25T10:46:05.936Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-25T10:46:06.266Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-25T10:57:02.114Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-25T11:16:53.810Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-25T11:16:54.806Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-25T11:16:55.280Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-25T11:25:13.741Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-25T11:40:53.429Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-25T11:40:53.916Z",
+          "state": "fixing",
+          "round": 1
+        },
+        {
+          "at": "2026-11-25T11:40:54.316Z",
+          "state": "fixing",
+          "round": 1
+        },
+        {
+          "at": "2026-11-25T11:52:03.634Z",
+          "state": "gate",
+          "round": 1
+        },
+        {
+          "at": "2026-11-25T11:52:45.655Z",
+          "state": "gate",
+          "round": 1
+        },
+        {
+          "at": "2026-11-25T11:52:46.665Z",
+          "state": "fixing",
+          "round": 1
+        },
+        {
+          "at": "2026-11-25T11:52:47.058Z",
+          "state": "fixing",
+          "round": 1
+        },
+        {
+          "at": "2026-11-25T12:01:54.875Z",
+          "state": "fixing",
+          "round": 1
+        },
+        {
+          "at": "2026-11-25T12:02:49.072Z",
+          "state": "parked",
+          "round": 2
+        }
+      ],
+      "earlier": [
+        {
+          "nnn": "722",
+          "title": "Record the dish and month research, Dandan's updated decisions and the salary-privacy change to INV-1",
+          "branch": "feat/722-dish-month-decisions-and",
+          "state": "asking",
+          "round": 0,
+          "tier": "judgment",
+          "models": {
+            "builder": {
+              "model": "opus",
+              "tier": "judgment",
+              "at": "2026-11-25T09:09:32.392Z"
+            },
+            "builder fix": {
+              "model": "opus",
+              "tier": "judgment",
+              "at": "2026-11-25T10:05:17.589Z"
+            }
+          },
+          "tiers": [
+            "judgment"
+          ],
+          "freeDiskGb": 3.8,
+          "sha": "54bf5efaa777e1a67c506b5e4474e2f0c01beb7d",
+          "calls": [
+            {
+              "stage": "builder",
+              "model": "opus",
+              "seconds": 1091.9,
+              "tokens": {
+                "input": 1337471,
+                "output": 18186
+              },
+              "exit": 0
+            },
+            {
+              "stage": "builder fix",
+              "model": "opus",
+              "seconds": 66.1,
+              "tokens": {
+                "input": 119178,
+                "output": 3673
+              },
+              "exit": 0
+            }
+          ],
+          "roundCauses": [
+            "round 1: gate: node scripts/scope-check.mjs --diff=origin/main --plan=plans/722-dish-month-decisions-and-inv1.plan.md"
+          ],
+          "reason": "asking 722-1: ESCALATE scope: ESCALATE: scope node scripts/scope-check.mjs --diff=origin/main exits 1 on plans/723-729 plan files. The run committed those to orch/biz-numbers, not this branch. The same check against origin/orch/biz-numbers exits 0.",
+          "park": {
+            "at": "2026-11-25T10:08:25.351Z",
+            "reason": "ESCALATE scope: ESCALATE: scope node scripts/scope-check.mjs --diff=origin/main exits 1 on plans/723-729 plan files. The run committed those to orch/biz-numbers, not this branch. The same check against origin/orch/biz-numbers exits 0."
+          },
+          "parkBranch": "park/biz-numbers-722"
+        }
+      ],
+      "escalations": [
+        {
+          "step": "resumed after: asking 722-1: ESCALATE scope: ESCALATE: scope node scripts/scope-check.mjs --diff=origin/main exits 1 on plans/723-729 plan files. The run committed t",
+          "check": "(not given)"
+        }
+      ],
+      "replan": "no — (not given)",
+      "tiers": [
+        "judgment"
+      ],
+      "freeDiskGb": 6.7,
+      "sha": "7a11987b44b3acf808cecd08ed99c7aaab2443c1",
+      "calls": [
+        {
+          "stage": "builder",
+          "model": "opus",
+          "seconds": 650,
+          "tokens": {
+            "input": 147150,
+            "output": 4438
+          },
+          "exit": 0
+        },
+        {
+          "stage": "builder fix",
+          "model": "opus",
+          "seconds": 493.7,
+          "tokens": {
+            "input": 139966,
+            "output": 4404
+          },
+          "exit": 0
+        },
+        {
+          "stage": "builder fix",
+          "model": "opus",
+          "seconds": 663.5,
+          "tokens": {
+            "input": 138975,
+            "output": 4634
+          },
+          "exit": 0
+        },
+        {
+          "stage": "builder fix",
+          "model": "opus",
+          "seconds": 418.6,
+          "tokens": {
+            "input": 156556,
+            "output": 4758
+          },
+          "exit": 0
+        }
+      ],
+      "roundCauses": [
+        "round 1: gate: node scripts/scope-check.mjs --diff=origin/main --plan=plans/722-dish-month-decisions-and-inv1.plan.md",
+        "round 2: gate: node scripts/scope-check.mjs --diff=origin/main --plan=plans/722-dish-month-decisions-and-inv1.plan.md",
+        "round 2: git push -u origin feat/722-dish-month-decisions-and failed: fatal: unable to access 'https://github.com/WDD-CODER/foodVibe1.0.git/': Could not resolve host: github.com"
+      ],
+      "reason": "hand-off file: git fetch origin failed: fatal: expected flush after ref listing",
+      "park": {
+        "at": "2026-11-25T12:05:26.401Z",
+        "reason": "hand-off file: git fetch origin failed: fatal: expected flush after ref listing"
+      },
+      "parkBranch": "park/biz-numbers-722"
+    },
+    "723": {
+      "nnn": "723",
+      "title": "One VAT rate and dealer type for the whole business, set by the owner",
+      "branch": "feat/723-business-vat-rate-and",
+      "state": "merged",
+      "round": 0,
+      "tier": "build",
+      "models": {
+        "builder": {
+          "model": "sonnet",
+          "tier": "build",
+          "at": "2026-11-25T12:08:37.240Z"
+        },
+        "reviewer": {
+          "model": "sonnet",
+          "at": "2026-11-25T12:45:57.750Z"
+        }
+      },
+      "humanItems": [
+        "As the owner, open «הגדרות» → «הגדרות עסק»: «שיעור מע״מ (%)» shows 18 and «סוג עוסק» shows «עוסק מורשה». Change the rate to 17 and the type to «עוסק פטור», press «שמור»: the toast «ההגדרות נשמרו» shows, and after a reload both values are still 17 and «עוסק פטור».",
+        "Type 101 in «שיעור מע״מ (%)»: the field shows «חייב להיות בין 0 ל-100» and «שמור» stays disabled.",
+        "As a consultant acting in that business (rate 17 from the card above), create a new diagnosis: its menu step shows «אחוז מע״מ» 17, not 18. A diagnosis made before the change keeps its own rate.",
+        "the screen's page with the data request failing · open the page · a readable error with a retry appears, not a blank page — with the server stopped, saving «הגדרות עסק» shows «השמירה נכשלה» and the typed values stay in the boxes so «שמור» can be pressed again."
+      ],
+      "history": [
+        {
+          "at": "2026-11-25T10:11:59.874Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-25T10:12:00.240Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-25T10:38:45.452Z",
+          "state": "parked",
+          "round": 0
+        },
+        {
+          "at": "2026-11-25T10:42:33.810Z",
+          "state": "asking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-25T12:08:36.835Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-25T12:08:37.243Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-25T12:31:18.286Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-25T12:45:46.344Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-25T12:45:57.752Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-25T12:46:10.779Z",
+          "state": "merging",
+          "round": 0
+        },
+        {
+          "at": "2026-11-25T12:48:15.065Z",
+          "state": "merged",
+          "round": 0
+        }
+      ],
+      "earlier": [
+        {
+          "nnn": "723",
+          "title": "One VAT rate and dealer type for the whole business, set by the owner",
+          "branch": "feat/723-business-vat-rate-and",
+          "state": "asking",
+          "round": 0,
+          "tier": "build",
+          "models": {
+            "builder": {
+              "model": "sonnet",
+              "tier": "build",
+              "at": "2026-11-25T10:12:00.235Z"
+            }
+          },
+          "tiers": [
+            "build"
+          ],
+          "freeDiskGb": 2.3,
+          "reason": "asking 723-1: ESCALATE scope: ESCALATE: scope server/test/business-route.test.js:32 asserts the exact default settings; it now needs vatRatePct: 18 and dealerType: 'murshe', and the scope guard refuses writes there",
+          "calls": [
+            {
+              "stage": "builder",
+              "model": "sonnet",
+              "seconds": 1604.3,
+              "tokens": {
+                "input": 547442,
+                "output": 4785
+              },
+              "exit": 0
+            }
+          ],
+          "park": {
+            "at": "2026-11-25T10:42:18.101Z",
+            "reason": "ESCALATE scope: ESCALATE: scope server/test/business-route.test.js:32 asserts the exact default settings; it now needs vatRatePct: 18 and dealerType: 'murshe', and the scope guard refuses writes there"
+          },
+          "parkBranch": "park/biz-numbers-723"
+        }
+      ],
+      "escalations": [
+        {
+          "step": "resumed after: asking 723-1: ESCALATE scope: ESCALATE: scope server/test/business-route.test.js:32 asserts the exact default settings; it now needs vatRatePct: 18 an",
+          "check": "(not given)"
+        }
+      ],
+      "replan": "no — (not given)",
+      "tiers": [
+        "build"
+      ],
+      "freeDiskGb": 7.1,
+      "sha": "4faffd14a4e2b898ac31148a6e3eedb67772ce4b",
+      "calls": [
+        {
+          "stage": "builder",
+          "model": "sonnet",
+          "seconds": 1356.7,
+          "tokens": {
+            "input": 205434,
+            "output": 2883
+          },
+          "exit": 0
+        },
+        {
+          "stage": "reviewer",
+          "model": "sonnet",
+          "seconds": 10.5,
+          "tokens": {
+            "input": 88898,
+            "output": 506
+          },
+          "exit": 0
+        }
+      ],
+      "checkedHead": "4fba42d484c1893d0052345777af62105853e571"
+    },
+    "724": {
+      "nnn": "724",
+      "title": "Dish analysis store: module, standing menu, monthly dish sales and sales-name aliases",
+      "branch": "feat/724-dish-analysis-store",
+      "state": "merged",
+      "round": 0,
+      "tier": "build",
+      "models": {
+        "builder": {
+          "model": "sonnet",
+          "tier": "build",
+          "at": "2026-11-25T13:30:36.267Z"
+        },
+        "reviewer": {
+          "model": "sonnet",
+          "at": "2026-11-25T13:55:47.953Z"
+        }
+      },
+      "humanItems": [
+        "On `/platform`, Dandan opens a business: the module list shows «ניתוח מנות» as a sixth tick box; ticking it,"
+      ],
+      "history": [
+        {
+          "at": "2026-11-25T10:42:35.622Z",
+          "state": "queued",
+          "round": 0
+        },
+        {
+          "at": "2026-11-25T12:53:22.319Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-25T12:53:22.690Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-25T13:24:20.870Z",
+          "state": "parked",
+          "round": 0
+        },
+        {
+          "at": "2026-11-25T13:27:54.990Z",
+          "state": "asking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-25T13:30:36.056Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-25T13:30:36.270Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-25T13:43:35.335Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-25T13:55:39.262Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-25T13:55:47.955Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-25T13:56:01.721Z",
+          "state": "merging",
+          "round": 0
+        },
+        {
+          "at": "2026-11-25T13:56:49.247Z",
+          "state": "merged",
+          "round": 0
+        }
+      ],
+      "earlier": [
+        {
+          "nnn": "724",
+          "round": 0,
+          "models": {},
+          "state": "queued",
+          "reason": "waits on the answer to ask 723-1",
+          "freeDiskGb": 2.3
+        },
+        {
+          "nnn": "724",
+          "title": "Dish analysis store: module, standing menu, monthly dish sales and sales-name aliases",
+          "branch": "feat/724-dish-analysis-store",
+          "state": "asking",
+          "round": 0,
+          "tier": "build",
+          "models": {
+            "builder": {
+              "model": "sonnet",
+              "tier": "build",
+              "at": "2026-11-25T12:53:22.687Z"
+            }
+          },
+          "tiers": [
+            "build"
+          ],
+          "freeDiskGb": 7.2,
+          "reason": "asking 724-1: replan needed: ESCALATE: scope server/test/admin-business.test.js — `pnpm run test:server` exits non-zero (6 failures, E11000 on the new unique indexes); the fixture needs `month: suffix, nameKey: suffix`; offer `approved: server/test/admin-business.test.js`",
+          "calls": [
+            {
+              "stage": "builder",
+              "model": "sonnet",
+              "seconds": 1857.5,
+              "tokens": {
+                "input": 4789634,
+                "output": 47446
+              },
+              "exit": 0
+            }
+          ],
+          "park": {
+            "at": "2026-11-25T13:27:39.737Z",
+            "reason": "replan needed: ESCALATE: scope server/test/admin-business.test.js — `pnpm run test:server` exits non-zero (6 failures, E11000 on the new unique indexes); the fixture needs `month: suffix, nameKey: suffix`; offer `approved: server/test/admin-business.test.js`"
+          },
+          "parkBranch": "park/biz-numbers-724"
+        }
+      ],
+      "escalations": [
+        {
+          "step": "resumed after: asking 724-1: replan needed: ESCALATE: scope server/test/admin-business.test.js — `pnpm run test:server` exits non-zero (6 failures, E11000 on the new",
+          "check": "(not given)"
+        }
+      ],
+      "replan": "no — (not given)",
+      "tiers": [
+        "build"
+      ],
+      "freeDiskGb": 7,
+      "sha": "a1492953f5db5bf57230f322b67bd5ac96265ac3",
+      "calls": [
+        {
+          "stage": "builder",
+          "model": "sonnet",
+          "seconds": 775.6,
+          "tokens": {
+            "input": 379495,
+            "output": 4792
+          },
+          "exit": 0
+        },
+        {
+          "stage": "reviewer",
+          "model": "sonnet",
+          "seconds": 12.3,
+          "tokens": {
+            "input": 125743,
+            "output": 616
+          },
+          "exit": 0
+        }
+      ],
+      "checkedHead": "ff38a34861a1fcbeb37e1201689201ce13cb3b83"
+    },
+    "725": {
+      "nnn": "725",
+      "title": "Standing menu page: the restaurant's dishes with price, net price and cost per portion",
+      "branch": "feat/725-standing-menu-page",
+      "state": "merged",
+      "round": 0,
+      "tier": "build",
+      "models": {
+        "builder": {
+          "model": "sonnet",
+          "tier": "build",
+          "at": "2026-11-25T14:00:08.320Z"
+        },
+        "builder fix": {
+          "model": "sonnet",
+          "tier": "build",
+          "at": "2026-11-25T14:20:06.546Z"
+        },
+        "reviewer": {
+          "model": "sonnet",
+          "at": "2026-11-25T14:39:27.206Z"
+        }
+      },
+      "humanItems": [
+        "The header shows «תפריט המסעדה» only for a business with «ניתוח מנות» switched on, and never to a staff",
+        "the list's page with no items · open the page · a message says the list is empty — here: «תפריט המסעדה» of a business with no dishes says «עוד אין מנות בתפריט» with «הוספת מנה».",
+        "Add a dish linked to a recipe: the course fills in from the recipe, the row shows the price, «נטו» (price ÷",
+        "A dish linked to a recipe that has an ingredient without a price shows the cost with the «חלקי» badge and",
+        "A dish linked to a bought product (for example a bottle of juice, amount 1 in «יחידה») and a dish with a typed",
+        "the page with the delete button · press delete, then cancel · a confirmation appears and nothing is removed — here: a dish's row menu «הסר מהתפריט», then «ביטול»: the dish stays; again with «אישור»: it leaves the list, and «הצג מנות שהוסרו» shows it with «החזר לתפריט».",
+        "the screen's page with the data request failing · open the page · a readable error with a retry appears, not a blank page — here: with the server stopped, «תפריט המסעדה» shows «לא הצלחנו לטעון את התפריט» and «נסו שוב».",
+        "any list page on a phone and on a desktop · look at the rows · the page header matches the other list pages and every row stays on one line — here: «תפריט המסעדה» next to «מוצרים».",
+        "Signed in as staff and opening `/restaurant-menu` by hand shows «המסך זמין לבעל העסק בלבד» and no prices."
+      ],
+      "history": [
+        {
+          "at": "2026-11-25T10:42:36.237Z",
+          "state": "queued",
+          "round": 0
+        },
+        {
+          "at": "2026-11-25T13:27:56.466Z",
+          "state": "queued",
+          "round": 0
+        },
+        {
+          "at": "2026-11-25T14:00:08.100Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-25T14:00:08.326Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-25T14:19:51.888Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-25T14:20:05.868Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-25T14:20:06.348Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-25T14:20:06.547Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-25T14:29:56.202Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-25T14:39:11.363Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-25T14:39:27.207Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-25T14:39:57.109Z",
+          "state": "merging",
+          "round": 0
+        },
+        {
+          "at": "2026-11-25T14:44:44.975Z",
+          "state": "merged",
+          "round": 0
+        }
+      ],
+      "earlier": [
+        {
+          "nnn": "725",
+          "round": 0,
+          "models": {},
+          "state": "queued",
+          "reason": "waits on the answer to ask 724-1",
+          "freeDiskGb": 7.2
+        }
+      ],
+      "tiers": [
+        "build"
+      ],
+      "freeDiskGb": 6.2,
+      "sha": "e65968aeaee5f25f54a3232490778dc5085a427c",
+      "calls": [
+        {
+          "stage": "builder",
+          "model": "sonnet",
+          "seconds": 1180.1,
+          "tokens": {
+            "input": 7128997,
+            "output": 69541
+          },
+          "exit": 0
+        },
+        {
+          "stage": "builder fix",
+          "model": "sonnet",
+          "seconds": 584.9,
+          "tokens": {
+            "input": 333455,
+            "output": 6702
+          },
+          "exit": 0
+        },
+        {
+          "stage": "reviewer",
+          "model": "sonnet",
+          "seconds": 27.2,
+          "tokens": {
+            "input": 383418,
+            "output": 1621
+          },
+          "exit": 0
+        }
+      ],
+      "roundCauses": [
+        "round 1: gate: node \"C:/coding projects/Cursor/foodvibe1.0/scripts/kit-checks.mjs\" --base origin/orch/biz-numbers --plan plans/725-standing-menu-page.plan.md"
+      ],
+      "checkedHead": "0204cfb183f09f4d60e4a31e2e9eed1879956272"
+    },
+    "726": {
+      "nnn": "726",
+      "title": "Type a month's dish sales and returns, with a reason for every return",
+      "branch": "feat/726-typed-monthly-dish-sales",
+      "state": "merged",
+      "round": 0,
+      "tier": "build",
+      "models": {
+        "builder": {
+          "model": "sonnet",
+          "tier": "build",
+          "at": "2026-11-25T14:49:37.715Z"
+        },
+        "reviewer": {
+          "model": "sonnet",
+          "at": "2026-11-25T15:29:04.098Z"
+        }
+      },
+      "humanItems": [
+        "On «תפריט המסעדה» the chips «תפריט» and «מכירות החודש» show; «מכירות החודש» opens this month (for example",
+        "Type sold and returned for two dishes, leave a third empty, type 0 for a fourth and press «שמירה»: the",
+        "On a dish with 3 returned, «סיבות» opens a popup: give 2 to «הוחזר על ידי אורח» and 1 to «אחר» with a note;",
+        "In the same popup type a new reason «מנה קרה» and add it: it is selected, can take a count, and is offered",
+        "the screen's page with the data request failing · open the page · a readable error with a retry appears, not a blank page — here: with the server stopped, «מכירות החודש» shows «לא הצלחנו לטעון את המכירות» and «נסו שוב».",
+        "the list's page with no items · open the page · a message says the list is empty — here: «מכירות החודש» of a business with no dishes says «עוד אין מנות בתפריט» with a link to «תפריט המסעדה».",
+        "Type a number, then press the back arrow to another month or click another link: the app asks before",
+        "any list page on a phone and on a desktop · look at the rows · the page header matches the other list pages and every row stays on one line — here: «מכירות החודש» on a phone, the two number boxes stay on the dish's line."
+      ],
+      "history": [
+        {
+          "at": "2026-11-25T10:42:36.928Z",
+          "state": "queued",
+          "round": 0
+        },
+        {
+          "at": "2026-11-25T13:27:56.808Z",
+          "state": "queued",
+          "round": 0
+        },
+        {
+          "at": "2026-11-25T14:49:37.464Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-25T14:49:37.717Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-25T15:20:57.266Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-25T15:28:44.834Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-25T15:29:04.102Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-25T15:29:24.826Z",
+          "state": "merging",
+          "round": 0
+        },
+        {
+          "at": "2026-11-25T15:31:50.776Z",
+          "state": "merged",
+          "round": 0
+        }
+      ],
+      "earlier": [
+        {
+          "nnn": "726",
+          "round": 0,
+          "models": {},
+          "state": "queued",
+          "reason": "waits on the answer to ask 724-1",
+          "freeDiskGb": 7.2
+        }
+      ],
+      "tiers": [
+        "build"
+      ],
+      "freeDiskGb": 4.4,
+      "sha": "2d0122eb17737d21f115cc2fb6444cbd57546fc2",
+      "calls": [
+        {
+          "stage": "builder",
+          "model": "sonnet",
+          "seconds": 1873.5,
+          "tokens": {
+            "input": 8146580,
+            "output": 77288
+          },
+          "exit": 0
+        },
+        {
+          "stage": "reviewer",
+          "model": "sonnet",
+          "seconds": 17.6,
+          "tokens": {
+            "input": 123189,
+            "output": 923
+          },
+          "exit": 0
+        }
+      ],
+      "checkedHead": "92c0163368adbf2314fc0c9dd10f8d34601a279a"
+    },
+    "727": {
+      "nnn": "727",
+      "title": "Monthly plan: the month record, its module and a page to open a month and type revenue and targets",
+      "branch": "feat/727-monthly-plan-store-and",
+      "state": "merged",
+      "round": 0,
+      "tier": "build",
+      "models": {
+        "builder": {
+          "model": "sonnet",
+          "tier": "build",
+          "at": "2026-11-25T16:25:40.064Z"
+        },
+        "reviewer": {
+          "model": "sonnet",
+          "at": "2026-11-25T16:46:40.017Z"
+        }
+      },
+      "humanItems": [
+        "As the platform admin, open a test business, tick «תכנון חודשי» and save with a reason; sign in as that business's owner: the dashboard chips show «תכנון חודשי».",
+        "On «תכנון חודשי» with no month yet: the page says «עוד אין חודשים. פתחו את החודש הראשון.»; press «חודש חדש», keep the current month and press «פתח חודש»: the month opens with both revenue boxes empty and marked «לא הוזן», and the targets 32 / 33 / 65 / 25 / 10 with «מקובל בישראל» beside each.",
+        "Type 0 in «הכנסה בפועל» and 120000 in «הכנסה צפויה», change «רווח נקי» to 8, press «שמירה», reload: the 0 is still 0 (not «לא הוזן»), the 120000 and the 8 are kept.",
+        "the list's page with no items · open the page · a message says the list is empty — «תכנון חודשי» of a business with no month shows «עוד אין חודשים. פתחו את החודש הראשון.».",
+        "the screen's page with the data request failing · open the page · a readable error with a retry appears, not a blank page — with the server stopped, «תכנון חודשי» shows «לא הצלחנו לטעון את החודשים» and «נסו שוב».",
+        "Sign in as a staff member of the same business: no «תכנון חודשי» chip, and typing `/monthly-plan` in the address bar lands on the dashboard."
+      ],
+      "history": [
+        {
+          "at": "2026-11-25T10:42:35.923Z",
+          "state": "queued",
+          "round": 0
+        },
+        {
+          "at": "2026-11-25T13:27:57.145Z",
+          "state": "queued",
+          "round": 0
+        },
+        {
+          "at": "2026-11-25T15:38:45.470Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-25T15:38:46.392Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-25T16:22:59.631Z",
+          "state": "parked",
+          "round": 0
+        },
+        {
+          "at": "2026-11-25T16:23:53.347Z",
+          "state": "asking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-25T16:25:39.922Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-25T16:25:40.065Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-25T16:36:47.349Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-25T16:46:33.561Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-25T16:46:40.018Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-25T16:46:54.343Z",
+          "state": "merging",
+          "round": 0
+        },
+        {
+          "at": "2026-11-25T16:47:39.780Z",
+          "state": "merged",
+          "round": 0
+        }
+      ],
+      "earlier": [
+        {
+          "nnn": "727",
+          "round": 0,
+          "models": {},
+          "state": "queued",
+          "reason": "waits on the answer to ask 724-1",
+          "freeDiskGb": 7.2
+        },
+        {
+          "nnn": "727",
+          "title": "Monthly plan: the month record, its module and a page to open a month and type revenue and targets",
+          "branch": "feat/727-monthly-plan-store-and",
+          "state": "asking",
+          "round": 0,
+          "tier": "build",
+          "models": {
+            "builder": {
+              "model": "sonnet",
+              "tier": "build",
+              "at": "2026-11-25T15:38:46.389Z"
+            }
+          },
+          "tiers": [
+            "build"
+          ],
+          "freeDiskGb": 5.9,
+          "reason": "asking 727-1: ESCALATE scope: ESCALATE: scope server/test/business-route.test.js — `pnpm run test:server` exits 1 (1 of 2086 tests failed): line 32 expects the exact `GET /business` settings object, which now also carries `monthTargets`. The scope guard refuses the write.",
+          "calls": [
+            {
+              "stage": "builder",
+              "model": "sonnet",
+              "seconds": 2652.9,
+              "tokens": {
+                "input": 17591328,
+                "output": 91319
+              },
+              "exit": 0
+            }
+          ],
+          "park": {
+            "at": "2026-11-25T16:23:43.275Z",
+            "reason": "ESCALATE scope: ESCALATE: scope server/test/business-route.test.js — `pnpm run test:server` exits 1 (1 of 2086 tests failed): line 32 expects the exact `GET /business` settings object, which now also carries `monthTargets`. The scope guard refuses the write."
+          },
+          "parkBranch": "park/biz-numbers-727"
+        }
+      ],
+      "escalations": [
+        {
+          "step": "resumed after: asking 727-1: ESCALATE scope: ESCALATE: scope server/test/business-route.test.js — `pnpm run test:server` exits 1 (1 of 2086 tests failed): line 32 ex",
+          "check": "(not given)"
+        }
+      ],
+      "replan": "no — (not given)",
+      "tiers": [
+        "build"
+      ],
+      "freeDiskGb": 5.1,
+      "sha": "08cc22072e5ee2cdb491d06a1a2f9be46d0a4f1d",
+      "calls": [
+        {
+          "stage": "builder",
+          "model": "sonnet",
+          "seconds": 664.7,
+          "tokens": {
+            "input": 188312,
+            "output": 3294
+          },
+          "exit": 0
+        },
+        {
+          "stage": "reviewer",
+          "model": "sonnet",
+          "seconds": 13.1,
+          "tokens": {
+            "input": 203507,
+            "output": 699
+          },
+          "exit": 0
+        }
+      ],
+      "checkedHead": "377c68d49a2a72f8be55e9932a0ccd3893c12639"
+    },
+    "728": {
+      "nnn": "728",
+      "title": "Month engine: profit, prime cost, break-even and an honest missing list on the monthly page",
+      "branch": "feat/728-month-engine-and-missing",
+      "state": "merged",
+      "round": 0,
+      "tier": "build",
+      "models": {
+        "builder": {
+          "model": "sonnet",
+          "tier": "build",
+          "at": "2026-11-25T16:49:50.632Z"
+        },
+        "builder fix": {
+          "model": "sonnet",
+          "tier": "build",
+          "at": "2026-11-25T17:02:49.047Z"
+        },
+        "reviewer": {
+          "model": "sonnet",
+          "at": "2026-11-25T17:06:05.504Z"
+        }
+      },
+      "humanItems": [
+        "On «תכנון חודשי», open a month with «הכנסה צפויה» 100000 and nothing else: «תמונת החודש» shows «הוזנו 0 מתוך 4», the actual column shows «לא הוזן» for every row, and the plan column's profit carries «חלקי».",
+        "Type 0 in «הכנסה בפועל» and save: the badge goes to «הוזנו 1 מתוך 4» (0 counts as entered) and the actual percentages show «—», not a number.",
+        "In «מחיר מנה מומלץ» type 5 as the plate cost with the food target at 30%: it shows «16.67 ₪ לפני מע״מ» and «19.67 ₪ כולל מע״מ»."
+      ],
+      "history": [
+        {
+          "at": "2026-11-25T10:42:36.642Z",
+          "state": "queued",
+          "round": 0
+        },
+        {
+          "at": "2026-11-25T13:27:57.475Z",
+          "state": "queued",
+          "round": 0
+        },
+        {
+          "at": "2026-11-25T16:23:54.128Z",
+          "state": "queued",
+          "round": 0
+        },
+        {
+          "at": "2026-11-25T16:49:50.409Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-25T16:49:50.634Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-25T17:02:40.665Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-25T17:02:48.672Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-25T17:02:48.922Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-25T17:02:49.049Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-25T17:03:17.128Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-25T17:05:58.336Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-25T17:06:05.506Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-25T17:06:20.480Z",
+          "state": "merging",
+          "round": 0
+        },
+        {
+          "at": "2026-11-25T17:07:01.488Z",
+          "state": "merged",
+          "round": 0
+        }
+      ],
+      "earlier": [
+        {
+          "nnn": "728",
+          "round": 0,
+          "models": {},
+          "state": "queued",
+          "reason": "waits on the answer to ask 727-1",
+          "freeDiskGb": 5.9
+        }
+      ],
+      "tiers": [
+        "build"
+      ],
+      "freeDiskGb": 5.1,
+      "sha": "c3d9db2377eaf3366211a4c17b8f0cc826adb59a",
+      "calls": [
+        {
+          "stage": "builder",
+          "model": "sonnet",
+          "seconds": 767.3,
+          "tokens": {
+            "input": 3028494,
+            "output": 42412
+          },
+          "exit": 0
+        },
+        {
+          "stage": "builder fix",
+          "model": "sonnet",
+          "seconds": 25.4,
+          "tokens": {
+            "input": 70954,
+            "output": 1080
+          },
+          "exit": 0
+        },
+        {
+          "stage": "reviewer",
+          "model": "sonnet",
+          "seconds": 13.6,
+          "tokens": {
+            "input": 51618,
+            "output": 1333
+          },
+          "exit": 0
+        }
+      ],
+      "roundCauses": [
+        "round 1: gate: node \"C:/coding projects/Cursor/foodvibe1.0/scripts/kit-checks.mjs\" --base origin/orch/biz-numbers --plan plans/728-month-engine-and-missing-list.plan.md"
+      ],
+      "checkedHead": "3f4704263f152fe42c5e020019c7fabeeb527bb5"
+    },
+    "729": {
+      "nnn": "729",
+      "title": "Monthly plan: fixed cost lines or one rough total, the labour total and typed purchases",
+      "branch": "feat/729-month-fixed-costs-and",
+      "state": "merged",
+      "round": 0,
+      "tier": "build",
+      "models": {
+        "builder": {
+          "model": "sonnet",
+          "tier": "build",
+          "at": "2026-11-25T17:09:12.657Z"
+        },
+        "reviewer": {
+          "model": "sonnet",
+          "at": "2026-11-25T18:00:47.717Z"
+        }
+      },
+      "humanItems": [
+        "Open a month on «תכנון חודשי»: «הוצאות קבועות» lists «שכירות», «ארנונה», «חשמל», «מים», «גז», «ביטוח», «כשרות», «שיווק», all «לא הוזן», and the line «הוזנו 0 מתוך 8 שורות».",
+        "Type 12000 in «שכירות» (בפועל), press «הוסף שורה», name it «הנהלת חשבונות» and type 1500, save and reload: both are kept and the line says «הוזנו 2 מתוך 9 שורות».",
+        "Switch «הוצאות קבועות» to «סכום אחד», type 30000, save: «תמונת החודש» uses 30000 as fixed costs; switch back to «שורות»: the 12000 and 1500 are still there and the figure goes back to 13500.",
+        "In «עלות צוות» choose «ברוטו», type 40000: it shows «50,000 ₪ (הערכה)» and the factor box «1.25»; change the factor to 1.3: it shows «52,000 ₪ (הערכה)».",
+        "the page with the delete button · press delete, then cancel · a confirmation appears and nothing is removed — on «תכנון חודשי» press «הסר» on «הנהלת חשבונות»: «להסיר את השורה?» asks; «ביטול» leaves the line, a second try with «הסר» removes it.",
+        "Fill «הכנסה בפועל», «קניות חומרי גלם», «עלות צוות» and one fixed line, save: the badge reads «הוזנו 4 מתוך 4» and «חלקי» shows only beside the fixed figure while other lines are still «לא הוזן».",
+        "Change a fixed line, then press another chip without saving: the page asks whether to leave; «הישאר» keeps the typed number."
+      ],
+      "history": [
+        {
+          "at": "2026-11-25T10:42:37.249Z",
+          "state": "queued",
+          "round": 0
+        },
+        {
+          "at": "2026-11-25T13:27:57.930Z",
+          "state": "queued",
+          "round": 0
+        },
+        {
+          "at": "2026-11-25T16:23:54.272Z",
+          "state": "queued",
+          "round": 0
+        },
+        {
+          "at": "2026-11-25T17:09:12.518Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-25T17:09:12.658Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-25T17:49:08.179Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-25T18:00:32.917Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-25T18:00:47.720Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-25T18:01:11.456Z",
+          "state": "merging",
+          "round": 0
+        },
+        {
+          "at": "2026-11-25T18:02:08.204Z",
+          "state": "merged",
+          "round": 0
+        }
+      ],
+      "earlier": [
+        {
+          "nnn": "729",
+          "round": 0,
+          "models": {},
+          "state": "queued",
+          "reason": "waits on the answer to ask 727-1",
+          "freeDiskGb": 5.9
+        }
+      ],
+      "tiers": [
+        "build"
+      ],
+      "freeDiskGb": 5,
+      "sha": "61409545a2cf53d95c87a1e5a39c48c5db2e139e",
+      "calls": [
+        {
+          "stage": "builder",
+          "model": "sonnet",
+          "seconds": 2392.7,
+          "tokens": {
+            "input": 8831285,
+            "output": 60171
+          },
+          "exit": 0
+        },
+        {
+          "stage": "reviewer",
+          "model": "sonnet",
+          "seconds": 21,
+          "tokens": {
+            "input": 189150,
+            "output": 1351
+          },
+          "exit": 0
+        }
+      ],
+      "checkedHead": "ef254b70fc614289b4bb49ea40af4d7675c939b8"
+    }
+  },
+  "notes": [
+    {
+      "at": "2026-11-25T09:09:07.997Z",
+      "plan": "722",
+      "text": "starts on the judgment tier: INV-1 changes"
+    },
+    {
+      "at": "2026-11-25T09:09:31.406Z",
+      "plan": "722",
+      "text": "the folder foodVibe1.0-orch-biz-numbers-722 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-25T09:27:44.672Z",
+      "plan": "722",
+      "text": "builder left undone (round 0): scope-check (kit copy) --diff=origin/orch/biz-numbers: fails from the builder worktree. It resolves git from repoRoot = resolve(__dirname,'..'), which is the main checkout, so it lists that checkout's files (.claude/todo.md, plans/736–738), none of them in this branch. The worktree's own scope-check"
+    },
+    {
+      "at": "2026-11-25T09:27:54.423Z",
+      "plan": "722",
+      "text": "GATE: skip pnpm run test:ci — no change under src/**, public/**, shared/**, angular.json, tsconfig*.json, karma.conf.*"
+    },
+    {
+      "at": "2026-11-25T10:05:12.709Z",
+      "plan": "722",
+      "text": "GATE: not run — node scripts/scope-check.mjs --diff=origin/main --plan=plans/722-dish-month-decisions-and-inv1.plan.md failed first; runs after the fix: node scripts/orch-state.mjs prepare --missing server/generated/schemas --script build:schemas --pm pnpm"
+    },
+    {
+      "at": "2026-11-25T10:05:13.431Z",
+      "plan": "722",
+      "text": "GATE: not run — node scripts/scope-check.mjs --diff=origin/main --plan=plans/722-dish-month-decisions-and-inv1.plan.md failed first; runs after the fix: pnpm run build"
+    },
+    {
+      "at": "2026-11-25T10:05:13.997Z",
+      "plan": "722",
+      "text": "GATE: not run — node scripts/scope-check.mjs --diff=origin/main --plan=plans/722-dish-month-decisions-and-inv1.plan.md failed first; runs after the fix: pnpm run lint"
+    },
+    {
+      "at": "2026-11-25T10:05:14.461Z",
+      "plan": "722",
+      "text": "GATE: not run — node scripts/scope-check.mjs --diff=origin/main --plan=plans/722-dish-month-decisions-and-inv1.plan.md failed first; runs after the fix: pnpm run lint:icons"
+    },
+    {
+      "at": "2026-11-25T10:05:15.046Z",
+      "plan": "722",
+      "text": "GATE: not run — node scripts/scope-check.mjs --diff=origin/main --plan=plans/722-dish-month-decisions-and-inv1.plan.md failed first; runs after the fix: pnpm run lint:no-native-select"
+    },
+    {
+      "at": "2026-11-25T10:05:16.698Z",
+      "plan": "722",
+      "text": "node scripts/scope-check.mjs --diff=origin/main --plan=plans/722-dish-month-decisions-and-inv1.plan.md failed before the slow checks: back to the builder (a bounce, not counted in maxFixRounds); the next gate runs every check"
+    },
+    {
+      "at": "2026-11-25T10:06:24.014Z",
+      "plan": "722",
+      "text": "builder left undone (round 0): gate-1: can't be fixed from this branch. The check's base (origin/main) also counts the run branch's own commits to other plans' files. Adding those files to plan 722's scope would be fake, and the gate checks the scope as the run branch holds it."
+    },
+    {
+      "at": "2026-11-25T10:08:42.379Z",
+      "plan": "722",
+      "text": "parked: nothing to save (nothing uncommitted)"
+    },
+    {
+      "at": "2026-11-25T10:08:43.084Z",
+      "plan": "722",
+      "text": "ask 722-1 (scope, the Human or the advisor answers): The origin/main scope check for plan 722 fails only on plans/723-729, which the run committed to orch/biz-numbers. How should the run treat it?"
+    },
+    {
+      "at": "2026-11-25T10:11:59.494Z",
+      "plan": "723",
+      "text": "the folder foodVibe1.0-orch-biz-numbers-723 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-25T10:38:44.946Z",
+      "plan": "723",
+      "text": "builder left undone (round 0): A6 (not ticked): folder maps are updated, but the full check list is not finished. test:server still fails on server/test/business-route.test.js, and admin-business-delete.test.js needs a rerun.; server/test/business-route.test.js:32 must add vatRatePct: 18 and dealerType: 'murshe' to its expected s"
+    },
+    {
+      "at": "2026-11-25T10:42:33.505Z",
+      "plan": "723",
+      "text": "parked: nothing to save (nothing uncommitted)"
+    },
+    {
+      "at": "2026-11-25T10:42:34.103Z",
+      "plan": "723",
+      "text": "ask 723-1 (scope, the Human or the advisor answers): Add server/test/business-route.test.js to plan 723's scope so its exact-defaults expectation can include vatRatePct 18 and dealerType 'murshe'?"
+    },
+    {
+      "at": "2026-11-25T10:42:34.870Z",
+      "plan": "723",
+      "text": "decided without the Human: advisor · scope: ask 723-1 (\"Add server/test/business-route.test.js to plan 723's scope so its exact-defaults expectation can include vatRatePct 18 and dealerType 'murshe'?\") answered: approved: server/test/business-route.test.js"
+    },
+    {
+      "at": "2026-11-25T10:42:37.662Z",
+      "text": "plan 723 asks 723-1 — 724, 727, 725, 728, 726, 729 wait on the answer; the rest go on"
+    },
+    {
+      "at": "2026-11-25T10:42:37.998Z",
+      "plan": "722",
+      "text": "ask 722-1 answered by the human: Treat the origin/main scope check as passed for 722, or run it with --diff=origin/orch/biz-numbers, which exits 0"
+    },
+    {
+      "at": "2026-11-25T10:43:00.268Z",
+      "plan": "722",
+      "text": "scope of plan 722 extended on orch/biz-numbers by the answer to 722-1: origin/main"
+    },
+    {
+      "at": "2026-11-25T10:45:50.026Z",
+      "plan": "722",
+      "text": "resumed from park/biz-numbers-722: round 0, tier judgment, after: asking 722-1: ESCALATE scope: ESCALATE: scope node scripts/scope-check.mjs --diff=origin/main exits 1 on plans/723-729 plan files. The run committed those to or"
+    },
+    {
+      "at": "2026-11-25T10:45:50.380Z",
+      "plan": "722",
+      "text": "starts on the judgment tier: resumed on the tier the stopped attempt ran on"
+    },
+    {
+      "at": "2026-11-25T10:46:05.619Z",
+      "plan": "722",
+      "text": "the folder foodVibe1.0-orch-biz-numbers-722 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-25T10:57:02.856Z",
+      "plan": "722",
+      "text": "GATE: skip pnpm run test:ci — no change under src/**, public/**, shared/**, angular.json, tsconfig*.json, karma.conf.*"
+    },
+    {
+      "at": "2026-11-25T11:16:50.907Z",
+      "plan": "722",
+      "text": "GATE: not run — node scripts/scope-check.mjs --diff=origin/main --plan=plans/722-dish-month-decisions-and-inv1.plan.md failed first; runs after the fix: node scripts/orch-state.mjs prepare --missing server/generated/schemas --script build:schemas --pm pnpm"
+    },
+    {
+      "at": "2026-11-25T11:16:51.252Z",
+      "plan": "722",
+      "text": "GATE: not run — node scripts/scope-check.mjs --diff=origin/main --plan=plans/722-dish-month-decisions-and-inv1.plan.md failed first; runs after the fix: pnpm run build"
+    },
+    {
+      "at": "2026-11-25T11:16:51.800Z",
+      "plan": "722",
+      "text": "GATE: not run — node scripts/scope-check.mjs --diff=origin/main --plan=plans/722-dish-month-decisions-and-inv1.plan.md failed first; runs after the fix: pnpm run lint"
+    },
+    {
+      "at": "2026-11-25T11:16:52.480Z",
+      "plan": "722",
+      "text": "GATE: not run — node scripts/scope-check.mjs --diff=origin/main --plan=plans/722-dish-month-decisions-and-inv1.plan.md failed first; runs after the fix: pnpm run lint:icons"
+    },
+    {
+      "at": "2026-11-25T11:16:53.195Z",
+      "plan": "722",
+      "text": "GATE: not run — node scripts/scope-check.mjs --diff=origin/main --plan=plans/722-dish-month-decisions-and-inv1.plan.md failed first; runs after the fix: pnpm run lint:no-native-select"
+    },
+    {
+      "at": "2026-11-25T11:16:54.335Z",
+      "plan": "722",
+      "text": "node scripts/scope-check.mjs --diff=origin/main --plan=plans/722-dish-month-decisions-and-inv1.plan.md failed before the slow checks: back to the builder (a bounce, not counted in maxFixRounds); the next gate runs every check"
+    },
+    {
+      "at": "2026-11-25T11:25:14.814Z",
+      "plan": "722",
+      "text": "GATE: skip pnpm run test:ci — no change under src/**, public/**, shared/**, angular.json, tsconfig*.json, karma.conf.*"
+    },
+    {
+      "at": "2026-11-25T11:52:05.598Z",
+      "plan": "722",
+      "text": "GATE: skip pnpm run test:ci — no change under src/**, public/**, shared/**, angular.json, tsconfig*.json, karma.conf.*"
+    },
+    {
+      "at": "2026-11-25T11:52:42.926Z",
+      "plan": "722",
+      "text": "GATE: not run — node scripts/scope-check.mjs --diff=origin/main --plan=plans/722-dish-month-decisions-and-inv1.plan.md failed first; runs after the fix: node scripts/orch-state.mjs prepare --missing server/generated/schemas --script build:schemas --pm pnpm"
+    },
+    {
+      "at": "2026-11-25T11:52:43.627Z",
+      "plan": "722",
+      "text": "GATE: not run — node scripts/scope-check.mjs --diff=origin/main --plan=plans/722-dish-month-decisions-and-inv1.plan.md failed first; runs after the fix: pnpm run build"
+    },
+    {
+      "at": "2026-11-25T11:52:44.161Z",
+      "plan": "722",
+      "text": "GATE: not run — node scripts/scope-check.mjs --diff=origin/main --plan=plans/722-dish-month-decisions-and-inv1.plan.md failed first; runs after the fix: pnpm run lint"
+    },
+    {
+      "at": "2026-11-25T11:52:44.700Z",
+      "plan": "722",
+      "text": "GATE: not run — node scripts/scope-check.mjs --diff=origin/main --plan=plans/722-dish-month-decisions-and-inv1.plan.md failed first; runs after the fix: pnpm run lint:icons"
+    },
+    {
+      "at": "2026-11-25T11:52:45.190Z",
+      "plan": "722",
+      "text": "GATE: not run — node scripts/scope-check.mjs --diff=origin/main --plan=plans/722-dish-month-decisions-and-inv1.plan.md failed first; runs after the fix: pnpm run lint:no-native-select"
+    },
+    {
+      "at": "2026-11-25T11:52:46.146Z",
+      "plan": "722",
+      "text": "node scripts/scope-check.mjs --diff=origin/main --plan=plans/722-dish-month-decisions-and-inv1.plan.md failed before the slow checks: back to the builder (a bounce, not counted in maxFixRounds); the next gate runs every check"
+    },
+    {
+      "at": "2026-11-25T12:05:41.518Z",
+      "plan": "722",
+      "text": "parked: nothing to save (nothing uncommitted)"
+    },
+    {
+      "at": "2026-11-25T12:05:42.012Z",
+      "plan": "723",
+      "text": "ask 723-1 answered by the advisor: approved: server/test/business-route.test.js"
+    },
+    {
+      "at": "2026-11-25T12:05:59.980Z",
+      "plan": "723",
+      "text": "scope of plan 723 extended on orch/biz-numbers by the answer to 723-1: server/test/business-route.test.js"
+    },
+    {
+      "at": "2026-11-25T12:08:24.143Z",
+      "plan": "723",
+      "text": "resumed from park/biz-numbers-723: round 0, tier build, after: asking 723-1: ESCALATE scope: ESCALATE: scope server/test/business-route.test.js:32 asserts the exact default settings; it now needs vatRatePct: 18 and dealerTy"
+    },
+    {
+      "at": "2026-11-25T12:08:36.268Z",
+      "plan": "723",
+      "text": "the folder foodVibe1.0-orch-biz-numbers-723 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-25T12:31:14.257Z",
+      "plan": "723",
+      "text": "builder left undone (round 0): [human] items: not ticked; [human] «הגדרות עסק»: defaults 18 and «עוסק מורשה», change to 17 and «עוסק פטור», save, reload: not checked by me; [human] 101 shows the range error and «שמור» stays disabled: not checked by me; [human] a new diagnosis as consultant starts with 17: not checked by me; [huma"
+    },
+    {
+      "at": "2026-11-25T12:46:25.334Z",
+      "plan": "723",
+      "text": "the folder foodVibe1.0-orch-merge-biz-numbers was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-25T12:53:21.951Z",
+      "plan": "724",
+      "text": "the folder foodVibe1.0-orch-biz-numbers-724 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-25T13:24:20.469Z",
+      "plan": "724",
+      "text": "builder left undone (round 0): A7 left unticked: its 'run every automatic check' step is not green because `pnpm run test:server` fails in server/test/admin-business.test.js (out of scope). Fix: add `month: suffix, nameKey: suffix` to the fixture's `doc()` in that file."
+    },
+    {
+      "at": "2026-11-25T13:27:54.808Z",
+      "plan": "724",
+      "text": "parked: nothing to save (nothing uncommitted)"
+    },
+    {
+      "at": "2026-11-25T13:27:55.221Z",
+      "plan": "724",
+      "text": "ask 724-1 (scope, the Human or the advisor answers): Add server/test/admin-business.test.js to the plan's scope so its raw fixtures get a unique `month` and `nameKey` per document?"
+    },
+    {
+      "at": "2026-11-25T13:27:55.727Z",
+      "plan": "724",
+      "text": "decided without the Human: advisor · scope: ask 724-1 (\"Add server/test/admin-business.test.js to the plan's scope so its raw fixtures get a unique `month` and `nameKey` per document?\") answered: approved: server/test/admin-business.test.js"
+    },
+    {
+      "at": "2026-11-25T13:27:58.244Z",
+      "plan": "724",
+      "text": "ask 724-1 answered by the advisor: approved: server/test/admin-business.test.js"
+    },
+    {
+      "at": "2026-11-25T13:28:14.696Z",
+      "plan": "724",
+      "text": "scope of plan 724 extended on orch/biz-numbers by the answer to 724-1: server/test/admin-business.test.js"
+    },
+    {
+      "at": "2026-11-25T13:30:27.476Z",
+      "plan": "724",
+      "text": "resumed from park/biz-numbers-724: round 0, tier build, after: asking 724-1: replan needed: ESCALATE: scope server/test/admin-business.test.js — `pnpm run test:server` exits non-zero (6 failures, E11000 on the new unique in"
+    },
+    {
+      "at": "2026-11-25T13:30:35.846Z",
+      "plan": "724",
+      "text": "the folder foodVibe1.0-orch-biz-numbers-724 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-25T14:00:07.888Z",
+      "plan": "725",
+      "text": "the folder foodVibe1.0-orch-biz-numbers-725 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-25T14:19:48.531Z",
+      "plan": "725",
+      "text": "builder left undone (round 0): The [human] Done-when items (header visibility, add/edit, partial/units labels, remove confirm, error retry, staff notice) are left for the Human to check; I did not tick them.; No [ui] cards or e2e tests: the plan has no [ui] items."
+    },
+    {
+      "at": "2026-11-25T14:20:04.442Z",
+      "plan": "725",
+      "text": "GATE: not run — node \"C:/coding projects/Cursor/foodvibe1.0/scripts/kit-checks.mjs\" --base origin/orch/biz-numbers --plan plans/725-standing-menu-page.plan.md failed first; runs after the fix: node scripts/orch-state.mjs prepare --missing server/generated/schemas --script build:schemas --pm pnpm"
+    },
+    {
+      "at": "2026-11-25T14:20:04.721Z",
+      "plan": "725",
+      "text": "GATE: not run — node \"C:/coding projects/Cursor/foodvibe1.0/scripts/kit-checks.mjs\" --base origin/orch/biz-numbers --plan plans/725-standing-menu-page.plan.md failed first; runs after the fix: pnpm run build"
+    },
+    {
+      "at": "2026-11-25T14:20:04.940Z",
+      "plan": "725",
+      "text": "GATE: not run — node \"C:/coding projects/Cursor/foodvibe1.0/scripts/kit-checks.mjs\" --base origin/orch/biz-numbers --plan plans/725-standing-menu-page.plan.md failed first; runs after the fix: pnpm run lint"
+    },
+    {
+      "at": "2026-11-25T14:20:05.183Z",
+      "plan": "725",
+      "text": "GATE: not run — node \"C:/coding projects/Cursor/foodvibe1.0/scripts/kit-checks.mjs\" --base origin/orch/biz-numbers --plan plans/725-standing-menu-page.plan.md failed first; runs after the fix: pnpm run test:ci"
+    },
+    {
+      "at": "2026-11-25T14:20:05.427Z",
+      "plan": "725",
+      "text": "GATE: not run — node \"C:/coding projects/Cursor/foodvibe1.0/scripts/kit-checks.mjs\" --base origin/orch/biz-numbers --plan plans/725-standing-menu-page.plan.md failed first; runs after the fix: pnpm run lint:icons"
+    },
+    {
+      "at": "2026-11-25T14:20:05.654Z",
+      "plan": "725",
+      "text": "GATE: not run — node \"C:/coding projects/Cursor/foodvibe1.0/scripts/kit-checks.mjs\" --base origin/orch/biz-numbers --plan plans/725-standing-menu-page.plan.md failed first; runs after the fix: pnpm run lint:no-native-select"
+    },
+    {
+      "at": "2026-11-25T14:20:06.146Z",
+      "plan": "725",
+      "text": "node \"C:/coding projects/Cursor/foodvibe1.0/scripts/kit-checks.mjs\" --base origin/orch/biz-numbers --plan plans/725-standing-menu-page.plan.md failed before the slow checks: back to the builder (a bounce, not counted in maxFixRounds); the next gate runs every check"
+    },
+    {
+      "at": "2026-11-25T14:49:37.209Z",
+      "plan": "726",
+      "text": "the folder foodVibe1.0-orch-biz-numbers-726 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-25T15:20:51.507Z",
+      "plan": "726",
+      "text": "builder left undone (round 0): [human] Done-when items (chips, typing and reload, reasons popup, error and empty states, leave question, phone layout): not self-marked; ci-scope-check --checkout-branch printed 'skipped (branch is not feat/NNN-*)' because the checkout was detached from its branch name"
+    },
+    {
+      "at": "2026-11-25T15:38:44.871Z",
+      "plan": "727",
+      "text": "the folder foodVibe1.0-orch-biz-numbers-727 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-25T16:22:59.443Z",
+      "plan": "727",
+      "text": "builder left undone (round 0): The `test:server` check does not pass until `server/test/business-route.test.js` line 32 has `monthTargets: { foodPct: 32, labourPct: 33, primePct: 65, fixedPct: 25, profitPct: 10 }` in its expected settings. That file is outside the plan's scope.; The [human] Done-when items are for the Human to ch"
+    },
+    {
+      "at": "2026-11-25T16:23:53.206Z",
+      "plan": "727",
+      "text": "parked: nothing to save (nothing uncommitted)"
+    },
+    {
+      "at": "2026-11-25T16:23:53.533Z",
+      "plan": "727",
+      "text": "ask 727-1 (scope, the Human or the advisor answers): May the builder update server/test/business-route.test.js line 32 so the expected GET /business settings include the new monthTargets default?"
+    },
+    {
+      "at": "2026-11-25T16:23:53.787Z",
+      "plan": "727",
+      "text": "decided without the Human: advisor · scope: ask 727-1 (\"May the builder update server/test/business-route.test.js line 32 so the expected GET /business settings include the new monthTargets default?\") answered: approved: server/test/business-route.test.js"
+    },
+    {
+      "at": "2026-11-25T16:23:54.415Z",
+      "plan": "727",
+      "text": "ask 727-1 answered by the advisor: approved: server/test/business-route.test.js"
+    },
+    {
+      "at": "2026-11-25T16:24:04.335Z",
+      "plan": "727",
+      "text": "scope of plan 727 extended on orch/biz-numbers by the answer to 727-1: server/test/business-route.test.js"
+    },
+    {
+      "at": "2026-11-25T16:25:33.805Z",
+      "plan": "727",
+      "text": "resumed from park/biz-numbers-727: round 0, tier build, after: asking 727-1: ESCALATE scope: ESCALATE: scope server/test/business-route.test.js — `pnpm run test:server` exits 1 (1 of 2086 tests failed): line 32 expects the"
+    },
+    {
+      "at": "2026-11-25T16:25:39.771Z",
+      "plan": "727",
+      "text": "the folder foodVibe1.0-orch-biz-numbers-727 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-25T16:49:50.285Z",
+      "plan": "728",
+      "text": "the folder foodVibe1.0-orch-biz-numbers-728 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-25T17:02:38.073Z",
+      "plan": "728",
+      "text": "builder left undone (round 0): [human] items (the three card checks on «תכנון חודשי») are for the Human"
+    },
+    {
+      "at": "2026-11-25T17:02:47.841Z",
+      "plan": "728",
+      "text": "GATE: not run — node \"C:/coding projects/Cursor/foodvibe1.0/scripts/kit-checks.mjs\" --base origin/orch/biz-numbers --plan plans/728-month-engine-and-missing-list.plan.md failed first; runs after the fix: node scripts/orch-state.mjs prepare --missing server/generated/schemas --script build:schemas --pm pnpm"
+    },
+    {
+      "at": "2026-11-25T17:02:47.969Z",
+      "plan": "728",
+      "text": "GATE: not run — node \"C:/coding projects/Cursor/foodvibe1.0/scripts/kit-checks.mjs\" --base origin/orch/biz-numbers --plan plans/728-month-engine-and-missing-list.plan.md failed first; runs after the fix: pnpm run build"
+    },
+    {
+      "at": "2026-11-25T17:02:48.100Z",
+      "plan": "728",
+      "text": "GATE: not run — node \"C:/coding projects/Cursor/foodvibe1.0/scripts/kit-checks.mjs\" --base origin/orch/biz-numbers --plan plans/728-month-engine-and-missing-list.plan.md failed first; runs after the fix: pnpm run lint"
+    },
+    {
+      "at": "2026-11-25T17:02:48.297Z",
+      "plan": "728",
+      "text": "GATE: not run — node \"C:/coding projects/Cursor/foodvibe1.0/scripts/kit-checks.mjs\" --base origin/orch/biz-numbers --plan plans/728-month-engine-and-missing-list.plan.md failed first; runs after the fix: pnpm run test:ci"
+    },
+    {
+      "at": "2026-11-25T17:02:48.424Z",
+      "plan": "728",
+      "text": "GATE: not run — node \"C:/coding projects/Cursor/foodvibe1.0/scripts/kit-checks.mjs\" --base origin/orch/biz-numbers --plan plans/728-month-engine-and-missing-list.plan.md failed first; runs after the fix: pnpm run lint:icons"
+    },
+    {
+      "at": "2026-11-25T17:02:48.550Z",
+      "plan": "728",
+      "text": "GATE: not run — node \"C:/coding projects/Cursor/foodvibe1.0/scripts/kit-checks.mjs\" --base origin/orch/biz-numbers --plan plans/728-month-engine-and-missing-list.plan.md failed first; runs after the fix: pnpm run lint:no-native-select"
+    },
+    {
+      "at": "2026-11-25T17:02:48.793Z",
+      "plan": "728",
+      "text": "node \"C:/coding projects/Cursor/foodvibe1.0/scripts/kit-checks.mjs\" --base origin/orch/biz-numbers --plan plans/728-month-engine-and-missing-list.plan.md failed before the slow checks: back to the builder (a bounce, not counted in maxFixRounds); the next gate runs every check"
+    },
+    {
+      "at": "2026-11-25T17:09:12.393Z",
+      "plan": "729",
+      "text": "the folder foodVibe1.0-orch-biz-numbers-729 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-25T18:03:04.536Z",
+      "text": "FINAL: same tree as plan 729's gate — node scripts/orch-state.mjs prepare --missing server/generated/schemas --script build:schemas --pm pnpm, pnpm run build, pnpm run lint, pnpm run test:ci, node scripts/override-check.mjs, pnpm run lint:icons, pnpm run lint:no-native-select, node scripts/plan-ledger-check.mjs, node scripts/breadcrumbs-check.mjs, node scripts/ci-scope-check.mjs --checkout-branch"
+    },
+    {
+      "at": "2026-11-25T18:03:05.493Z",
+      "text": "make this a default? staff read the three dish types with base fields only, so staff cannot read `name`, unlike `diagnoses` — the plan's empty STAFF_READ_FIELDS — reverse: list `name` in STAFF_READ_FIELDS for the type (trigger: list) — reply: default yes run-list"
+    },
+    {
+      "at": "2026-11-25T18:03:05.849Z",
+      "text": "make this a default? the business's own return reasons are taxonomy terms keyed by their Hebrew text, no translation key — reverse: route a new reason through the translation-key popup (trigger: screen) — reply: default yes run-screen"
+    },
+    {
+      "at": "2026-11-25T18:03:06.123Z",
+      "text": "make this a default? the «הסכום כולל מע״מ» toggle divides the typed amount by 1 + VAT rate when the box loses focus, then switches itself off; it is hidden for `patur` — reverse: remove the toggle from the page (trigger: destructive-action) — reply: default yes run-destructive-action"
+    }
+  ],
+  "attempts": 1,
+  "phase": "finished",
+  "freeDiskGb": 5,
+  "updatedAt": "2026-11-25T18:03:08.409Z",
+  "selfDecided": [
+    {
+      "plan": "723",
+      "kind": "advisor · scope",
+      "what": "ask 723-1 (\"Add server/test/business-route.test.js to plan 723's scope so its exact-defaults expectation can include vatRatePct 18 and dealerType 'murshe'?\") answered: approved: server/test/business-route.test.js",
+      "why": "scope: 1 path(s) inside the repo, none sensitive (1 of 5 for this plan)",
+      "undo": "before merge it: on the run branch, git checkout origin/main -- server/test/business-route.test.js (drops the plan's change to that file), commit, push",
+      "at": "2026-11-25T10:42:34.552Z"
+    },
+    {
+      "plan": "724",
+      "kind": "advisor · scope",
+      "what": "ask 724-1 (\"Add server/test/admin-business.test.js to the plan's scope so its raw fixtures get a unique `month` and `nameKey` per document?\") answered: approved: server/test/admin-business.test.js",
+      "why": "scope: 1 path(s) inside the repo, none sensitive (1 of 5 for this plan)",
+      "undo": "before merge it: on the run branch, git checkout origin/main -- server/test/admin-business.test.js (drops the plan's change to that file), commit, push",
+      "at": "2026-11-25T13:27:55.480Z"
+    },
+    {
+      "plan": "727",
+      "kind": "advisor · scope",
+      "what": "ask 727-1 (\"May the builder update server/test/business-route.test.js line 32 so the expected GET /business settings include the new monthTargets default?\") answered: approved: server/test/business-route.test.js",
+      "why": "scope: 1 path(s) inside the repo, none sensitive (1 of 5 for this plan)",
+      "undo": "before merge it: on the run branch, git checkout origin/main -- server/test/business-route.test.js (drops the plan's change to that file), commit, push",
+      "at": "2026-11-25T16:23:53.659Z"
+    }
+  ],
+  "decisions": [
+    {
+      "id": "D1",
+      "plan": "722",
+      "type": "seen",
+      "text": "seen: C:/coding projects/Cursor/foodvibe1.0/scripts/scope-check.mjs:71 — repoRoot is resolved from the script's own folder, so the 'scope-check (kit copy)' check diffs the main checkout, not the worktree it is run in.",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D2",
+      "plan": "722",
+      "type": "seen",
+      "text": "seen: the Done-when item 'scope-check --diff=origin/main exits 0' in plans/722-dish-month-decisions-and-inv1.plan.md cannot pass on this run branch: the run branch's scope commits (e.g. 92de8524 plan(723)) change plans/723–729, so origin/main differs on those files.",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D3",
+      "plan": "722",
+      "type": "seen",
+      "text": "seen: scripts/scope-check.mjs:169 with --diff=origin/main in a run's CHECKS fails every plan built after the run commits scope answers to other plans' files on the run branch; in a run the check should use the run branch as its base",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D4",
+      "plan": "723",
+      "type": "behaviour",
+      "text": "behaviour: the dealer-type row is a plain div.business-field holding app-custom-select, with no label wrapper, because custom-select is a button-like control — reverse: wrap it in a label or app-form-field",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D5",
+      "plan": "723",
+      "type": "seen",
+      "text": "seen: server/test/admin-business-delete.test.js fails on a Mongo memory-server start timeout (10s) when the whole server suite runs in parallel; environment, not this change",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D6",
+      "plan": "722",
+      "type": "seen",
+      "text": "seen: running the main checkout's scripts/scope-check.mjs from this worktree exits 1 and lists files that are only in the main checkout's working tree (.claude/todo.md, plans/736-741, 'Claude outputs/*'), not in this branch's diff. The worktree copy of the same check exits 0. The gate's own 'scope-check (kit copy)' run decides this check.",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D7",
+      "plan": "724",
+      "type": "behaviour",
+      "text": "behaviour: staff read the three dish types with base fields only, so staff cannot read `name`, unlike `diagnoses` — the plan's empty STAFF_READ_FIELDS — reverse: list `name` in STAFF_READ_FIELDS for the type",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D8",
+      "plan": "724",
+      "type": "behaviour",
+      "text": "behaviour: a new alias is stored with `hits: 0` because checkStoredDoc does not store parsed defaults — reverse: drop the `hits: 0` assignment in the POST handler of generic.js",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D9",
+      "plan": "724",
+      "type": "seen",
+      "text": "seen: server/test/admin-business.test.js:35 — fixtures for every user collection give two docs per business with no `month` or `nameKey`, which collide with the new unique indexes",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D10",
+      "plan": "724",
+      "type": "behaviour",
+      "text": "behaviour: one document per dish for the standing menu (not one per business) — reverse: one menu document holding a dish list",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D11",
+      "plan": "724",
+      "type": "behaviour",
+      "text": "behaviour: staff read the three types with base fields only (empty STAFF_READ_FIELDS), not a 403 — reverse: refuse staff reads with 403 (an INV-1 change)",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D12",
+      "plan": "724",
+      "type": "behaviour",
+      "text": "behaviour: the business's own return reasons are taxonomy terms keyed by their Hebrew text, no translation key — reverse: route a new reason through the translation-key popup",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D13",
+      "plan": "724",
+      "type": "behaviour",
+      "text": "behaviour: a menu dish keeps its own course so dishes without a recipe can be classified per course — reverse: read course through the recipe only",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D14",
+      "plan": "725",
+      "type": "behaviour",
+      "text": "behaviour: on a phone a row shows name, price with VAT, cost and the row menu; course, «נטו» and «נשאר למנה» are hidden at the shared phone breakpoint instead of a column carousel — reverse: move the `.rm-row__wide` cells into app-column-carousel-cell",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D15",
+      "plan": "725",
+      "type": "behaviour",
+      "text": "behaviour: the dishes load from the page (`MenuDishDataService.load()`), not from a route resolver, so a failed load shows the retry instead of an empty menu — reverse: load them in a route resolver",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D16",
+      "plan": "725",
+      "type": "behaviour",
+      "text": "behaviour: the header link reads `PermissionService.isOwner_` (owner or acting consultant), because the header's own `isOwner_` is the business owner only — reverse: use the header's `isOwner_`",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D17",
+      "plan": "725",
+      "type": "behaviour",
+      "text": "behaviour: the page's own row-menu actions are plain `c-btn-ghost--sm` text buttons inside `app-row-actions-menu` — reverse: swap for icon buttons",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D18",
+      "plan": "726",
+      "type": "behaviour",
+      "text": "behaviour: a stored row of a dish that is no longer on the menu at all is kept unchanged on save (no data loss) — reverse: drop such rows on save",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D19",
+      "plan": "726",
+      "type": "behaviour",
+      "text": "behaviour: typing the name of an existing reason in the popup only selects it, no duplicate term is created — reverse: allow duplicate-named reasons",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D20",
+      "plan": "726",
+      "type": "behaviour",
+      "text": "behaviour: the «תפריט» chip uses an empty queryParams object so only the matching chip is lit, because tab-chips.component.html is outside scope — reverse: add an exact flag to TabChip and the template",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D21",
+      "plan": "726",
+      "type": "behaviour",
+      "text": "behaviour: the «שמות שלא נספרו» section is a toggle chip (c-chip c-chip--tap), not a native details — reverse: switch to details",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D22",
+      "plan": "726",
+      "type": "behaviour",
+      "text": "behaviour: setting «הוחזרו» to 0 drops the reasons like clearing it, with the same toast — reverse: keep the reasons at 0 and block the save",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D23",
+      "plan": "726",
+      "type": "behaviour",
+      "text": "behaviour: the plan's Reuse Check got extra lines and the component-families engine-classes line was rewritten to list every new class, so kit-checks passes — reverse: drop the lines and accept the KIT_CHECKS findings",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D24",
+      "plan": "726",
+      "type": "seen",
+      "text": "seen: src/app/pages/requests/requests.page.html:37 — build warning NG8102, the ?? operator on a non-nullable left side (not touched)",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D25",
+      "plan": "727",
+      "type": "behaviour",
+      "text": "behaviour: the month's profit target starts at 10 from the month defaults, not from `settings.profitTargetPct` (25, an event margin), as the plan says — reverse: seed profitPct from profitTargetPct in `server/routes/month-plans.js`",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D26",
+      "plan": "727",
+      "type": "behaviour",
+      "text": "behaviour: `currentMonthKey` in `month-key.util.ts` now counts the Asia/Jerusalem month (it used the browser's local month) so there is one month rule, and its spec uses UTC-noon dates — reverse: make `currentMonthKey` read `getFullYear()` and `getMonth()` again",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D27",
+      "plan": "727",
+      "type": "behaviour",
+      "text": "behaviour: the «הסכום כולל מע״מ» toggle divides the typed amount by 1 + VAT rate when the box loses focus, then switches itself off; it is hidden for `patur` — reverse: remove the toggle from the page",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D28",
+      "plan": "727",
+      "type": "behaviour",
+      "text": "behaviour: the new dictionary key `mp_save` («שמירה») is outside the plan's key list because the plan names the button but gives it no key — reverse: reuse the existing `save` key («שמור»)",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D29",
+      "plan": "727",
+      "type": "behaviour",
+      "text": "behaviour: the «חודש חדש» button is the empty state's own button while there are no months and sits in the page header once there are — reverse: always show it in the header",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D30",
+      "plan": "727",
+      "type": "behaviour",
+      "text": "behaviour: the month picker has no extra leave question of its own; it navigates and the route's leave guard asks when typed changes would be lost — reverse: add an explicit confirm in `pick()`",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D31",
+      "plan": "727",
+      "type": "removes",
+      "text": "removes: nothing user-facing is removed",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D32",
+      "plan": "728",
+      "type": "behaviour",
+      "text": "behaviour: a derived figure whose inputs are all blank shows «לא הוזן» when its column is partial, and «—» when it cannot be computed (for example break-even at food % ≥ 100) — reverse: show «—» for every blank figure",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D33",
+      "plan": "728",
+      "type": "behaviour",
+      "text": "behaviour: a plan food cost taken from the target («לפי היעד») does not count as a missing input — reverse: add foodCost to the plan column's missing list",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D34",
+      "plan": "728",
+      "type": "behaviour",
+      "text": "behaviour: roomForTeam is null when revenue is null, because the profit target is a share of revenue — reverse: treat revenue as 0 in the sum",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D35",
+      "plan": "728",
+      "type": "seen",
+      "text": "seen: docs/brain/inventory.md:1 — kit-checks reports INVENTORY stale; regenerate with node scripts/inventory.mjs (the file is outside this plan's scope)",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D36",
+      "plan": "729",
+      "type": "behaviour",
+      "text": "behaviour: a month stored before this plan shows the default fixed lines and labour on the page, and the first save of any field also stores them (plan text says so) — reverse: send the groups only after the owner edits them",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D37",
+      "plan": "729",
+      "type": "behaviour",
+      "text": "behaviour: the «הערכה» and «חלקי» flags show as two small chips under «תמונת החודש» on the page. I did not touch the shared month-figures component (outside scope) — reverse: remove the mp-flags paragraph from monthly-plan.page.html",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D38",
+      "plan": "729",
+      "type": "behaviour",
+      "text": "behaviour: added one dictionary key, mp_estimate («הערכה»), for the page flag; it is not in the plan's key list — reverse: delete the key and the chip",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D39",
+      "plan": "729",
+      "type": "behaviour",
+      "text": "behaviour: the card titles «הוצאות קבועות» and «עלות צוות» sit in the page template, not inside the cards, so the card styles do not copy existing style blocks — reverse: move the h2 into the cards and accept the style-duplicate debt",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D40",
+      "plan": "729",
+      "type": "seen",
+      "text": "seen: the plan's scope-check kit-copy check (`scope-check (kit copy) --diff=...`) was not run: no scope-check file in the kit scripts folder matched, only scope-check.mjs, and the repo's own `scope-check.mjs --arch` and `--reuse` both pass",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    }
+  ],
+  "finishedAt": "2026-11-25T18:03:08.406Z",
+  "finalGate": {
+    "ok": true,
+    "command": null,
+    "at": "2026-11-25T18:03:08.408Z",
+    "attempt": 1,
+    "blamed": []
+  }
+}

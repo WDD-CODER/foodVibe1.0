@@ -19,6 +19,8 @@ describe('TermsModalComponent (plan 584)', () => {
   const host = (): HTMLElement => fixture.nativeElement
   const acceptBtn = (): HTMLButtonElement => host().querySelector('[data-testid="terms-accept"]') as HTMLButtonElement
   const body = (): HTMLElement => host().querySelector('[data-testid="terms-body"]') as HTMLElement
+  /** Plan 747: the button says why instead of being natively disabled. */
+  const blocked = (): boolean => acceptBtn().getAttribute('aria-disabled') === 'true'
 
   async function create(loadResult: Observable<Terms> = of(TERMS)): Promise<void> {
     termsService = jasmine.createSpyObj<TermsService>('TermsService', ['load'])
@@ -53,11 +55,15 @@ describe('TermsModalComponent (plan 584)', () => {
     await new Promise((r) => setTimeout(r, 10))
     fixture.detectChanges()
     expect(body().scrollHeight).toBeGreaterThan(body().clientHeight + 100)
-    expect(acceptBtn().disabled).toBeTrue()
+    expect(blocked()).toBeTrue()
+    const emitted: string[] = []
+    fixture.componentInstance.accepted.subscribe((v) => emitted.push(v))
+    acceptBtn().click()
+    expect(emitted).toEqual([])
     body().scrollTop = body().scrollHeight
     body().dispatchEvent(new Event('scroll'))
     fixture.detectChanges()
-    expect(acceptBtn().disabled).toBeFalse()
+    expect(blocked()).toBeFalse()
   })
 
   it('is enabled at once when the text fits without scrolling', async () => {
@@ -65,7 +71,7 @@ describe('TermsModalComponent (plan 584)', () => {
     body().style.maxHeight = 'none'
     ;(fixture.componentInstance as unknown as { onScroll: () => void }).onScroll()
     fixture.detectChanges()
-    expect(acceptBtn().disabled).toBeFalse()
+    expect(blocked()).toBeFalse()
   })
 
   it('emits accepted with the version on click', async () => {
@@ -81,7 +87,7 @@ describe('TermsModalComponent (plan 584)', () => {
   it('a load error shows the message and keeps the button disabled', async () => {
     await create(throwError(() => new Error('x')))
     expect(host().querySelector('[data-testid="terms-load-error"]')).not.toBeNull()
-    expect(acceptBtn().disabled).toBeTrue()
+    expect(blocked()).toBeTrue()
   })
 
   it('shows the close button only when dismissible', async () => {
@@ -106,10 +112,10 @@ describe('TermsModalComponent (plan 584)', () => {
     window.dispatchEvent(new Event('resize'))
     fixture.detectChanges()
     expect(body().scrollHeight).toBeGreaterThan(body().clientHeight + 100)
-    expect(acceptBtn().disabled).toBeTrue()
+    expect(blocked()).toBeTrue()
     body().scrollTop = body().scrollHeight
     window.dispatchEvent(new Event('resize'))
     fixture.detectChanges()
-    expect(acceptBtn().disabled).toBeFalse()
+    expect(blocked()).toBeFalse()
   })
 })

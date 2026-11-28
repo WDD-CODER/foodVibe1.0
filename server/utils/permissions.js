@@ -22,12 +22,12 @@ const OWNER_ONLY_ACTIONS = new Set(['editMoney', 'manageTeam', 'editSettings', '
 const CONSULTANT_DENIED = new Set(['manageTeam', 'editSettings'])
 const EVENTS = 'menuEvents'
 /** Plan 512: types only an owner may create, edit or delete (staff read them through `staffProjection`). */
-const OWNER_ONLY_TYPES = new Set(['clients', 'frontDeskProfiles', 'knowledgeItems', 'invoices', 'diagnoses'])
+const OWNER_ONLY_TYPES = new Set(['clients', 'frontDeskProfiles', 'knowledgeItems', 'invoices', 'diagnoses', 'menuDishes', 'dishSalesMonths', 'dishSalesAliases', 'monthPlans'])
 /** Fields every stored document carries; a staff projection never hides them. */
 const BASE_FIELDS = ['_id', 'schemaVersion', 'userId', 'businessId', 'createdBy', 'createdAt', 'updatedAt', 'deletedAt', 'deletedBy']
 
 /** Taxonomy kinds only an owner may add, change or delete. */
-const LOCKED_TAXONOMY_KINDS = ['eventType', 'menuType', 'station']
+const LOCKED_TAXONOMY_KINDS = ['eventType', 'menuType', 'station', 'dishReturnReason']
 /** Written by the app on every member's behalf (history, activity, translation keys): not checked per creator. */
 const SYSTEM_TYPES = ['VERSION_HISTORY', 'activity_log', 'DICTIONARY_OVERRIDES']
 

@@ -25,12 +25,29 @@
         }
       </label>
     }
+    <div class="business-field" data-testid="business-dealerType-row">
+      <span class="business-field__label">{{ 'dealer_type' | translatePipe }}</span>
+      <app-custom-select formControlName="dealerType" [options]="dealerOptions" />
+      <span class="business-field__help">{{ 'dealer_type_help' | translatePipe }}</span>
+    </div>
+    <div class="business-group" formGroupName="monthTargets" data-testid="business-month-targets">
+      <h3 class="business-group__title">{{ 'mp_settings_targets_title' | translatePipe }}</h3>
+      @for (field of monthTargetFields; track field.key) {
+        <label class="business-field">
+          <span class="business-field__label">{{ field.labelKey | translatePipe }}</span>
+          <!-- prettier-ignore -->
+          <span class="c-input-wrapper" appNumberBox><input type="number" inputmode="decimal" step="0.1" dir="ltr" [formControlName]="field.key" [attr.data-testid]="'business-month-' + field.key" /><span class="business-field__suffix" aria-hidden="true">%</span></span>
+          <span class="business-field__help">{{ band(field.key) }}</span>
+        </label>
+      }
+    </div>
     <div class="c-form-actions">
       <button
         type="submit"
         class="c-btn-primary"
         data-testid="business-settings-save"
-        [disabled]="!canSave()"
+        [disabled]="isSaving_()"
+        [appDisabledWhy]="saveWhy_() ? (saveWhy_()! | translatePipe) : null"
         [attr.aria-busy]="isSaving_() || null"
       >
         {{ (isSaving_() ? 'saving' : 'save') | translatePipe }}

@@ -28,6 +28,7 @@
     [class.custom-select-trigger--chip]="variant() === 'chip'"
     [class.open]="isOpen()"
     [disabled]="disabled"
+    [appDisabledWhy]="disabledWhy()"
     (mousedown)="onTriggerMousedown()"
     (focus)="onTriggerFocus()"
     (click)="onTriggerClick()"

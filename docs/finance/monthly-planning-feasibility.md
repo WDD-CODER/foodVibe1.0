@@ -323,3 +323,50 @@ Each decision lists the options, the recommended one first.
    - Or: events only.
 10. Order of building: recommended is slices 1 to 3 first (a month, the engine and the fixed lines) because they need no AI and no
     payroll data; salary and AI capture after the privacy answers.
+
+## 9. Updated decisions (2026-11-24)
+
+Dandan approved every recommended option on 2026-11-24 ("decisions: all recommended"). The reasons and sources for
+each row are in [the research report](dish-and-month-research.md), section "Updated decisions". Section 8 above is
+kept as the original question; this table is the answer the build plans follow.
+
+| # | Status | Chosen option |
+|---|---|---|
+| 1 | keep | The business's own `monthly_plan` module; the consultant enters and reads numbers when acting in the business. Per-employee pay is the exception (N-M3). |
+| 2 | keep, refined | The month stores its own target set, copied from the settings at creation: food %, labour %, prime %, profit %, plus fixed and overhead %. The consultant may change the month's copy. |
+| 3 | keep | A payslip photo is never kept and never drafted; payslip capture itself is deferred until an owner asks. |
+| 4 | keep | Salary data is never part of platform learning, whatever `aiPrivate` says. |
+| 5 | keep, reworded | Price by target food-cost %: price = plate cost ÷ target food-cost %, where target food-cost % = 100 − labour % − overhead % − profit %. Computed net and shown × 1.18. An "overhead per dish sold" figure appears only as information once dish sales exist. |
+| 6 | keep, refined | Approved invoices keyed on the tax-invoice date, labelled "purchases, not usage", with the stock correction later. Invoices without a date and unfinished lines are flagged and left out; header discounts are spread across lines; a typed purchases total is allowed for cash buys. |
+| 7 | change | The rate and dealer type are read from the single business setting (dish decision 6, N-X1); each month keeps a copy of the rate for history. All money is net. An unknown `vatIncluded` is flagged, not guessed. |
+| 8 | keep | A second engine file that names C-PRICING as its counterpart, plus one sentence added to the contract. |
+| 9 | keep, refined | Revenue is typed by hand, net of VAT and discounts, without tips. Closed events, and later the dish sales import's net total, are shown as hints and never added automatically. |
+| 10 | change | The revised slice order below: labour as a total, invoice food cost and carry-forward move ahead of AI capture; per-employee lines move late and payslip capture is deferred. |
+| N-M1 | new | The owner types an employer-cost total; if only gross is known, gross × an editable factor (default 1.25), labelled "estimate". |
+| N-M2 | new | Each line is null (not entered) or a number, where 0 is a real value. The month shows a completeness badge, and profit and break-even are labelled "partial" until the key lines exist. |
+| N-M3 | new | Per-employee pay lines are owner-only. The server computes labour totals, and the consultant and every other non-owner reader receives totals only. INV-1 changed with Dandan's `approve arch change INV-1` (2026-11-24); see ADR 0035. |
+| N-M4 | new | Seed Israeli target bands: food 30–35%, labour 30–35%, fixed and overhead 20–25%, net 5–10%, prime at most 65%. All editable, shown next to the actuals. |
+| N-M5 | new | "Start next month" copies fixed lines and targets with an optional ±%. Missing prior values come across blank, not zero. |
+| N-M6 | new | The whole month is Open or Closed. Reopening needs a typed reason; the log records who, when, field, old value and new value. This replaces per-value approval. |
+| N-M7 | new | Break-even = fixed ÷ (1 − variable %). Daily target = monthly ÷ the month's stored open days. |
+| N-M8 | new | Kashrut supervision is added to the starter fixed lines. |
+| N-X1 | new | One business-level VAT rate and dealer-type setting, read by dish analysis, the month and the diagnosis (plan 723). |
+| N-X2 | new | Closing a month locks the monthly actuals and freezes the dish costs in one server request (INV-3). |
+| N-X3 | new | One sales import per month, owned by dish analysis; its net total is offered as the month's revenue hint. The dish import is built before the monthly revenue-source slice. |
+
+Revised build order (chosen; replaces the order of section 7):
+
+1. Module and the empty month, unchanged (plan 727).
+2. Engine and missing list with null-vs-zero, prime cost, break-even and completeness (N-M2) (plan 728).
+3. Fixed lines, rough mode and the labour total with burden factor; labour moves in from old slice 4 (plan 729).
+4. Actual food cost from invoices (moved up from 6).
+5. Carry-forward (moved up from 11).
+6. Month close, reopen and audit (was 5, reshaped by N-M6).
+7. Revenue sources and dish price, unchanged.
+8. Daily target and break-even progress (new).
+9. Per-employee team lines with server-side totals (moved late from 4; owner-only under N-M3 and ADR 0035).
+10. Stock correction, unchanged.
+11. Bill capture by AI (was 8).
+12. Payslip capture, deferred until an owner asks (was 9).
+
+The business VAT rate and dealer type (N-X1) are carried by plan 723, which both tracks read.

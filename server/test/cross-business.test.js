@@ -9,14 +9,14 @@ const request = require('supertest')
 const jwt = require('jsonwebtoken')
 const { buildTestApp, teardownTestApp, signTestToken, testDb } = require('./helpers/app')
 const {
-  productBody, recipeBody, supplierBody, equipmentBody, venueBody, menuEventBody, stored,
+  productBody, recipeBody, supplierBody, equipmentBody, venueBody, menuEventBody, menuDishBody, dishMonthBody, dishAliasBody, stored,
 } = require('./helpers/v2-docs')
+const { clearModuleCache } = require('../middleware/require-module')
 const { ALL_USER_ENTITY_TYPES } = require('../constants/all-user-entity-types')
 const { SEARCHABLE_ENTITY_TYPES } = require('../constants/searchable-entity-types')
 const { SOFT_DELETE_TYPES, ROUTER_WRITE_TYPES } = require('../constants/collections')
 const { MODULE_KEYS } = require('../generated/schemas/modules')
 const { baseDesign } = require('../generated/schemas/menu-design')
-const { clearModuleCache } = require('../middleware/require-module')
 
 let app
 
@@ -31,8 +31,10 @@ afterAll(async () => {
 beforeEach(async () => {
   const db = testDb()
   for (const c of await db.listCollections().toArray()) if (c.type === 'collection') await db.collection(c.name).deleteMany({})
-  // Plan 764: menu_design is off by default, so both businesses have every module on.
-  await db.collection('businesses').insertMany(['biz_X', 'biz_Y'].map(_id => ({ _id, name: _id, ownerId: _id, createdAt: 1, internal: false, modules: [...MODULE_KEYS] })))
+  // Plans 724 and 764: dish_analysis and menu_design are off by default, so both businesses have every module on.
+  await db.collection('businesses').insertMany(['biz_X', 'biz_Y'].map(_id => ({
+    _id, name: _id, ownerId: 'o_' + _id, createdAt: 1, internal: false, lastSyncedMasterVersion: 0, modules: [...MODULE_KEYS],
+  })))
   clearModuleCache()
 })
 
@@ -63,6 +65,10 @@ const BODY = {
   invoices: () => ({}),
   diagnoses: () => ({}),
   stockCounts: () => ({}),
+  // Plan 724: the dish analysis store (generic API).
+  menuDishes: () => menuDishBody({ name: 'מנה X' }),
+  dishSalesMonths: () => dishMonthBody(),
+  dishSalesAliases: () => dishAliasBody({ name: 'שם X' }),
   VERSION_HISTORY: () => ({ entityType: 'recipes', entityId: 'entity-X', note: 'x' }),
   activity_log: () => ({ action: 'x', at: 1 }),
   DICTIONARY_OVERRIDES: () => ({ items: { a: 'b' } }),

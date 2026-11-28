@@ -199,7 +199,7 @@
               type="radio"
               name="logistics-scope"
               [checked]="draft().scope === 'mine'"
-              [disabled]="!!editing()"
+              [appDisabledWhy]="editing() ? ('why_meta_scope_fixed_when_editing' | translatePipe) : null"
               (change)="setScope('mine')"
             />
             <span>{{ 'metadata_logistics_scope_mine' | translatePipe }}</span>
@@ -209,7 +209,7 @@
               type="radio"
               name="logistics-scope"
               [checked]="draft().scope === 'everyone'"
-              [disabled]="!!editing()"
+              [appDisabledWhy]="editing() ? ('why_meta_scope_fixed_when_editing' | translatePipe) : null"
               (change)="setScope('everyone')"
             />
             <span>{{ 'metadata_logistics_scope_everyone' | translatePipe }}</span>

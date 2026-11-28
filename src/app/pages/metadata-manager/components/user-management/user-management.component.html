@@ -25,19 +25,60 @@
                   <span class="c-chip teal">{{ 'business_role_' + user.businessRole | translatePipe }}</span>
                 }
                 @if (user.isPlatformAdmin) {
-                  <span class="c-chip amber" [attr.title]="'platform_admin' | translatePipe">
+                  <span
+                    class="c-chip amber"
+                    role="img"
+                    data-testid="platform-admin-chip"
+                    [attr.aria-label]="'platform_admin' | translatePipe"
+                    [appTooltip]="'platform_admin' | translatePipe"
+                  >
                     <lucide-icon name="crown" [size]="12"></lucide-icon>
                   </span>
                 }
               </span>
             </div>
             <div class="item-actions">
+              <!-- Plan 736: the user's AI allowance, before the delete button. -->
+              <div class="user-chips" data-testid="ai-allowance">
+                <label class="user-email" [attr.for]="'ai-allowance-' + user._id">{{
+                  'admin_ai_allowance' | translatePipe
+                }}</label>
+                <!-- prettier-ignore -->
+                <div appNumberBox [style.inline-size.rem]="6"><input type="number"
+                    class="c-input"
+                    inputmode="numeric"
+                    min="0"
+                    [attr.max]="allowanceMax"
+                    step="1"
+                    data-testid="ai-allowance-input"
+                    [id]="'ai-allowance-' + user._id"
+                    [value]="allowanceText(user)"
+                    [attr.aria-invalid]="allowanceInvalid(user) ? 'true' : null"
+                    (input)="onAllowanceInput(user, $any($event.target).value)"
+                  /></div>
+                <span class="user-email">{{ usedText(user) }}</span>
+                <button
+                  type="button"
+                  class="c-btn-ghost"
+                  data-testid="ai-allowance-save"
+                  [disabled]="!canSaveAllowance(user)"
+                  [appDisabledWhy]="allowanceWhy(user) ? (allowanceWhy(user)! | translatePipe) : null"
+                  (click)="onSaveAllowance(user)"
+                >
+                  {{ 'save' | translatePipe }}
+                </button>
+                @if (allowanceInvalid(user)) {
+                  <span class="c-field-error" data-testid="ai-allowance-error">{{
+                    'admin_ai_allowance_invalid' | translatePipe
+                  }}</span>
+                }
+              </div>
               <button
                 class="c-icon-btn danger"
                 (click)="onDeleteUser(user)"
-                [disabled]="isOwnBusiness(user)"
+                [appDisabledWhy]="isOwnBusiness(user) ? ('why_meta_own_business_user' | translatePipe) : null"
+                [disabledWhyTip]="'remove' | translatePipe"
                 [attr.aria-label]="'remove' | translatePipe"
-                [attr.title]="'remove' | translatePipe"
               >
                 <lucide-icon name="trash-2" [size]="16"></lucide-icon>
               </button>

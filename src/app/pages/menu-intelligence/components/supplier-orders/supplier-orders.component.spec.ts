@@ -251,7 +251,7 @@ describe('SupplierOrdersComponent', () => {
       createWithOnion()
       expect(text()).toContain('cheaper_at_supplier')
       expect(buttons().length).toBe(1)
-      expect(buttons()[0].disabled).toBeFalse()
+      expect(buttons()[0].getAttribute('aria-disabled')).toBeNull()
     })
 
     it('a click saves the stored event with the move added', async () => {
@@ -281,7 +281,9 @@ describe('SupplierOrdersComponent', () => {
 
     it('the button is disabled while the event is not saved', () => {
       createWithOnion(undefined, false)
-      expect(buttons()[0].disabled).toBeTrue()
+      expect(buttons()[0].getAttribute('aria-disabled')).toBe('true')
+      buttons()[0].click()
+      expect(updateMenuEvent).not.toHaveBeenCalled()
     })
 
     it('a save error shows save_failed and writes nothing else', async () => {

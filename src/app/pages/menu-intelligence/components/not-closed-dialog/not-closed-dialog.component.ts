@@ -2,6 +2,7 @@ import { afterNextRender, ChangeDetectionStrategy, Component, ElementRef, inject
 import { TextareaAutoGrowDirective } from 'src/app/core/directives/textarea-auto-grow.directive'
 import { FormsModule } from '@angular/forms'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
+import { DisabledWhyDirective } from 'src/app/shared/tooltip/disabled-why.directive'
 import { NOT_CLOSED_REASONS } from '@schemas/entities'
 import type { NotClosedReason } from '@models/menu-event.model'
 
@@ -17,7 +18,7 @@ export interface NotClosedAnswer {
 @Component({
   selector: 'app-not-closed-dialog',
   standalone: true,
-  imports: [TextareaAutoGrowDirective, FormsModule, TranslatePipe],
+  imports: [TextareaAutoGrowDirective, FormsModule, TranslatePipe, DisabledWhyDirective],
   templateUrl: './not-closed-dialog.component.html',
   styleUrl: './not-closed-dialog.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

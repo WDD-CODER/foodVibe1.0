@@ -17,6 +17,9 @@ TypeScript interfaces, types, and small constants for domain entities and shared
 | `venue.model.ts` | Venue profile / infra | VenueProfile, VenueInfraItem, EnvironmentType |
 | `logistics.model.ts` | Event/dish logistics | EventLogistics, DishLogistics, BaselineEntry, ServiceOverride, etc. |
 | `menu-event.model.ts` | Menu builder event model (plan 579: logistics answer section is a string, payer ours, hiddenKeys on the site logistics) | MenuEvent, MenuSection, MenuTypeDefinition, ALL_DISH_FIELDS |
+| `menu-dish.model.ts` | Standing-menu dish, mirror of the menu dish schema (plan 725) | MenuDish, DishCostSource, DISH_COST_SOURCES |
+| `dish-sales-month.model.ts` | One month of dish sales and returns, mirror of the month schema (plan 726) | DishSalesMonth, DishSalesRow, DishReturnReasonLine, DISH_RETURN_REASONS |
+| `menu-design.model.ts` | Menu design types, taken from the shared schema (plan 764) | MenuDesign, MenuDesignDraft, NewMenuDesign |
 | `menu-design.model.ts` | Menu design types, taken from the shared schema (plan 764); used by the designs screens (plan 765) | MenuDesign, MenuDesignDraft, NewMenuDesign |
 | `client.model.ts` | Client entity (who an event is for), mirror of the client schema | Client, ClientType, CLIENT_TYPES |
 | `knowledge-item.model.ts` | Knowledge item (a fact the business knows about itself), mirror of the schema (plan 554) | KnowledgeItem, KNOWLEDGE_TOPICS |
@@ -26,7 +29,7 @@ TypeScript interfaces, types, and small constants for domain entities and shared
 | `user.model.ts` | User/session | User |
 | `msg.model.ts` | User message / toast | Msg |
 | `label.model.ts` | Label definitions for UI | LabelDefinition, LABEL_COLOR_PALETTE |
-| `admin-user.model.ts` | Admin user entity | AdminUser |
+| `admin-user.model.ts` | Admin user entity (plan 736: with the AI allowance and used count) | AdminUser, AiAllowanceSaved |
 | `ai-menu-draft.model.ts` | AI-drafted menu + match types | AiMenuDraft, AiMenuSectionDraft, AiMenuDishDraft, AiMenuPatch, MatchedMenu, MatchedSection, MatchedDish |
 | `ai-product-draft.model.ts` | AI-drafted product | AiProductDraft, AiProductPatch |
 | `business-stats.model.ts` | Dashboard read model of the business stats route (plan 447) | StatsPeriod, BusinessStats, BusinessStatsCards, CountCard, FunnelStage, UpcomingEvent |

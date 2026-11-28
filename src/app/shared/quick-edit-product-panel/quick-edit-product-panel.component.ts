@@ -27,6 +27,7 @@ import { getEffectivePrice, getSupplierIds } from '@utils/product-source.util'
 import { isProductNameTaken } from 'src/app/core/utils/product-name-error.util'
 import { SelectOnFocusDirective } from '@directives/select-on-focus.directive'
 import { ModalShellComponent } from '../modal-shell/modal-shell.component'
+import { DisabledWhyDirective } from '../tooltip/disabled-why.directive'
 import { NumberBoxDirective } from '@directives/number-box.directive'
 
 @Component({
@@ -39,7 +40,8 @@ import { NumberBoxDirective } from '@directives/number-box.directive'
     LucideAngularModule,
     TranslatePipe,
     CustomSelectComponent,
-    SelectOnFocusDirective
+    SelectOnFocusDirective,
+    DisabledWhyDirective
   ],
   templateUrl: './quick-edit-product-panel.component.html',
   styleUrl: './quick-edit-product-panel.component.scss',

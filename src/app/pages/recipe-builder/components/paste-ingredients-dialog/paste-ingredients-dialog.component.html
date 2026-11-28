@@ -29,7 +29,8 @@
         <button
           type="button"
           class="c-btn-primary"
-          [disabled]="!text_().trim() || isSaving_()"
+          [disabled]="isSaving_()"
+          [appDisabledWhy]="!text_().trim() ? ('why_write_first' | translatePipe) : null"
           [attr.aria-busy]="isSaving_() || null"
           (click)="onSubmit()"
         >

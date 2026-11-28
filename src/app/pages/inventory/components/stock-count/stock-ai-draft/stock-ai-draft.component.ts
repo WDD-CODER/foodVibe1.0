@@ -6,6 +6,7 @@ import { CounterComponent } from 'src/app/shared/counter/counter.component'
 import { LoaderComponent } from 'src/app/shared/loader/loader.component'
 import { SearchComboboxComponent, type SearchPick } from 'src/app/shared/search-combobox/search-combobox.component'
 import { VoiceNoteComponent, type VoiceNoteSend } from 'src/app/shared/voice-note/voice-note.component'
+import { DisabledWhyDirective } from 'src/app/shared/tooltip/disabled-why.directive'
 import { aiCapErrorKey } from 'src/app/core/utils/ai-error.util'
 import { GeminiService } from '@services/gemini.service'
 import { LoggingService } from '@services/logging.service'
@@ -73,7 +74,8 @@ export interface StockAiExtracted {
     CounterComponent,
     LoaderComponent,
     VoiceNoteComponent,
-    SearchComboboxComponent
+    SearchComboboxComponent,
+    DisabledWhyDirective
   ],
   templateUrl: './stock-ai-draft.component.html',
   styleUrl: './stock-ai-draft.component.scss',
@@ -89,7 +91,10 @@ export class StockAiDraftComponent {
   readonly unmatched = input<StockAiUnmatched[]>([])
   /** Every product of the business, for the search under a spoken line. */
   readonly products = input<StockAiProductOption[]>([])
+  /** Only while the sheet's own save runs; a sheet that is off for another reason passes `disabledWhy`. */
   readonly disabled = input(false)
+  /** Why the count by voice cannot be opened (translated); the open button says it. null = it can. */
+  readonly disabledWhy = input<string | null>(null)
   readonly pick = output<StockAiPick>()
   /** Plan 655: the answer to «כמה?» on a line whose amount is missing. */
   readonly amount = output<StockAiAmount>()

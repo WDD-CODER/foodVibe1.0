@@ -57,7 +57,7 @@ const call = (log, extra = {}) =>
     timeoutMs: 1000,
     log,
     eventPrefix: 'ai.test',
-    usage: { businessId: 'bizA', userId: 'u1', feature: 'parse_text' },
+    usage: { businessId: 'bizA', userId: 'u1', allowance: { reserved: false }, feature: 'parse_text' },
     ...extra,
   });
 const rows = async () => {

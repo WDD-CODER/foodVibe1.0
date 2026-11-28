@@ -74,7 +74,13 @@
     }
 
     <div class="model-actions">
-      <button type="button" class="c-btn-primary" [disabled]="!isDirty_() || isSaving_()" (click)="onSave()">
+      <button
+        type="button"
+        class="c-btn-primary"
+        [disabled]="isSaving_()"
+        [appDisabledWhy]="!isDirty_() ? ('why_nothing_to_save' | translatePipe) : null"
+        (click)="onSave()"
+      >
         {{ 'save' | translatePipe }}
       </button>
       @if (isDirty_()) {

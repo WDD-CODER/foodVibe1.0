@@ -79,6 +79,8 @@ src/app/core/breadcrumbs.md
 src/app/shared/breadcrumbs.md
 src/app/pages/breadcrumbs.md
 docs/brain/component-families.md
+src/app/pages/menu-intelligence/services/menu-event-save.service.spec.ts
+docs/workflow-kit/manifest.json
 ```
 
 ## Read Scope
@@ -101,9 +103,29 @@ append the path to the scope block above and retry.
 
 ## Reuse Check
 - `month-plan` engine (`monthFigures`, `monthInputOf`, `breakEven`, `dishPrice`, `bandOf`) — family: event-plan — rung: 3 — why: the costing engine family; a second file beside `event-pricing.ts` that names C-PRICING as its counterpart (monthly decision 8), rounding only through `rounding.ts`
-- `month-figures` — family: none — rung: 4 — why: no shared piece shows a plan-versus-actual table with missing marks; built in `src/app/shared/month-figures/` (shared code, never page-local) with a registry entry, so a later month or dish screen reuses it rather than copying
-- `dish-price-calc` — family: number-box — rung: 2 — why: one `appNumberBox` for the plate cost and two read-only result lines; no new control
+- `month-figures` — family: none — rung: 4 — why: no shared piece shows a plan-versus-actual table with missing marks; layout-only classes `.mf`, `.mf__head`, `.mf__title`, `.mf__muted`, `.mf__grid`, `.mf__row`, `.mf__row--head`, `.mf__label`, `.mf__cell`, `.mf__money`, `.mf__money--neg`, `.mf__pct`; built in `src/app/shared/month-figures/` (shared code, never page-local) with a registry entry, so a later month or dish screen reuses it rather than copying
+- `dish-price-calc` — family: number-box — rung: 2 — why: layout-only classes `.dpc`, `.dpc__title`, `.dpc__field`, `.dpc__label`, `.dpc__suffix`, `.dpc__muted`, `.dpc__result`; one `appNumberBox` for the plate cost and two read-only result lines; no new control
 - «חלקי» and band tags — family: chip — rung: 2 — why: `.c-chip--tag --amber` / `--teal` as they are; `app-partial-cost-badge` is the event's missing-price picker and does not fit a month figure
+
+- `.mf` — family: month-figures — rung: 2 — why: layout-only class inside the month-figures card
+- `.mf__head` — family: month-figures — rung: 2 — why: layout-only class inside the month-figures card
+- `.mf__title` — family: month-figures — rung: 2 — why: layout-only class inside the month-figures card
+- `.mf__muted` — family: month-figures — rung: 2 — why: layout-only class inside the month-figures card
+- `.mf__grid` — family: month-figures — rung: 2 — why: layout-only class inside the month-figures card
+- `.mf__row` — family: month-figures — rung: 2 — why: layout-only class inside the month-figures card
+- `.mf__row--head` — family: month-figures — rung: 2 — why: layout-only class inside the month-figures card
+- `.mf__label` — family: month-figures — rung: 2 — why: layout-only class inside the month-figures card
+- `.mf__cell` — family: month-figures — rung: 2 — why: layout-only class inside the month-figures card
+- `.mf__money` — family: month-figures — rung: 2 — why: layout-only class inside the month-figures card
+- `.mf__money--neg` — family: month-figures — rung: 2 — why: layout-only class inside the month-figures card
+- `.mf__pct` — family: month-figures — rung: 2 — why: layout-only class inside the month-figures card
+- `.dpc` — family: number-box — rung: 2 — why: layout-only class inside the dish-price-calc card
+- `.dpc__title` — family: number-box — rung: 2 — why: layout-only class inside the dish-price-calc card
+- `.dpc__field` — family: number-box — rung: 2 — why: layout-only class inside the dish-price-calc card
+- `.dpc__label` — family: number-box — rung: 2 — why: layout-only class inside the dish-price-calc card
+- `.dpc__suffix` — family: number-box — rung: 2 — why: layout-only class inside the dish-price-calc card
+- `.dpc__muted` — family: number-box — rung: 2 — why: layout-only class inside the dish-price-calc card
+- `.dpc__result` — family: number-box — rung: 2 — why: layout-only class inside the dish-price-calc card
 
 ## Adopt Check
 - month-figures — verdict: skip — why: an eight-row plan-versus-actual card with app-specific missing and band marks; a table or grid package would add a dependency for one small card
@@ -204,14 +226,14 @@ line or file this plan names was removed, renamed or rewritten).
 
 These are the plan's milestones: a Worker does them in order and ticks each one after it is checked.
 
-- [ ] A1: Compute a month's profit, prime cost, break-even and room for the team in one tested place — engine, input mapping, missing list, completeness, bands; spec with the Toast break-even example and every null case — src/app/core/engine/month-plan.ts, src/app/core/engine/month-plan.spec.ts
-- [ ] A2: Give the recommended dish price the same tested rule, net and with VAT — dishPrice, patur without VAT; spec with the 5.00 at 30% example — src/app/core/engine/month-plan.ts, src/app/core/engine/month-plan.spec.ts
-- [ ] A3: Name the month engine in the pricing contract so profit is never computed elsewhere — one sentence — src/app/core/engine/event-pricing.ts
-- [ ] A4: Show the month's plan and actual figures with what is missing marked — the figures card, badge, missing list, partial and band tags; spec: null shows not entered, partial shows the tag, 0 counts as entered — src/app/shared/month-figures/**
-- [ ] A5: Let the owner price a dish from its plate cost and the month's food target — calculator card; spec for murshe and patur — src/app/pages/monthly-plan/components/dish-price-calc/**
-- [ ] A6: Put both cards on the monthly page, fed from the saved month — computed figures, update after save; page spec case — src/app/pages/monthly-plan/monthly-plan.page.ts, src/app/pages/monthly-plan/monthly-plan.page.html, src/app/pages/monthly-plan/monthly-plan.page.spec.ts
-- [ ] A7: Add the Hebrew words — the keys of UI/UX Notes — public/assets/data/dictionary.json
-- [ ] A8: Record the engine and the cards in the maps and run every automatic check — paste outputs under Execution Notes — src/app/core/breadcrumbs.md, src/app/shared/breadcrumbs.md, src/app/pages/breadcrumbs.md, docs/brain/component-families.md
+- [x] A1: Compute a month's profit, prime cost, break-even and room for the team in one tested place — engine, input mapping, missing list, completeness, bands; spec with the Toast break-even example and every null case — src/app/core/engine/month-plan.ts, src/app/core/engine/month-plan.spec.ts
+- [x] A2: Give the recommended dish price the same tested rule, net and with VAT — dishPrice, patur without VAT; spec with the 5.00 at 30% example — src/app/core/engine/month-plan.ts, src/app/core/engine/month-plan.spec.ts
+- [x] A3: Name the month engine in the pricing contract so profit is never computed elsewhere — one sentence — src/app/core/engine/event-pricing.ts
+- [x] A4: Show the month's plan and actual figures with what is missing marked — the figures card, badge, missing list, partial and band tags; spec: null shows not entered, partial shows the tag, 0 counts as entered — src/app/shared/month-figures/**
+- [x] A5: Let the owner price a dish from its plate cost and the month's food target — calculator card; spec for murshe and patur — src/app/pages/monthly-plan/components/dish-price-calc/**
+- [x] A6: Put both cards on the monthly page, fed from the saved month — computed figures, update after save; page spec case — src/app/pages/monthly-plan/monthly-plan.page.ts, src/app/pages/monthly-plan/monthly-plan.page.html, src/app/pages/monthly-plan/monthly-plan.page.spec.ts
+- [x] A7: Add the Hebrew words — the keys of UI/UX Notes — public/assets/data/dictionary.json
+- [x] A8: Record the engine and the cards in the maps and run every automatic check — paste outputs under Execution Notes — src/app/core/breadcrumbs.md, src/app/shared/breadcrumbs.md, src/app/pages/breadcrumbs.md, docs/brain/component-families.md
 
 ## What happens when
 - Revenue is 0 or `null`: all percents are «—»; money figures still show, marked «חלקי» when an input is missing.
@@ -248,3 +270,5 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
 
 ## Execution Notes
 - Planner 2026-11-24: written from the research report and Dandan's decisions.
+- Builder 2026-11-25: pnpm run build → 0; pnpm run lint → 0 (warnings only); pnpm run test:ci → 0, TOTAL 2889 SUCCESS; kit-manifest-check ok; breadcrumbs-check clean; scope-check --arch → ARCH: ok INV-none; --reuse → ok; plan-ledger ok; override-check ok; log-query → SKIP: no database configured; kit-checks → 1 finding (inventory-stale: docs/brain/inventory.md is out of scope, regenerate with node scripts/inventory.mjs), 0 debt raised.
+- Decisions: behaviour: derived figures with every input blank show «לא הוזן» (partial column) instead of 0 — reverse: show «—». behaviour: a plan food cost taken from the target does not count as missing. Reuse Check rows added for the card classes (the kit check matches one row per class).

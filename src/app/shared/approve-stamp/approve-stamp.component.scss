@@ -45,6 +45,10 @@
     cursor: default;
   }
 
+  &[aria-disabled='true'] {
+    cursor: not-allowed;
+  }
+
   .approve-stamp__img {
     width: 3.5rem;
     height: 3.5rem;

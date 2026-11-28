@@ -2,8 +2,7 @@
   appColumnCarouselGroup
   [isPanelOpen]="isPanelOpen_()"
   (panelToggle)="togglePanel()"
-  [gridTemplate]="'2fr 1fr minmax(48px, 0.8fr) 1.2fr 0.8fr 80px auto'"
-  [mobileGridTemplate]="'2fr 1fr 40px 28px'"
+  [columns]="columns"
   [resultCount]="filteredEquipment_().length"
   [resultTotal]="equipmentData.allEquipment_().length"
 >
@@ -35,8 +34,7 @@
       type="button"
       class="c-btn-primary"
       (click)="onAdd()"
-      [disabled]="!isLoggedIn()"
-      [attr.title]="!isLoggedIn() ? ('sign_in_to_use' | translatePipe) : null"
+      [appDisabledWhy]="!isLoggedIn() ? ('sign_in_to_use' | translatePipe) : null"
     >
       <lucide-icon name="plus" [size]="18"></lucide-icon>
       <span class="btn-label">{{ 'add' | translatePipe }}</span>
@@ -67,8 +65,7 @@
     <app-column-carousel-header>
       <div
         class="col-category c-grid-header-cell c-sortable-header"
-        appColumnSlide
-        label="category"
+        *appFallColumn="'category'; label: 'category'"
         (click)="setSort('category')"
         (keydown.enter)="setSort('category')"
         (keydown.space)="$event.preventDefault(); setSort('category')"
@@ -79,8 +76,7 @@
       </div>
       <div
         class="col-owned c-grid-header-cell c-sortable-header"
-        appColumnSlide
-        label="owned_quantity"
+        *appFallColumn="'owned'; label: 'owned_quantity'"
         (click)="setSort('owned')"
         (keydown.enter)="setSort('owned')"
         (keydown.space)="$event.preventDefault(); setSort('owned')"
@@ -89,10 +85,14 @@
       >
         {{ 'owned_quantity' | translatePipe }}
       </div>
-      <div class="col-scaling c-grid-header-cell" appColumnSlide label="scaling_rule" role="presentation">
+      <div class="col-scaling c-grid-header-cell" *appFallColumn="'scaling'; label: 'scaling_rule'" role="presentation">
         {{ 'scaling_rule' | translatePipe }}
       </div>
-      <div class="col-consumable c-grid-header-cell" appColumnSlide label="is_consumable" role="presentation">
+      <div
+        class="col-consumable c-grid-header-cell"
+        *appFallColumn="'consumable'; label: 'is_consumable'"
+        role="presentation"
+      >
         {{ 'is_consumable' | translatePipe }}
       </div>
     </app-column-carousel-header>
@@ -129,16 +129,24 @@
       >
         <div class="col-name c-list-body-cell" role="cell">{{ item.nameHebrew }}</div>
         <app-column-carousel-cell>
-          <div class="col-category c-list-body-cell" appColumnSlide [label]="'category' | translatePipe">
-            {{ item.category | translatePipe }}
+          <div class="col-category c-list-body-cell" *appFallColumn="'category'; label: 'category' | translatePipe">
+            <span class="cell-line" [appTooltip]="item.category | translatePipe">{{
+              item.category | translatePipe
+            }}</span>
           </div>
-          <div class="col-owned c-list-body-cell" appColumnSlide [label]="'owned_quantity' | translatePipe">
+          <div
+            class="col-owned c-list-body-cell cell-nowrap"
+            *appFallColumn="'owned'; label: 'owned_quantity' | translatePipe"
+          >
             {{ item.ownedQuantity }}
           </div>
-          <div class="col-scaling c-list-body-cell" appColumnSlide [label]="'scaling_rule' | translatePipe">
-            {{ scalingSummary(item) }}
+          <div class="col-scaling c-list-body-cell" *appFallColumn="'scaling'; label: 'scaling_rule' | translatePipe">
+            <span class="cell-line" [appTooltip]="scalingSummary(item)">{{ scalingSummary(item) }}</span>
           </div>
-          <div class="col-consumable c-list-body-cell" appColumnSlide [label]="'is_consumable' | translatePipe">
+          <div
+            class="col-consumable c-list-body-cell"
+            *appFallColumn="'consumable'; label: 'is_consumable' | translatePipe"
+          >
             <span class="c-chip c-chip--tag c-chip--soft" [class.c-chip--teal]="item.isConsumable">
               {{ item.isConsumable ? ('approved_yes' | translatePipe) : ('approved_no' | translatePipe) }}
             </span>
@@ -153,8 +161,7 @@
               class="c-icon-btn danger"
               (click)="onDelete(item); $event.stopPropagation()"
               [attr.aria-label]="'delete' | translatePipe"
-              [disabled]="!isLoggedIn()"
-              [attr.title]="!isLoggedIn() ? ('sign_in_to_use' | translatePipe) : null"
+              [appDisabledWhy]="!isLoggedIn() ? ('sign_in_to_use' | translatePipe) : null"
             >
               <lucide-icon name="trash-2" [size]="18"></lucide-icon>
             </button>
@@ -279,7 +286,8 @@
           type="button"
           class="c-btn-primary"
           (click)="onInlineSave()"
-          [disabled]="editForm_.invalid || isSavingEdit_()"
+          [disabled]="isSavingEdit_()"
+          [appDisabledWhy]="editForm_.invalid ? ('fill_required_fields' | translatePipe) : null"
         >
           @if (isSavingEdit_()) {
             <app-loader size="small" [inline]="true" />

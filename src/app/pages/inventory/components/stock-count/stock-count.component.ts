@@ -5,13 +5,11 @@ import {
   computed,
   DestroyRef,
   effect,
-  ElementRef,
   inject,
   linkedSignal,
   OnInit,
   signal,
-  untracked,
-  viewChild
+  untracked
 } from '@angular/core'
 import { HttpErrorResponse } from '@angular/common/http'
 import { FormsModule } from '@angular/forms'
@@ -31,7 +29,8 @@ import { InputClearComponent } from 'src/app/shared/input-clear/input-clear.comp
 import { ListShellComponent } from 'src/app/shared/list-shell/list-shell.component'
 import { ListRowCheckboxComponent } from 'src/app/shared/list-selection/list-row-checkbox.component'
 import { LoaderComponent } from 'src/app/shared/loader/loader.component'
-import { placeInViewport } from 'src/app/core/utils/viewport-placement.util'
+import { TooltipDirective } from 'src/app/shared/tooltip/tooltip.directive'
+import { DisabledWhyDirective } from 'src/app/shared/tooltip/disabled-why.directive'
 import { formatQty } from 'src/app/core/engine/rounding'
 import { toBase } from 'src/app/core/engine/units'
 import { normalizeHebrew } from 'src/app/core/utils/recipe-match.util'
@@ -57,7 +56,7 @@ import {
   type StockAiUnmatched
 } from './stock-ai-draft/stock-ai-draft.component'
 import type { StockExtractLine } from '@schemas/ai-stock-extract.schema'
-import { PHONE_QUERY, TABLET_DOWN_QUERY } from '@utils/breakpoints'
+import { PHONE_NARROW_QUERY, PHONE_QUERY, TABLET_DOWN_QUERY } from '@utils/breakpoints'
 
 interface RowState {
   counted: boolean
@@ -106,17 +105,6 @@ const MARK_SIZES: Record<MarkSize, { box: string; tap: string }> = {
   desktop: { box: '1.5rem', tap: '3rem' }
 }
 
-/** The base-amount popover: its text and where it sits (viewport coordinates, from `placeInViewport`). */
-interface BasePopover {
-  id: string
-  text: string
-  /** The tapped control, in viewport coordinates when it was tapped. */
-  anchor: { top: number; bottom: number; left: number; width: number }
-  /** Set once the rendered box is measured and placed; until then the box is drawn hidden. */
-  top: number | null
-  left: number | null
-}
-
 interface UnitOption {
   value: string
   label: string
@@ -153,13 +141,14 @@ function todayIso(): string {
     ListShellComponent,
     ListRowCheckboxComponent,
     LoaderComponent,
+    TooltipDirective,
+    DisabledWhyDirective,
     StockBelowMinimumComponent,
     StockAiDraftComponent
   ],
   templateUrl: './stock-count.component.html',
   styleUrl: './stock-count.component.scss',
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  host: { '(document:click)': 'closeBase_()', '(document:keydown.escape)': 'closeBase_()' }
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class StockCountComponent implements OnInit {
   private readonly kitchen_ = inject(KitchenStateService)
@@ -217,10 +206,19 @@ export class StockCountComponent implements OnInit {
   protected readonly dateOk_ = computed(
     () => /^\d{4}-\d{2}-\d{2}$/.test(this.countedDate_()) && this.countedDate_() <= todayIso()
   )
+  /** Plan 747: why the count cannot be closed (a dictionary key); null when it can or while it only saves. */
+  protected readonly finalizeWhy_ = computed<string | null>(() => {
+    if (!this.dateOk_()) return 'why_count_date_invalid'
+    return this.countedCount_() === 0 ? 'why_nothing_counted' : null
+  })
   /** Plan 655: true below the desktop breakpoint; set from the media query and kept in step with it. */
   protected readonly narrow_ = signal(typeof window !== 'undefined' && window.matchMedia(NARROW_QUERY).matches)
   /** Plan 657: true on a phone (≤ 767px); sizes the counted mark. */
   protected readonly phone_ = signal(typeof window !== 'undefined' && window.matchMedia(PHONE_QUERY).matches)
+  /** Plan 763: true on a narrow phone (≤ 419px), where a row is two lines. */
+  protected readonly narrowPhone_ = signal(
+    typeof window !== 'undefined' && window.matchMedia(PHONE_NARROW_QUERY).matches
+  )
   /** Plan 657: the counted mark's size tokens for the current width. */
   protected readonly mark_ = computed(() => {
     const size: MarkSize = this.phone_() ? 'phone' : this.narrow_() ? 'tablet' : 'desktop'
@@ -230,17 +228,20 @@ export class StockCountComponent implements OnInit {
   protected readonly showBase_ = computed(() => this.shownRows_().some((r) => r.base !== ''))
   /** Plan 655: below desktop the base amount is no column — a small control opens it instead. */
   protected readonly baseColumn_ = computed(() => this.showBase_() && !this.narrow_())
-  protected readonly basePopover_ = signal<BasePopover | null>(null)
-  private readonly basePopRef_ = viewChild<ElementRef<HTMLElement>>('basePop')
   protected readonly addUnitValue = ADD_UNIT
   protected readonly gridTemplate_ = computed(() => {
     if (this.view_() !== 'sheet') return '1fr'
     return this.baseColumn_() ? '2fr 1.2fr 1.2fr 0.9fr 1fr' : '2fr 1.2fr 1.2fr 0.9fr'
   })
+  /**
+   * The phone's columns — the base column does not exist below desktop. One line: name, amount, unit, counted. On a
+   * narrow phone (≤ 419px, plans 762/763) the controls only: the name has a line of its own above them. The unit
+   * column keeps room for the unit and the fixed slot beside it (plan 747): never under 6rem.
+   */
   protected readonly mobileGridTemplate_ = computed(() => {
     if (this.view_() !== 'sheet') return '1fr'
-    const cols = 'minmax(0, 1.5fr) auto minmax(0, 1fr) auto'
-    return this.baseColumn_() ? cols + ' minmax(3.5rem, auto)' : cols
+    const controls = 'auto minmax(6rem, 1fr) auto'
+    return this.narrowPhone_() ? controls : `minmax(0, 1.5fr) ${controls}`
   })
 
   /** Plan 645: built once per product list, not per row per check. */
@@ -322,23 +323,6 @@ export class StockCountComponent implements OnInit {
   private readonly snapshotSig_ = computed(() => JSON.stringify([this.countedDate_(), this.countedLinesSig_()]))
 
   constructor() {
-    // Plan 658: place the base box from its measured size; a resize re-places it, a scroll closes it.
-    effect((onCleanup) => {
-      const el = this.basePopRef_()?.nativeElement
-      if (!el || !this.basePopover_()) return
-      untracked(() => this.placeBase_(el))
-      const onResize = (): void => this.placeBase_(el)
-      const onScroll = (event: Event): void => {
-        if (event.target instanceof Node && el.contains(event.target)) return
-        this.basePopover_.set(null)
-      }
-      window.addEventListener('resize', onResize)
-      window.addEventListener('scroll', onScroll, true)
-      onCleanup(() => {
-        window.removeEventListener('resize', onResize)
-        window.removeEventListener('scroll', onScroll, true)
-      })
-    })
     warnBeforeUnload(() => this.hasRealChanges())
     effect(() => {
       const snap = this.snapshotSig_()
@@ -352,80 +336,24 @@ export class StockCountComponent implements OnInit {
     const query = window.matchMedia(NARROW_QUERY)
     const onChange = (e: MediaQueryListEvent): void => {
       this.narrow_.set(e.matches)
-      if (!e.matches) this.basePopover_.set(null)
     }
     query.addEventListener('change', onChange)
     const phoneQuery = window.matchMedia(PHONE_QUERY)
     const onPhoneChange = (e: MediaQueryListEvent): void => this.phone_.set(e.matches)
     phoneQuery.addEventListener('change', onPhoneChange)
+    const narrowPhoneQuery = window.matchMedia(PHONE_NARROW_QUERY)
+    const onNarrowPhoneChange = (e: MediaQueryListEvent): void => this.narrowPhone_.set(e.matches)
+    narrowPhoneQuery.addEventListener('change', onNarrowPhoneChange)
     this.destroyRef_.onDestroy(() => {
       query.removeEventListener('change', onChange)
       phoneQuery.removeEventListener('change', onPhoneChange)
+      narrowPhoneQuery.removeEventListener('change', onNarrowPhoneChange)
     })
   })
 
-  /** Plan 655: the base amount of a row, as the hover text and the popover show it. */
+  /** Plan 655: the base amount of a row, as the hover text and the tooltip show it. */
   protected baseLabel_(base: string): string {
     return `${this.translation_.translate('stk_base_amount')}: ${base}`
-  }
-
-  /** Plans 655/659: a tap (phone only) opens the base box, or closes it when it is the same row; above a phone a click does nothing extra. */
-  protected toggleBase_(row: SheetRow, event: Event): void {
-    event.stopPropagation()
-    if (!this.phone_()) return
-    if (this.basePopover_()?.id === row.product._id) {
-      this.basePopover_.set(null)
-      return
-    }
-    this.openBase_(row, event)
-  }
-
-  /** Plan 659: above a phone, mouseenter/focus on the control opens the base box. */
-  protected hoverBase_(row: SheetRow, event: Event): void {
-    if (this.phone_()) return
-    if (this.basePopover_()?.id === row.product._id) return
-    this.openBase_(row, event)
-  }
-
-  /** Plan 659: above a phone, mouseleave/blur closes the base box. */
-  protected leaveBase_(): void {
-    if (this.phone_()) return
-    this.basePopover_.set(null)
-  }
-
-  private openBase_(row: SheetRow, event: Event): void {
-    const target = event.currentTarget as HTMLElement | null
-    const rect = target?.getBoundingClientRect()
-    this.basePopover_.set({
-      id: row.product._id,
-      text: this.baseLabel_(row.base),
-      anchor: rect
-        ? { top: rect.top, bottom: rect.bottom, left: rect.left, width: rect.width }
-        : { top: 0, bottom: 0, left: 0, width: 0 },
-      top: null,
-      left: null
-    })
-  }
-
-  /** Plan 658: measures the rendered box (its real size) and places it by `placeInViewport`, below its control when there is room. */
-  private placeBase_(el: HTMLElement): void {
-    const pop = this.basePopover_()
-    if (!pop) return
-    // The top layer keeps the box out of any ancestor that would re-base `position: fixed`.
-    if (typeof el.showPopover === 'function' && !el.matches(':popover-open')) el.showPopover()
-    const { width, height } = el.getBoundingClientRect()
-    const placed = placeInViewport({
-      anchor: pop.anchor,
-      panel: { width, height },
-      viewport: { width: document.documentElement.clientWidth, height: document.documentElement.clientHeight },
-      prefer: 'below'
-    })
-    if (placed.top === pop.top && placed.left === pop.left) return
-    this.basePopover_.set({ ...pop, top: placed.top, left: placed.left })
-  }
-
-  protected closeBase_(): void {
-    this.basePopover_.set(null)
   }
 
   async ngOnInit(): Promise<void> {

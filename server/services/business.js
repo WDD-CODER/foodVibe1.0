@@ -129,7 +129,7 @@ async function deleteBusinessServerData(db, business, log) {
     if (!(await deleteStoredFile(file))) filesLeft += 1
   }
   const counts = { files: files.length, filesLeft }
-  for (const name of ['storedFiles', 'priceHistory', 'invoiceAliases', 'businessAccess']) {
+  for (const name of ['storedFiles', 'priceHistory', 'invoiceAliases', 'businessAccess', 'monthPlans']) {
     counts[name] = (await db.collection(name).deleteMany({ businessId })).deletedCount
   }
   if (filesLeft > 0) log?.warn?.({ event: 'business.delete.files_left', businessId, count: filesLeft })

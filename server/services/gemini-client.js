@@ -19,6 +19,7 @@ const mongoose = require('mongoose');
 const { isAiFeature } = require('../constants/ai-features');
 const { recordAiUsage } = require('./ai-usage');
 const { capState } = require('./ai-cap');
+const { reserveAiCall } = require('./ai-allowance');
 
 const GEMINI_BASE_URL = 'https://generativelanguage.googleapis.com/v1beta/models';
 
@@ -431,6 +432,10 @@ async function callGemini({ body, timeoutMs, log, eventPrefix, needsVision = fal
     log.error({ event: 'ai.usage.missing', eventPrefix });
     meter = false;
   }
+  // Plan 736: a signed-in call must carry the request's allowance holder (usageOf in routes/ai.js adds it).
+  if (process.env.VITEST && typeof usage?.userId === 'string' && usage.userId && !usage.allowance) {
+    throw new Error('callGemini: usage.allowance required for a signed-in call');
+  }
   let medium = needsVision ? 'image' : null;
   if (needsMedia !== undefined) {
     if (ALL_MEDIA.includes(needsMedia)) medium = needsMedia;
@@ -469,6 +474,12 @@ async function callGemini({ body, timeoutMs, log, eventPrefix, needsVision = fal
   if (knownReset) {
     return { kind: 'model_exhausted', model, nextModel: firstUsable(candidates, now), resetAt: knownReset.toISOString() };
   }
+  const overBudget = await reserveAllowance(usage, log);
+  if (overBudget) {
+    if (meter) recordAiUsage({ usage, model, ok: false, errorCode: 'ai_budget_exhausted', latencyMs: 0, log });
+    log.info({ event: 'ai.allowance.refused', feature: usage.feature });
+    return { kind: 'ai_budget_exhausted', model };
+  }
 
   // Plan 614: a failure that goes away by itself (Google overloaded or unavailable, a dropped connection) is
   // tried again, up to MAX_ATTEMPTS calls in all. Every attempt is a real call and is counted and logged on its own.
@@ -480,6 +491,25 @@ async function callGemini({ body, timeoutMs, log, eventPrefix, needsVision = fal
     await sleep(retryDelayMs(attempt));
   }
   return result;
+}
+
+/**
+ * Plan 736: takes one call from the signed-in user's lifetime AI allowance, once per request (`usage.allowance` is
+ * the request's holder from trackAiAllowance). True only when the user has used it all. A platform admin
+ * (`usage.unlimited`) is never counted; a database error or Mongo not connected never blocks AI.
+ */
+async function reserveAllowance(usage, log) {
+  const userId = usage?.userId;
+  if (typeof userId !== 'string' || !userId) return false;
+  if (!usage.allowance) return false;
+  if (usage.unlimited === true || usage.allowance.reserved) return false;
+  if (mongoose.connection.readyState !== 1) return false;
+  try {
+    return (await reserveAiCall(mongoose.connection.db, usage.allowance, userId)) === 'over';
+  } catch {
+    log.warn({ event: 'ai.allowance.check_failed', userId });
+    return false;
+  }
 }
 
 const MAX_ATTEMPTS = 4;

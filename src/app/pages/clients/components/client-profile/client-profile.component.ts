@@ -25,6 +25,7 @@ import {
   CustomMultiSelectComponent,
   type CustomMultiSelectOption
 } from 'src/app/shared/custom-multi-select/custom-multi-select.component'
+import { DisabledWhyDirective } from 'src/app/shared/tooltip/disabled-why.directive'
 import { stageLabelKey } from 'src/app/core/utils/event-stage-ui.util'
 import { buildTimeline, clientDialDigits } from './client-profile.util'
 
@@ -54,7 +55,8 @@ const REASON_MAX = 200
     ClientFormComponent,
     ClientPickerComponent,
     NewInquiryDialogComponent,
-    CustomMultiSelectComponent
+    CustomMultiSelectComponent,
+    DisabledWhyDirective
   ],
   templateUrl: './client-profile.component.html',
   styleUrl: './client-profile.component.scss',

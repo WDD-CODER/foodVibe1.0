@@ -43,7 +43,7 @@
             [options]="environmentOptions"
             [placeholder]="'logistics_environment'"
             [ngModel]="environment_() ?? ''"
-            [disabled]="!canEdit_()"
+            [disabledWhy]="editWhy_() ? (editWhy_()! | translatePipe) : null"
             (ngModelChange)="setEnvironment($event)"
           />
           @if (phase_() === 'site_visit') {
@@ -51,7 +51,7 @@
               <span class="logistics-field-label">{{ 'logistics_meeting_at' | translatePipe }}</span>
               <app-date-field
                 [value]="event_()?.siteLogistics?.meetingAt ?? ''"
-                [disabled]="!canEdit_()"
+                [disabledWhy]="editWhy_() ? (editWhy_()! | translatePipe) : null"
                 ariaLabelKey="logistics_meeting_at"
                 (committed)="setMeetingAt($event)"
               />
@@ -63,7 +63,7 @@
                 class="c-input"
                 maxlength="80"
                 [value]="event_()?.siteLogistics?.meetingWith ?? ''"
-                [disabled]="!canEdit_()"
+                [appDisabledWhy]="editWhy_() ? (editWhy_()! | translatePipe) : null"
                 (blur)="setMeetingWith($event)"
               />
             </label>
@@ -132,7 +132,7 @@
                     <input
                       type="checkbox"
                       [checked]="isNeeded(row)"
-                      [disabled]="!canEdit_() || row.hidden"
+                      [appDisabledWhy]="rowWhy(row) ? (rowWhy(row)! | translatePipe) : null"
                       (change)="setNeeded(row, $any($event.target).checked)"
                     />
                     <span>{{ 'logistics_status_needed' | translatePipe }}</span>
@@ -146,7 +146,7 @@
                         [value]="row.answer?.quantity ?? 0"
                         [min]="0"
                         [max]="100000"
-                        [disabled]="!canEdit_()"
+                        [disabledWhy]="editWhy_() ? (editWhy_()! | translatePipe) : null"
                         (valueChange)="setQuantity(row, $event)"
                       />
                     }
@@ -154,7 +154,7 @@
                       <button
                         type="button"
                         class="c-chip c-chip--tap"
-                        [disabled]="!canEdit_()"
+                        [appDisabledWhy]="editWhy_() ? (editWhy_()! | translatePipe) : null"
                         (click)="toggleNote(row.key)"
                       >
                         {{ 'logistics_note' | translatePipe }}
@@ -166,7 +166,7 @@
                         class="c-input logistics-note"
                         [attr.maxlength]="textMax"
                         [value]="row.answer?.text ?? ''"
-                        [disabled]="!canEdit_()"
+                        [appDisabledWhy]="editWhy_() ? (editWhy_()! | translatePipe) : null"
                         [attr.aria-label]="'logistics_note' | translatePipe"
                         (input)="setText(row, $any($event.target).value)"
                       />
@@ -182,7 +182,7 @@
                         type="radio"
                         [name]="'payer-' + row.key"
                         [checked]="providerOf(row) === 'ours'"
-                        [disabled]="!canEdit_() || row.hidden"
+                        [appDisabledWhy]="rowWhy(row) ? (rowWhy(row)! | translatePipe) : null"
                         (change)="setProvider(row, 'ours')"
                       />
                       <span>{{ 'logistics_payer_ours' | translatePipe }}</span>
@@ -192,7 +192,7 @@
                         type="radio"
                         [name]="'payer-' + row.key"
                         [checked]="providerOf(row) === 'client'"
-                        [disabled]="!canEdit_() || row.hidden"
+                        [appDisabledWhy]="rowWhy(row) ? (rowWhy(row)! | translatePipe) : null"
                         (change)="setProvider(row, 'client')"
                       />
                       <span>{{ 'logistics_payer_client_care' | translatePipe }}</span>

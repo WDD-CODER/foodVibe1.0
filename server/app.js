@@ -27,6 +27,7 @@ const notificationsRouter = require('./routes/notifications');
 const geocodeRouter = require('./routes/geocode');
 const stockRouter = require('./routes/stock');
 const diagRouter = require('./routes/diag');
+const monthPlansRouter = require('./routes/month-plans');
 const adminLearningRouter = require('./routes/admin-learning');
 const menuDesignRouter = require('./routes/menu-design');
 const logRouter = require('./routes/log');
@@ -234,6 +235,8 @@ app.use('/api/v1/stock', stockRouter);
 // Plan 767: the menu design program's own router (the PDF measurement; plan 768 adds the export).
 app.use('/api/v1/menu-design', menuDesignRouter);
 app.use('/api/v1/diag', diagRouter);
+// Plan 727: the monthly plan (money; owner and consultant only, module monthly_plan).
+app.use('/api/v1/month-plans', monthPlansRouter);
 // Plan 543 (ADR 0030): the public door for non-members — never behind verifyToken, so no usage is recorded.
 app.use('/api/v1/public', publicRouter);
 

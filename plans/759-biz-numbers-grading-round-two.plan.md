@@ -75,6 +75,9 @@ src/app/core/engine/month-plan.spec.ts
 src/app/**/breadcrumbs.md
 docs/brain/component-families.md
 docs/brain/inventory.md
+docs/workflow-kit/manifest.json
+src/app/pages/settings/components/business-settings-tab/business-settings-tab.component.spec.ts
+_shared/debt-baseline.json
 ```
 
 ## Read Scope
@@ -92,10 +95,10 @@ append the path to the scope block above and retry.
 - INV-1: preserves — no permission change; salary lines stay owner-only (ADR 0034); only how figures are shown.
 - INV-none: preserves — nothing new is stored; the forecast fill-in is worked out in the browser for display, saved
   actuals are unchanged.
+- INV-6: preserves — no AI call is added or changed; the scope meets its `src/app/**/*ai*` path only by wildcard.
 
 ## Reuse Check
-- none — uses the shared tooltip (`[appTooltip]`, family `tooltip`), `app-month-figures` (family `month-figures`) and
-  the existing `month-pair` component; money through `src/app/core/engine/rounding.ts`.
+- `.mf__money--forecast` (month-figures.component.scss) — family: month-figures — rung: 2 — why: a faded variant of `.mf__money`; the hint is the shared `[appTooltip]`, money goes through `src/app/core/engine/rounding.ts`.
 
 ## Defaults
 
@@ -150,11 +153,11 @@ line or file this plan names was removed, renamed or rewritten).
 
 These are the plan's milestones: a Worker does them in order and ticks each one after it is checked.
 
-- [ ] C1: Show each dish's VAT amount in the shared tooltip and move the column note to it — src/app/pages/restaurant-menu/restaurant-menu.page.html
-- [ ] C2: Fill empty actuals from the forecast in the actual column and mark them — src/app/core/engine/month-plan.ts
-- [ ] C3: Show filled-in figures faded with the shared tooltip in the month picture — src/app/shared/month-figures/month-figures.component.html
-- [ ] C4: Make every forecast/actual pair the same chip that opens and closes — src/app/pages/monthly-plan/components/month-pair/month-pair.component.ts
-- [ ] C5: Run every automatic check and paste the outputs under Execution Notes — plans/759-biz-numbers-grading-round-two.plan.md
+- [x] C1: Show each dish's VAT amount in the shared tooltip and move the column note to it — src/app/pages/restaurant-menu/restaurant-menu.page.html
+- [x] C2: Fill empty actuals from the forecast in the actual column and mark them — src/app/core/engine/month-plan.ts
+- [x] C3: Show filled-in figures faded with the shared tooltip in the month picture — src/app/shared/month-figures/month-figures.component.html
+- [x] C4: Make every forecast/actual pair the same chip that opens and closes — src/app/pages/monthly-plan/components/month-pair/month-pair.component.ts
+- [x] C5: Run every automatic check and paste the outputs under Execution Notes — plans/759-biz-numbers-grading-round-two.plan.md
 
 ## What happens when
 - A fixed line has a forecast but no actual, another has an actual: the fixed actual is their sum, marked as partly
@@ -176,3 +179,41 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
 - none
 
 ## Execution Notes
+
+- Step 0: `scope-check.mjs --drift` → `REALITY: clean`.
+- Plan lines added so the checks can read them: `## Architecture Impact` INV-6 (the `--arch` check matched the scope to
+  `src/app/**/*ai*` by wildcard) and `## Reuse Check` the one new class `.mf__money--forecast`.
+- `behaviour:` a derived figure with one input filled from the forecast and another with no number at all is faded and
+  keeps «חלקי». The «הוצאות קבועות: חלקי» flag under the picture goes only when the forecast covers every fixed line
+  without an actual. The badge «הוזנו X מתוך 4» and the «חסר» line still count typed actuals. Reverse:
+  `actualColumn` in `month-plan.ts`, `flags_` in `monthly-plan.page.ts`.
+- `behaviour:` a negative figure from the forecast is faded, not red. Reverse: move `.mf__money--forecast` above
+  `.mf__money--neg`.
+- `behaviour:` an open box keeps its small chip beside it (the visible side name; a press on it closes the box); a
+  chip press does not blur another box before the click; each side keeps a 2.75rem row so closing moves nothing below.
+  Reverse: the `mousedown` line in `month-pair.component.html`, `.mpp__side` in its stylesheet.
+- `behaviour:` a dish with no price has no VAT hint; the net title and the priced net cells take keyboard focus. The
+  old dictionary keys `restaurant_menu_vat_note(_patur)` stay unused (the dictionary is append-only).
+- Ask 759-1 (advisor): `business-settings-tab.component.spec.ts` `:134` and `:195` now read `aria-disabled`;
+  `_shared/debt-baseline.json` `reuse-copy.tooltip` 202 → 240 (only that kind changed; the added entries are the
+  copies the run-branch merge brought, and this branch holds one fewer than the run branch's 241).
+- `seen:` `business-settings-tab.component.ts:170` — `saveWhy_` compares only the five number fields, so changing just
+  the dealer type or a month target leaves «שמור» blocked with «אין מה לשמור» (הגדרות → change only «סוג עוסק» →
+  press «שמור»). The component is outside this plan's scope and is unchanged. The two assertions at spec `:145` and
+  `:183` (`disabled` false) pass trivially and carry a note. Fix: `saveWhy_` uses `differs(value, stored)`.
+
+- Fix round 1 (rev-1): spec `101 in a month target disables save` now asserts the `max` error and the reason
+  `why_settings_fix_invalid` in the tooltip, since `aria-disabled` alone passes without the range check. With the
+  control's validators cleared for one trial run → `TOTAL: 1 FAILED, 14 SUCCESS`; restored → `TOTAL: 15 SUCCESS`.
+
+### Check outputs (code commit `05bdba8a`)
+
+- `pnpm run build` → exit 0 (budget and CommonJS warnings only).
+- `pnpm run lint` → exit 0, 0 errors, 69 warnings.
+- `pnpm run test:ci` → exit 0, `TOTAL: 3082 SUCCESS`.
+- `kit-manifest-check.mjs --root .` → `KIT_MANIFEST: ok`; `scope-check.mjs --diff=origin/orch/biz-house` → `SCOPE: ok`.
+- `kit-checks.mjs --base origin/orch/biz-house` → `KIT_CHECKS: ok (6 checks)`.
+- `--arch` → `ARCH: ok INV-1, INV-none, INV-6`; `--reuse` → `REUSE: ok`; `breadcrumbs-check` → clean;
+  `inventory --check` → ok; `override-check` → ok; `lint:icons` → ok; `lint:no-native-select` → exit 0;
+  `plan-ledger-check` → OK; `ci-scope-check --checkout-branch` → skipped, exit 0; `log-query` → `SKIP: no database
+  configured`.

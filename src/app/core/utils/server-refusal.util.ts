@@ -1,5 +1,6 @@
 import { HttpErrorResponse } from '@angular/common/http'
 import { API } from '@services/http-storage.adapter'
+import { isAiBudgetExhausted } from '@utils/ai-error.util'
 
 export interface ServerIssue {
   path: string
@@ -54,9 +55,13 @@ export function readServerRefusal(err: unknown): ServerRefusal | null {
   return { issues, error: typeof body.error === 'string' ? body.error : '' }
 }
 
-/** True for exactly the answers the interceptor already toasted (data-API 400, 403 no_permission, data-API 429). */
+/**
+ * True for exactly the answers the interceptor already toasted (data-API 400, 403 no_permission, data-API 429,
+ * and plan 736's 402 `AI_BUDGET_EXHAUSTED`).
+ */
 export function refusalShownToUser(err: unknown): boolean {
   if (!(err instanceof HttpErrorResponse)) return false
+  if (err.status === 402) return isAiBudgetExhausted(err)
   if (err.status === 400) return isDataApi(err)
   if (err.status === 429) return isDataApi(err)
   if (err.status === 403) return err.error?.messageKey === 'no_permission'

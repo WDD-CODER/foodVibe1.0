@@ -378,7 +378,11 @@
                 <button
                   type="button"
                   class="logistics-add-btn"
-                  [disabled]="!logisticsPicker.selectedToolId_() && !logisticsPicker.searchQuery_().trim()"
+                  [appDisabledWhy]="
+                    !logisticsPicker.selectedToolId_() && !logisticsPicker.searchQuery_().trim()
+                      ? ('why_recipe_tool_first' | translatePipe)
+                      : null
+                  "
                   (click)="logisticsPicker.onAddClick()"
                 >
                   {{ 'add' | translatePipe }}

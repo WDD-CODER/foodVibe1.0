@@ -13,6 +13,7 @@ import { MenuEventDataService } from '@services/menu-event-data.service'
 import { AddItemModalService } from '@services/add-item-modal.service'
 import { LucideAngularModule } from 'lucide-angular'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
+import { DisabledWhyDirective } from 'src/app/shared/tooltip/disabled-why.directive'
 import { TranslationService } from '@services/translation.service'
 import { UserMsgService } from '@services/user-msg.service'
 import { TranslationKeyModalService, isTranslationKeyResult } from '@services/translation-key-modal.service'
@@ -59,6 +60,7 @@ const KIND_BY_TYPE: Record<MetadataType | 'menuType', TaxonomyKind> = {
     FormsModule,
     LucideAngularModule,
     TranslatePipe,
+    DisabledWhyDirective,
     TaxonomyKindManagerComponent,
     PreparationCategoryManagerComponent,
     SectionCategoryManagerComponent,
@@ -193,8 +195,9 @@ export class MetadataManagerComponent implements OnInit {
   protected jumpTo(id: string, chip: HTMLElement): void {
     this.activeSectionId_.set(id)
     const reduced = typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches
+    // The chip first (one instant move of the row), then the one smooth page scroll (plan 743).
+    this.jumpRail()?.centerChild(chip, { instant: true })
     this.document.getElementById(id)?.scrollIntoView({ behavior: reduced ? 'auto' : 'smooth', block: 'start' })
-    this.jumpRail()?.centerChild(chip)
   }
 
   protected readonly labelColor = (key: string): string => this.metadataRegistry.getLabelColor(key)

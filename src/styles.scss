@@ -2,6 +2,8 @@
  * desktop from 1024px. Every @media uses these four names; never a typed width. Component styles get the same
  * names from src/app/core/styles/_breakpoints.scss, the browser code from src/app/core/utils/breakpoints.ts;
  * scripts/test/breakpoints-no-literals.test.mjs keeps the three equal. */
+/* Plan 763: one narrower step inside the phone range, up to 419px, for a row that needs two lines only there. */
+$break-phone-narrow-max: 419px;
 $break-phone-max: 767px;
 $break-tablet-min: 768px;
 $break-tablet-max: 1023px;
@@ -169,6 +171,7 @@ $break-desktop-min: 1024px;
   --topnav-h: 3.5rem;      /* 56 — top nav bar */
 
   /* ---- Breakpoints (CSS): the four names above, for scripts and specs that read them (plan 656) ---- */
+  --bp-phone-narrow-max: #{$break-phone-narrow-max};
   --bp-phone-max: #{$break-phone-max};
   --bp-tablet-min: #{$break-tablet-min};
   --bp-tablet-max: #{$break-tablet-max};
@@ -1167,6 +1170,15 @@ textarea.c-input {
       inset 0 2px 0 var(--mark-line),
       inset 0 -2px 0 var(--mark-line);
   }
+}
+
+/* Measured columns (plan 745): the cells of a carousel host are one level down at every width, the
+   switching cell included. */
+.c-list-row.is-selected > .column-carousel--measured > .c-list-body-cell {
+  background: color-mix(in srgb, var(--color-primary) 14%, white);
+  box-shadow:
+    inset 0 2px 0 var(--mark-line),
+    inset 0 -2px 0 var(--mark-line);
 }
 
 /* ---- Engine: Pagination controls (plan 304 M3) — row-count reduction for large
@@ -2992,4 +3004,140 @@ input[type='number']::-webkit-outer-spin-button {
   ):focus-visible {
   outline: 2px solid var(--border-focus);
   outline-offset: 2px;
+}
+
+/* ── Tooltip — shared look (plan 744) ──
+   The box of the appTooltip directive (src/app/shared/tooltip/). It lives in the browser top layer
+   (popover), appended to <body>, so its look is global. `left` is physical on purpose: --tip-arrow-x is a
+   geometric distance from the box's left edge. */
+.c-tooltip {
+  position: fixed;
+  inset: auto;
+  inline-size: max-content;
+  max-inline-size: min(20rem, calc(100vw - 1rem));
+  margin: 0;
+  padding: 0.375rem 0.625rem;
+  overflow: visible;
+
+  color: var(--color-text-main);
+  font-size: var(--fs-xs);
+  line-height: 1.4;
+  // A line break in the text stays a line break; long text wraps inside max-inline-size.
+  white-space: pre-line;
+  overflow-wrap: anywhere;
+
+  background: var(--bg-glass-dense);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-card);
+  pointer-events: none;
+
+  &::after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: var(--tip-arrow-x, 50%);
+    transform: translateX(-50%);
+
+    border: 5px solid transparent;
+    border-top-color: var(--border-default);
+  }
+  &::before {
+    content: '';
+    position: absolute;
+    top: calc(100% - 1px);
+    left: var(--tip-arrow-x, 50%);
+    z-index: 1;
+    transform: translateX(-50%);
+
+    border: 5px solid transparent;
+    border-top-color: var(--bg-glass-dense);
+  }
+}
+
+.c-tooltip--below {
+  &::after {
+    top: auto;
+    bottom: 100%;
+
+    border-top-color: transparent;
+    border-bottom-color: var(--border-default);
+  }
+  &::before {
+    top: auto;
+    bottom: calc(100% - 1px);
+
+    border-top-color: transparent;
+    border-bottom-color: var(--bg-glass-dense);
+  }
+}
+
+/* List container (plan 747): a checkbox column dropped for lack of room has no grid track, so its cells go too. */
+.fit-no-select .col-select {
+  display: none;
+}
+
+/* ── A control that cannot be used and says why (plan 747, default disabled-explains-why) ──
+   Set by the appDisabledWhy directive (src/app/shared/tooltip/) together with aria-disabled="true". The control
+   is not natively disabled (it must stay reachable to show its reason), so the native :disabled look of the
+   button engines is repeated here: the same values as .c-btn-primary:disabled and .c-icon-btn:disabled. */
+.is-disabled {
+  cursor: not-allowed;
+
+  opacity: 0.5;
+}
+
+.c-btn-primary.is-disabled,
+.c-btn-ghost.is-disabled {
+  transform: none;
+
+  @media (hover: hover) {
+    &:hover {
+      transform: none;
+    }
+  }
+
+  &:active {
+    transform: none;
+  }
+}
+
+.c-btn-ghost.is-disabled {
+  @media (hover: hover) {
+    &:hover {
+      background: var(--bg-glass-dense);
+    }
+  }
+}
+
+.c-icon-btn.is-disabled {
+  filter: saturate(0);
+  opacity: 0.3;
+
+  @media (hover: hover) {
+    &:hover {
+      color: var(--color-text-muted);
+
+      background: transparent;
+      transform: none;
+      opacity: 0.3;
+    }
+  }
+}
+
+/* A toggle chip whose hidden checkbox / radio is blocked with a reason (plan 747 G6): the class sits on the
+   input, the user sees the label — so the chip itself takes the look of `.c-chip--toggle:has(> input:disabled)`
+   and keeps its resting colours on hover. */
+.c-chip--toggle:has(> input.is-disabled) {
+  cursor: not-allowed;
+
+  opacity: 0.5;
+
+  &:not(:has(> input:checked), .is-on):hover {
+    color: var(--color-text-secondary);
+
+    background: var(--bg-glass);
+
+    border-color: var(--border-default);
+  }
 }

@@ -1,0 +1,167 @@
+{
+  "run": "house-style-finish",
+  "branch": "orch/house-style-finish",
+  "base": "main",
+  "startedAt": "2026-11-26T23:19:38.466Z",
+  "mainShaAtStart": "d111ab3bef2cc23e7d0c5ba8478c09b01c5da242",
+  "plans": {
+    "758": {
+      "nnn": "758",
+      "title": "House style: the finishing pass of plan 747 (inactive controls look and read right)",
+      "branch": "feat/758-house-style-finishing-pass",
+      "state": "merged",
+      "round": 0,
+      "tier": "build",
+      "models": {
+        "builder": {
+          "model": "sonnet",
+          "tier": "build",
+          "at": "2026-11-26T23:22:34.802Z"
+        },
+        "reviewer": {
+          "model": "sonnet",
+          "at": "2026-11-26T23:45:18.153Z"
+        }
+      },
+      "humanItems": [
+        "On «מתכונים» → a recipe → the ingredients table, signed in as a staff user without edit rights: the add and",
+        "On «ניהול» → coefficients, as a user who cannot edit: the save button looks grey and its tooltip says why.",
+        "On a page with a toggle chip whose tick is blocked (the builder names the page in Execution Notes): the chip"
+      ],
+      "history": [
+        {
+          "at": "2026-11-26T23:22:34.255Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-26T23:22:34.805Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-26T23:40:57.595Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-26T23:45:06.797Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-26T23:45:18.155Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-26T23:47:19.460Z",
+          "state": "merging",
+          "round": 0
+        },
+        {
+          "at": "2026-11-26T23:49:59.191Z",
+          "state": "merged",
+          "round": 0
+        }
+      ],
+      "tiers": [
+        "build"
+      ],
+      "freeDiskGb": 9.7,
+      "sha": "816d4c1e6bf44a970b262575f4e559f1fb518c6c",
+      "calls": [
+        {
+          "stage": "builder",
+          "model": "sonnet",
+          "seconds": 1099.3,
+          "tokens": {
+            "input": 7698140,
+            "output": 62775
+          },
+          "exit": 0
+        },
+        {
+          "stage": "reviewer",
+          "model": "sonnet",
+          "seconds": 118.5,
+          "tokens": {
+            "input": 1347909,
+            "output": 13978
+          },
+          "exit": 0
+        }
+      ],
+      "checkedHead": "40eab0f7a35750eb32a75819ceb3edc9bbe9418d"
+    }
+  },
+  "notes": [
+    {
+      "at": "2026-11-26T23:22:33.752Z",
+      "plan": "758",
+      "text": "the folder foodVibe1.0-orch-house-style-finish-758 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-26T23:47:34.959Z",
+      "plan": "758",
+      "text": "the folder foodVibe1.0-orch-merge-house-style-finish was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-26T23:52:04.422Z",
+      "text": "FINAL: same tree as plan 758's gate — node scripts/orch-state.mjs prepare --missing server/generated/schemas --script build:schemas --pm pnpm, pnpm run build, pnpm run lint, pnpm run test:ci, node scripts/override-check.mjs, pnpm run lint:icons, pnpm run lint:no-native-select, node scripts/plan-ledger-check.mjs, node scripts/breadcrumbs-check.mjs, node scripts/ci-scope-check.mjs --checkout-branch"
+    }
+  ],
+  "attempts": 1,
+  "phase": "finished",
+  "freeDiskGb": 9.7,
+  "updatedAt": "2026-11-26T23:52:08.574Z",
+  "decisions": [
+    {
+      "id": "D1",
+      "plan": "758",
+      "type": "behaviour",
+      "text": "behaviour: a blocked edit, clone or delete button in the menu library uses the blocked icon-button look (opacity 0.3, grey, also on hover), because the general 0.5 is barely different from its resting 0.7 — reverse: change the opacity in the [aria-disabled='true'] rule of menu-library-list.component.scss",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D2",
+      "plan": "758",
+      "type": "seen",
+      "text": "seen: src/app/pages/recipe-builder/components/recipe-ingredients-table/recipe-ingredients-table.component.html (.col-actions trash button and .qty-btn.plus) and recipe-builder.page.html:270 (.add-row-btn) have no edit-rights block, so the first [human] card (grey add and remove buttons for a staff user without edit rights) cannot be seen as written; only the minus button at 0 a",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D3",
+      "plan": "758",
+      "type": "seen",
+      "text": "seen: src/app/pages/metadata-manager/components/coefficient-manager/coefficient-manager.component.ts:106 — for a user who cannot edit, the save button's tooltip says there are no changes to save (why_nothing_to_save), not that the user lacks permission (second [human] card)",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    }
+  ],
+  "finishedAt": "2026-11-26T23:52:08.570Z",
+  "finalGate": {
+    "ok": true,
+    "command": null,
+    "at": "2026-11-26T23:52:08.573Z",
+    "attempt": 1,
+    "blamed": []
+  }
+}

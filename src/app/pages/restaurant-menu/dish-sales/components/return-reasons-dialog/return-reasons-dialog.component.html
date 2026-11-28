@@ -1,0 +1,67 @@
+<app-modal-shell size="md" [hasChanges]="hasChanges_()" (dismissed)="close()">
+  <div class="rr-dialog" data-testid="return-reasons-dialog">
+    <h2 class="rr-dialog__title">{{ titleText() }}</h2>
+
+    <ul class="rr-dialog__list">
+      @for (key of keys_(); track key) {
+        <li class="rr-dialog__row" [attr.data-testid]="'return-reason-' + key">
+          <span class="rr-dialog__label">{{ labelKey(key) | translatePipe }}</span>
+          <app-counter [value]="countOf(key)" [min]="0" (valueChange)="setCount(key, $event)" />
+        </li>
+        @if (key === other && countOf(other) > 0) {
+          <li class="rr-dialog__note">
+            <label class="visually-hidden" for="return-reason-note">{{
+              'return_reasons_other_note' | translatePipe
+            }}</label>
+            <input
+              id="return-reason-note"
+              type="text"
+              data-testid="return-reason-note"
+              autocomplete="off"
+              [maxLength]="noteMax"
+              [placeholder]="'return_reasons_other_note' | translatePipe"
+              [ngModel]="note_()"
+              (ngModelChange)="note_.set($event)"
+            />
+            @if (noteMissing_()) {
+              <p class="rr-dialog__error" data-testid="return-reason-note-required">
+                {{ 'return_reasons_note_required' | translatePipe }}
+              </p>
+            }
+          </li>
+        }
+      }
+    </ul>
+
+    <div class="rr-dialog__add" data-testid="return-reason-add">
+      <app-custom-select
+        [ngModel]="pickValue_()"
+        (ngModelChange)="onPick($event)"
+        [options]="addOptions_()"
+        [addNewValue]="addValue"
+        addNewLabelKey="add_new_return_reason"
+        placeholder="return_reasons_add"
+        [typeToFilter]="true"
+        [allowTypedAdd]="true"
+        (addNewChosen)="onAddTyped($event)"
+      />
+    </div>
+
+    <p class="rr-dialog__given" [class.rr-dialog__given--over]="over_()" data-testid="return-reasons-given">
+      {{ givenText() }}
+    </p>
+
+    <div class="c-modal-actions">
+      <button type="button" class="c-btn-ghost" (click)="close()">{{ 'cancel' | translatePipe }}</button>
+      <button
+        type="button"
+        class="c-btn-primary"
+        data-testid="return-reasons-ok"
+        [disabled]="!canConfirm_()"
+        (click)="confirm()"
+      >
+        {{ 'return_reasons_ok' | translatePipe }}
+      </button>
+    </div>
+  </div>
+</app-modal-shell>

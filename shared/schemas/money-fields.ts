@@ -20,4 +20,9 @@ export const MONEY_FIELDS: Record<string, readonly string[]> = {
   businesses: ['settings', 'baseline'],
   // Plan 615 (C-REGISTRY): an invoice's prices.
   invoices: ['lines[].unitPrice', 'lines[].lineTotal', 'lines[].price'],
+  // Plan 724: dish analysis prices, costs and net sales.
+  menuDishes: ['priceWithVat', 'typedCost'],
+  dishSalesMonths: ['rows[].netSales', 'frozen'],
+  // Plan 727: a month's targets, VAT copy and revenue.
+  monthPlans: ['targets', 'revenue', 'vatRatePct', 'fixed', 'labour', 'purchases'],
 }

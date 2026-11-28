@@ -261,7 +261,13 @@
       <button type="button" class="c-btn-ghost" (click)="isReasonOpen_.set(false)">
         {{ 'cancel' | translatePipe }}
       </button>
-      <button type="button" class="c-btn-primary" [disabled]="!reason_().trim() || isBusy_()" (click)="onReasonSave()">
+      <button
+        type="button"
+        class="c-btn-primary"
+        [disabled]="isBusy_()"
+        [appDisabledWhy]="!reason_().trim() ? ('why_client_reason_first' | translatePipe) : null"
+        (click)="onReasonSave()"
+      >
         {{ 'save' | translatePipe }}
       </button>
     </div>

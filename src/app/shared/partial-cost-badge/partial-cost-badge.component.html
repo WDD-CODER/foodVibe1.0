@@ -67,7 +67,8 @@
                       <button
                         type="button"
                         class="c-btn-primary partial-save"
-                        [disabled]="!canSave(row)"
+                        [disabled]="savingKey_() !== null"
+                        [appDisabledWhy]="!hasValidPrice(row) ? ('why_shared_price_above_zero' | translatePipe) : null"
                         [attr.aria-label]="'quick_price_save' | translatePipe"
                         (click)="save(row)"
                       >

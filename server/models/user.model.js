@@ -28,6 +28,12 @@ const userSchema = new Schema(
     termsAcceptedVersion: { type: String, default: null },
     termsAcceptedAt: { type: Number, default: null },
     termsAcceptedIp: { type: String, default: null },
+    // Plan 736: lifetime AI requests. No default on purpose: a missing `aiAllowance` reads as AI_DEFAULT_ALLOWANCE
+    // (shared/schemas/ai-allowance.schema.ts) and a missing `aiCallsUsed` as 0 (server/services/ai-allowance.js).
+    aiAllowance: { type: Number },
+    aiCallsUsed: { type: Number },
+    // The platform admin's changes to `aiAllowance`, newest last, last 20 kept: { at, by, byName, from, to }.
+    aiAllowanceHistory: { type: [Schema.Types.Mixed], default: undefined },
   },
   { timestamps: false }
 );

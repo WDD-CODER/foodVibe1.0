@@ -140,7 +140,7 @@ describe('VenueDetailComponent (plan 373: videos and navigation)', () => {
 
   it('disables the upload button while signed out', async () => {
     const el = await setup(BASE, false)
-    expect(el.querySelector<HTMLButtonElement>('.video-upload-btn')?.disabled).toBeTrue()
+    expect(el.querySelector<HTMLButtonElement>('.video-upload-btn')?.getAttribute('aria-disabled')).toBe('true')
   })
 
   it('builds the navigate links from a typed address when no location is saved', async () => {

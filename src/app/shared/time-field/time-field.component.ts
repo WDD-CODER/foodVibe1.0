@@ -13,6 +13,7 @@ import {
 } from '@angular/core'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
 import { formatTimeDigits, parseHm } from 'src/app/core/utils/time-input.util'
+import { DisabledWhyDirective } from 'src/app/shared/tooltip/disabled-why.directive'
 
 /**
  * Plan 537: a 24-hour time you can type (`0830` becomes `08:30`) or pick. Same structure as `app-date-field`:
@@ -23,7 +24,7 @@ import { formatTimeDigits, parseHm } from 'src/app/core/utils/time-input.util'
 @Component({
   selector: 'app-time-field',
   standalone: true,
-  imports: [TranslatePipe],
+  imports: [TranslatePipe, DisabledWhyDirective],
   templateUrl: './time-field.component.html',
   styleUrl: './time-field.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -37,6 +38,8 @@ export class TimeFieldComponent {
   /** Translation key of the aria-label for the text input (no visible label). */
   readonly ariaLabelKey = input<string | null>(null)
   readonly disabled = input<boolean>(false)
+  /** Why the time cannot be changed (translated). With a reason the field is blocked and says why (plan 747). */
+  readonly disabledWhy = input<string | null>(null)
   /** The parent marks the field red without this field's own message (used for row errors). */
   readonly flagged = input<boolean>(false)
   /** Fires when the user finishes: leaves the field with an empty or real time, or picks one. */
@@ -80,7 +83,7 @@ export class TimeFieldComponent {
 
   /** Desktop: a click opens the browser's picker; typing still works. Touch is handled by the overlay. */
   protected onTextClick(): void {
-    if (this.coarse_() || this.disabled()) return
+    if (this.coarse_() || this.disabled() || this.disabledWhy()) return
     const el = this.picker().nativeElement
     if (typeof el.showPicker !== 'function') return
     try {

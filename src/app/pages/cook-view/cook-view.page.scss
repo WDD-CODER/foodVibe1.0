@@ -377,6 +377,11 @@
   &:is(button) {
     cursor: pointer;
   }
+
+  // Blocked with a reason (appDisabledWhy): the dimmed look comes from the global .is-disabled.
+  &:is(button)[aria-disabled='true'] {
+    cursor: not-allowed;
+  }
 }
 
 .cv-chip--warn {
@@ -440,13 +445,18 @@
     border-color var(--dur-fast) var(--ease-smooth),
     transform var(--dur-fast) var(--ease-smooth);
 
-  &:hover:not(:disabled) {
+  &:hover:not(:disabled):not([aria-disabled='true']) {
     border-color: var(--color-primary);
     transform: translateY(-1px);
   }
 
   &:disabled {
     opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  // Blocked with a reason (appDisabledWhy): the dimmed look comes from the global .is-disabled.
+  &[aria-disabled='true'] {
     cursor: not-allowed;
   }
 
@@ -515,12 +525,16 @@
   &:is(button) {
     cursor: pointer;
 
-    &:hover:not(:disabled) {
+    &:hover:not(:disabled):not([aria-disabled='true']) {
       background: var(--color-primary-soft);
     }
 
     &:disabled {
       opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    &[aria-disabled='true'] {
       cursor: not-allowed;
     }
   }

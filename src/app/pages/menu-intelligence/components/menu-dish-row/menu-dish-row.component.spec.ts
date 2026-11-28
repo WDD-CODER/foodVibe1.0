@@ -196,6 +196,9 @@ describe('MenuDishRowComponent partial badge (plan 444)', () => {
           useValue: { productsById_: computed(() => new Map()), recipesById_: computed(() => new Map()) }
         },
         { provide: ProductDataService, useValue: { updateProduct: () => Promise.resolve() } },
+        // Not staff, said here: the real service reads the signed-in user another spec may have left behind,
+        // and a staff user hides the badge (the cause of this describe's occasional failures, plan 747).
+        { provide: PermissionService, useValue: { isStaff_: signal(false), can: () => true } },
         { provide: TranslationService, useValue: { translate: (k: string) => k } }
       ]
     }).compileComponents()
@@ -236,6 +239,9 @@ describe('MenuDishRowComponent partial badge (plan 444)', () => {
           useValue: { productsById_: computed(() => new Map()), recipesById_: computed(() => new Map()) }
         },
         { provide: ProductDataService, useValue: { updateProduct: () => Promise.resolve() } },
+        // Not staff, said here: the real service reads the signed-in user another spec may have left behind,
+        // and a staff user hides the badge (the cause of this describe's occasional failures, plan 747).
+        { provide: PermissionService, useValue: { isStaff_: signal(false), can: () => true } },
         { provide: TranslationService, useValue: { translate: (k: string) => k } }
       ]
     }).compileComponents()

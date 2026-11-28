@@ -1,0 +1,38 @@
+@layer components.fixed-costs-card {
+  :host {
+    display: block;
+  }
+
+  .fc {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-3);
+  }
+
+  .fc__line {
+    display: grid;
+    grid-template-columns: minmax(4rem, 1fr) minmax(0, max-content) 2.75rem;
+    align-items: center;
+    gap: var(--space-3);
+    inline-size: 100%;
+  }
+
+  .fc__name {
+    font-weight: 600;
+    word-break: break-word;
+    line-height: var(--lh-snug);
+  }
+
+  .fc__name-input {
+    min-inline-size: 0;
+    inline-size: 100%;
+    box-sizing: border-box;
+  }
+
+  .fc__muted {
+    color: var(--color-text-muted);
+    font-size: var(--fs-xs);
+    line-height: var(--lh-normal);
+  }
+}

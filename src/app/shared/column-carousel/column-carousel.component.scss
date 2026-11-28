@@ -2,13 +2,14 @@
 // Plan 349 — shared mobile column carousel (header + cells). One stylesheet for both.
 // Desktop (>768px): the host is `display: contents`, so each projected [columnSlide] is a
 // normal grid cell and nothing carousel-specific shows.
+// Plan 745 — measured mode (`.column-carousel--measured`, children are `*appFallColumn`): the host is always
+// `display: contents`; the switching column is the `.cc-box` inside it and looks the same at any width.
 
 :host(.column-carousel) {
   display: contents;
 }
 
 .cc-header,
-.cc-cell-label,
 .cc-arrow {
   display: none;
 }
@@ -40,54 +41,8 @@
   }
 }
 
-@media (max-width: $break-phone-max) {
-  // ── Shared ────────────────────────────────────────────────────────────────
-  :host(.column-carousel) {
-    position: relative;
-    display: flex;
-    flex-direction: column;
-    align-items: stretch;
-    justify-content: center;
-
-    min-width: 0;
-    // No overflow clipping: the header's floating arrows overhang the cell edge.
-    overflow: visible;
-    touch-action: pan-y; // vertical scroll stays native; horizontal swipe handled in JS
-  }
-
-  // Only the active slide shows; it takes the cell's look from the host, not its own.
-  :host(.column-carousel) ::ng-deep .column-slide {
-    display: none !important;
-  }
-
-  :host(.column-carousel) ::ng-deep .column-slide.column-slide--active {
-    display: flex !important;
-    align-items: center;
-    justify-content: center;
-
-    min-width: 0;
-    width: 100%;
-    padding: 0;
-
-    background: transparent;
-    border: none;
-
-    animation: cc-slide-in 150ms ease;
-  }
-
-  :host(.column-carousel--header) ::ng-deep .column-slide.column-slide--active {
-    display: -webkit-box !important;
-    -webkit-box-orient: vertical;
-    -webkit-line-clamp: 2;
-    overflow: hidden;
-
-    white-space: normal;
-    overflow-wrap: anywhere;
-    text-align: center;
-    text-wrap: balance;
-    line-height: 1.2;
-  }
-
+// The arrows, dots and header label: the same in the phone slide mode and in measured mode.
+@mixin cc-chrome {
   .cc-arrow {
     position: relative;
     display: grid;
@@ -118,12 +73,6 @@
       outline: 2px solid var(--border-focus);
       outline-offset: 1px;
     }
-  }
-
-  // ── Header ────────────────────────────────────────────────────────────────
-  :host(.column-carousel--header) {
-    row-gap: 0.25rem;
-    padding-inline: 1.25rem;
   }
 
   .cc-header {
@@ -186,38 +135,139 @@
       inset-inline-end: 0;
     }
   }
+}
 
-  // ── Cell ──────────────────────────────────────────────────────────────────
+@media (max-width: $break-phone-max) {
+  // ── Shared ────────────────────────────────────────────────────────────────
+  :host(.column-carousel:not(.column-carousel--measured)) {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: center;
+
+    min-width: 0;
+    // No overflow clipping: the header's floating arrows overhang the cell edge.
+    overflow: visible;
+    touch-action: pan-y; // vertical scroll stays native; horizontal swipe handled in JS
+  }
+
+  // Only the active slide shows; it takes the cell's look from the host, not its own.
+  :host(.column-carousel:not(.column-carousel--measured)) ::ng-deep .column-slide {
+    display: none !important;
+  }
+
+  :host(.column-carousel:not(.column-carousel--measured)) ::ng-deep .column-slide.column-slide--active {
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+
+    min-width: 0;
+    width: 100%;
+    padding: 0;
+
+    background: transparent;
+    border: none;
+
+    animation: cc-slide-in 150ms ease;
+  }
+
+  :host(.column-carousel--header:not(.column-carousel--measured)) ::ng-deep .column-slide.column-slide--active {
+    display: -webkit-box !important;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    overflow: hidden;
+
+    white-space: normal;
+    overflow-wrap: anywhere;
+    text-align: center;
+    text-wrap: balance;
+    line-height: 1.2;
+  }
+
+  :host(.column-carousel:not(.column-carousel--measured)) {
+    @include cc-chrome;
+  }
+
+  :host(.column-carousel--header:not(.column-carousel--measured)) {
+    row-gap: 0.25rem;
+    padding-inline: 1.25rem;
+  }
+
   // The host carries `.c-list-body-cell` (row background, border, tints, hover); only the
   // inline padding is tightened so the value gets the room.
-  :host(.column-carousel--cell) {
+  :host(.column-carousel--cell:not(.column-carousel--measured)) {
+    gap: 0.125rem;
+    padding-inline: 0.25rem;
+  }
+}
+
+// ── Measured mode (plan 745): the switching column, at any width ─────────────
+:host(.column-carousel--measured) {
+  @include cc-chrome;
+
+  .cc-box {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: center;
+
+    min-width: 0;
+    overflow: visible;
+    touch-action: pan-y;
+  }
+
+  .cc-box--header {
+    row-gap: 0.25rem;
+    padding-inline: 1.25rem;
+  }
+
+  .cc-box--cell {
     gap: 0.125rem;
     padding-inline: 0.25rem;
   }
 
-  .cc-cell-label {
+  .cc-fall {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 0.25rem;
 
     min-width: 0;
   }
 
-  .cc-cell-label-text {
-    min-width: 0;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+  // The fallen column's own cell element loses its cell look: the box carries it.
+  .cc-fall > ::ng-deep * {
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
 
-    font-size: var(--fs-2xs, 0.6875rem);
-    font-weight: 600;
-    color: var(--color-text-muted);
+    min-width: 0;
+    width: 100%;
+    padding: 0 !important;
+
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+  }
+
+  .cc-box--header .cc-fall > ::ng-deep * {
+    display: -webkit-box !important;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    overflow: hidden;
+
+    white-space: normal;
+    overflow-wrap: anywhere;
+    text-align: center;
+    text-wrap: balance;
+    line-height: 1.2;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  :host(.column-carousel) ::ng-deep .column-slide.column-slide--active {
+  :host(.column-carousel) ::ng-deep .column-slide.column-slide--active,
+  :host(.column-carousel--measured) .cc-fall > ::ng-deep * {
     animation: none;
   }
 

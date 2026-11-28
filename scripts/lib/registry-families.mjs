@@ -141,5 +141,20 @@ export const REUSE_RULES = [
     exclude: ['**/*.spec.ts'],
     pattern: /class="(?:[^"]*\s)?(?:[a-z][a-z0-9]*(?:(?:-|__)[a-z0-9]+)*(?:-|__)empty|empty-state[\w-]*|no-results)(?:\s[^"]*)?"/,
     hint: 'show "nothing here" with app-empty-state (src/app/shared/empty-state/), not a hand-made block'
+  },
+  {
+    id: 'house-tooltip',
+    family: 'tooltip',
+    files: ['src/app/**/*.html'],
+    pattern: /\[attr\.title\]=|\[title\]=|<(?:button|a|span|div|p|i|li|td|th|label|input|img|lucide-icon)\b[^>]*\stitle="/,
+    hint: 'show a hint with the shared tooltip (not the browser\'s title), so it looks the same everywhere and works on touch'
+  },
+  // Default disabled-explains-why (plan 747): a new bare [disabled] is flagged; the bindings that are there are debt.
+  {
+    id: 'house-disabled-why',
+    family: 'tooltip',
+    files: ['src/app/**/*.html'],
+    pattern: /\[disabled\]=/,
+    hint: 'a control that can be disabled says why: use [appDisabledWhy]="reason" (src/app/shared/tooltip/), or keep [disabled] only while its own action runs'
   }
 ]

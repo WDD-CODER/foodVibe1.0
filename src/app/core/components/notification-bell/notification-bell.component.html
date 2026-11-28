@@ -1,14 +1,20 @@
-<div class="bell" dir="rtl">
+<div class="bell" [class.bell--menu]="variant() === 'menu'" dir="rtl">
   <button
     type="button"
-    class="c-icon-btn bell__btn"
-    data-testid="notification-bell"
-    [title]="'alerts_bell_tip' | translatePipe"
+    class="bell__btn"
+    [class.c-icon-btn]="variant() === 'icon'"
+    [class.bell__menu-btn]="variant() === 'menu'"
+    [attr.data-testid]="variant() === 'menu' ? 'notification-bell-menu' : 'notification-bell'"
+    [appTooltip]="variant() === 'icon' ? ('alerts_bell_tip' | translatePipe) : null"
     [attr.aria-label]="'alerts_title' | translatePipe"
     [attr.aria-expanded]="isOpen_()"
+    [attr.role]="variant() === 'menu' ? 'menuitem' : null"
     (click)="toggle()"
   >
-    <lucide-icon name="bell" [size]="18"></lucide-icon>
+    <lucide-icon name="bell" [size]="variant() === 'menu' ? 16 : 18"></lucide-icon>
+    @if (variant() === 'menu') {
+      <span class="bell__menu-label">{{ 'alerts_title' | translatePipe }}</span>
+    }
     @if (unread_() > 0) {
       <span class="c-chip__count bell__count" data-testid="notification-count">{{ unread_() }}</span>
     }

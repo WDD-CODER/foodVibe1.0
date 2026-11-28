@@ -4,6 +4,7 @@ import { LucideAngularModule } from 'lucide-angular'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
 import { CustomSelectComponent } from 'src/app/shared/custom-select/custom-select.component'
 import { FormFieldComponent } from 'src/app/shared/form-field/form-field.component'
+import { DisabledWhyDirective } from 'src/app/shared/tooltip/disabled-why.directive'
 import { TaxonomyStore } from '@services/taxonomy-store.service'
 import { LogisticsItemRegistryService, type LogisticsItemTerm } from '@services/logistics-item-registry.service'
 import { ConfirmModalService } from '@services/confirm-modal.service'
@@ -67,7 +68,14 @@ const PHASE_TAB_KEY: Record<LogisticsPhase, string> = {
 @Component({
   selector: 'app-logistics-item-manager',
   standalone: true,
-  imports: [FormsModule, LucideAngularModule, TranslatePipe, CustomSelectComponent, FormFieldComponent],
+  imports: [
+    FormsModule,
+    LucideAngularModule,
+    TranslatePipe,
+    CustomSelectComponent,
+    FormFieldComponent,
+    DisabledWhyDirective
+  ],
   templateUrl: './logistics-item-manager.component.html',
   styleUrl: './logistics-item-manager.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush

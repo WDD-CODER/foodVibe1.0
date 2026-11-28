@@ -53,6 +53,19 @@ function logisticsItemBody(overrides = {}) {
   return { kind: 'logisticsItem', key: 'האם יש מקרר?', phase: 'site_visit', section: 'infrastructure', answerType: 'status', ...overrides };
 }
 
+/** Plan 724: valid POST bodies of the dish analysis store. */
+function menuDishBody(overrides = {}) {
+  return { name: 'מנה', costSource: 'units', active: true, ...overrides };
+}
+
+function dishMonthBody(overrides = {}) {
+  return { month: '2026-10', rows: [], ...overrides };
+}
+
+function dishAliasBody(overrides = {}) {
+  return { name: 'שניצל', action: 'skip', portionFactor: 1, ...overrides };
+}
+
 /** A full stored doc (what is in Mongo): body + server-owned fields. */
 function stored(body, fields) {
   // Plan 425: every stored doc carries a business and a creator. Tests seed by `userId`; the business follows it.
@@ -60,4 +73,4 @@ function stored(body, fields) {
   return { schemaVersion: 2, createdAt: 1, updatedAt: 1, businessId, createdBy: fields.userId, ...body, ...fields };
 }
 
-module.exports = { productBody, recipeBody, supplierBody, equipmentBody, venueBody, menuEventBody, logisticsAnswer, logisticsItemBody, stored };
+module.exports = { productBody, recipeBody, supplierBody, equipmentBody, venueBody, menuEventBody, logisticsAnswer, logisticsItemBody, menuDishBody, dishMonthBody, dishAliasBody, stored };

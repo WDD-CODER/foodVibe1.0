@@ -20,6 +20,7 @@ import { LucideAngularModule } from 'lucide-angular'
 import { TranslationService } from '../../core/services/translation.service'
 import { InputClearComponent } from '../input-clear/input-clear.component'
 import { AddOptionRowComponent } from '../add-option-row/add-option-row.component'
+import { DisabledWhyDirective } from '../tooltip/disabled-why.directive'
 import {
   AddOptionLabel,
   addOptionLabel,
@@ -51,7 +52,8 @@ const PICKER_KEY = 0
     ScrollableDropdownComponent,
     LucideAngularModule,
     InputClearComponent,
-    AddOptionRowComponent
+    AddOptionRowComponent,
+    DisabledWhyDirective
   ],
   providers: [{ provide: NG_VALUE_ACCESSOR, useExisting: CustomMultiSelectComponent, multi: true }],
   templateUrl: './custom-multi-select.component.html',
@@ -82,6 +84,8 @@ export class CustomMultiSelectComponent implements ControlValueAccessor {
   searchable = input<boolean>(false)
   triggerTitle = input<string>('')
   clearable = input<boolean>(false)
+  /** Why the select cannot be opened (translated). With a reason it is blocked and says why in a tooltip (plan 747). */
+  disabledWhy = input<string | null>(null)
 
   // OUTPUTS
   valueChange = output<string[]>()
@@ -94,6 +98,8 @@ export class CustomMultiSelectComponent implements ControlValueAccessor {
   private _onChange: (value: string[]) => void = () => {}
   private _onTouched: () => void = () => {}
   private _isDisabled = signal(false)
+  /** Cannot be opened: disabled through the form control, or by a caller's reason. */
+  private readonly blocked_ = computed(() => this._isDisabled() || !!this.disabledWhy())
 
   protected readonly triggerRef = viewChild<ElementRef<HTMLButtonElement>>('triggerRef')
   protected readonly searchInputRef = viewChild<ElementRef<HTMLInputElement>>('searchInputRef')
@@ -171,8 +177,9 @@ export class CustomMultiSelectComponent implements ControlValueAccessor {
     return this._value()
   }
 
+  /** Natively disabled only when no reason is given; with a reason the trigger stays reachable to say why. */
   protected get disabled(): boolean {
-    return this._isDisabled()
+    return this._isDisabled() && !this.disabledWhy()
   }
 
   // CREATE
@@ -220,7 +227,7 @@ export class CustomMultiSelectComponent implements ControlValueAccessor {
 
   // UI HANDLERS
   protected toggle(): void {
-    if (this._isDisabled()) return
+    if (this.blocked_()) return
     this.clearCloseTimeout()
     const next = !this.isOpen()
     this.isOpen.set(next)
@@ -238,7 +245,7 @@ export class CustomMultiSelectComponent implements ControlValueAccessor {
   }
 
   protected openDropdown(): void {
-    if (this._isDisabled()) return
+    if (this.blocked_()) return
     this.clearCloseTimeout()
     this.isOpen.set(true)
     this.setHighlight_(0)
@@ -312,7 +319,7 @@ export class CustomMultiSelectComponent implements ControlValueAccessor {
       this.isFocusFromMouse_ = false
       return
     }
-    if (!this._isDisabled() && !this.isOpen()) {
+    if (!this.blocked_() && !this.isOpen()) {
       this.openDropdown()
     }
   }

@@ -5,6 +5,7 @@ import { LucideAngularModule } from 'lucide-angular'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
 import { PageHeaderComponent } from 'src/app/shared/page-header/page-header.component'
 import { EmptyStateComponent } from 'src/app/shared/empty-state/empty-state.component'
+import { DisabledWhyDirective } from 'src/app/shared/tooltip/disabled-why.directive'
 import { BookingDataService } from '@services/booking-data.service'
 import { ConfirmModalService } from '@services/confirm-modal.service'
 import { TranslationService } from '@services/translation.service'
@@ -41,7 +42,14 @@ export function weekStartIso(iso: string): string {
 @Component({
   selector: 'app-bookings-page',
   standalone: true,
-  imports: [RouterLink, LucideAngularModule, TranslatePipe, PageHeaderComponent, EmptyStateComponent],
+  imports: [
+    RouterLink,
+    LucideAngularModule,
+    TranslatePipe,
+    PageHeaderComponent,
+    EmptyStateComponent,
+    DisabledWhyDirective
+  ],
   templateUrl: './bookings.page.html',
   styleUrl: './bookings.page.scss',
   changeDetection: ChangeDetectionStrategy.OnPush

@@ -11,13 +11,14 @@ import { TranslationKeyModalService, isTranslationKeyResult } from '@services/tr
 import { EquipmentCategory } from 'src/app/core/models/equipment.model'
 import { CustomSelectComponent } from 'src/app/shared/custom-select/custom-select.component'
 import { ModalShellComponent } from '../modal-shell/modal-shell.component'
+import { DisabledWhyDirective } from '../tooltip/disabled-why.directive'
 
 const ADD_NEW_VALUE = '__add_new__'
 
 @Component({
   selector: 'app-add-equipment-modal',
   standalone: true,
-  imports: [CommonModule, FormsModule, TranslatePipe, CustomSelectComponent, ModalShellComponent],
+  imports: [CommonModule, FormsModule, TranslatePipe, CustomSelectComponent, ModalShellComponent, DisabledWhyDirective],
   templateUrl: './add-equipment-modal.component.html',
   styleUrl: './add-equipment-modal.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush

@@ -12,6 +12,7 @@ import { EmptyStateComponent } from 'src/app/shared/empty-state/empty-state.comp
 import { FormFieldComponent } from 'src/app/shared/form-field/form-field.component'
 import { LoaderComponent } from 'src/app/shared/loader/loader.component'
 import { PageHeaderComponent } from 'src/app/shared/page-header/page-header.component'
+import { DisabledWhyDirective } from 'src/app/shared/tooltip/disabled-why.directive'
 import { DiagnosisService } from './services/diagnosis.service'
 
 /** Plan 634: the consultant's diagnoses of the active (client's) business, and the form that starts a new one. */
@@ -28,7 +29,8 @@ import { DiagnosisService } from './services/diagnosis.service'
     EmptyStateComponent,
     FormFieldComponent,
     LoaderComponent,
-    PageHeaderComponent
+    PageHeaderComponent,
+    DisabledWhyDirective
   ],
   templateUrl: './diagnosis.page.html',
   styleUrl: './diagnosis.page.scss',

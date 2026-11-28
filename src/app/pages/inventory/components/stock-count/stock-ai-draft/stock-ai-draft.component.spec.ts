@@ -261,7 +261,7 @@ describe('StockAiDraftComponent', () => {
       })
 
       it('(c) a confirm with 0 emits nothing', () => {
-        expect(confirm().disabled).toBeTrue()
+        expect(confirm().getAttribute('aria-disabled')).toBe('true')
         confirm().click()
         counter().componentInstance.valueChange.emit(0)
         fixture.detectChanges()

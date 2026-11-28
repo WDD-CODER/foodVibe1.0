@@ -81,7 +81,9 @@ describe('TabChipsComponent', () => {
           { path: 'diagnosis', component: BlankStubComponent },
           { path: 'settings', component: BlankStubComponent },
           { path: 'clients', component: BlankStubComponent },
-          { path: 'frontdesk/knowledge', component: BlankStubComponent }
+          { path: 'frontdesk/knowledge', component: BlankStubComponent },
+          { path: 'restaurant-menu', component: BlankStubComponent },
+          { path: 'restaurant-menu/sales', component: BlankStubComponent }
         ]),
         { provide: TranslationService, useValue: mockTranslation },
         { provide: FrontDeskBadgeService, useValue: { waitingCount_: signal(0) } }
@@ -196,6 +198,30 @@ describe('TabChipsComponent', () => {
     expect(active.injector.get(RouterLink).href).toBe('/frontdesk/knowledge')
   })
 
+  it('shows the menu and sales chips on both restaurant pages with dish_analysis, the right one active (plan 726)', async () => {
+    modulesOn.set([...ALL_MODULES, 'dish_analysis'])
+    for (const [url, active] of [
+      ['/restaurant-menu', '/restaurant-menu'],
+      ['/restaurant-menu/sales?month=2026-10', '/restaurant-menu/sales']
+    ]) {
+      await router.navigateByUrl(url)
+      fixture.detectChanges()
+      await fixture.whenStable()
+      fixture.detectChanges()
+      expect(chipIds()).withContext(url).toEqual(['/restaurant-menu', '/restaurant-menu/sales'])
+      const lit = fixture.debugElement
+        .queryAll(By.css('a.c-chip--tab.active'))
+        .map((d) => d.injector.get(RouterLink).href)
+      expect(lit).withContext(url).toEqual([active])
+    }
+  })
+
+  it('hides the restaurant chip row without dish_analysis (plan 726)', async () => {
+    await router.navigateByUrl('/restaurant-menu/sales')
+    fixture.detectChanges()
+    expect(chipIds()).toEqual([])
+  })
+
   it('should render nothing on a route with no mapped chip group', async () => {
     await router.navigateByUrl('/settings')
     fixture.detectChanges()
@@ -275,5 +301,70 @@ describe('TabChipsComponent builder chip for staff (plan 476)', () => {
   it('keeps the recipe on the builder chip for an owner', async () => {
     user_.set({ _id: 'o1', name: 'o', email: 'o@x', businessId: 'b1', businessRole: 'owner' })
     expect(await chipPaths('/cook/r1')).toEqual(['/recipe-builder/r1', '/cook/r1'])
+  })
+})
+
+describe('TabChipsComponent monthly plan chip (plan 727)', () => {
+  const user_ = signal<User | null>(null)
+
+  const chipPaths = async (url = '/dashboard'): Promise<string[]> => {
+    const router = TestBed.inject(Router)
+    const fixture = TestBed.createComponent(TabChipsComponent)
+    await router.navigateByUrl(url)
+    fixture.detectChanges()
+    return fixture.debugElement.queryAll(By.css('a.c-chip--tab')).map((d) => d.injector.get(RouterLink).href ?? '')
+  }
+  const as = (businessRole: 'owner' | 'staff' | 'consultant') =>
+    user_.set({ _id: 'u1', name: 'n', email: 'n@x', businessId: 'b1', businessRole } as User)
+
+  beforeEach(async () => {
+    user_.set(null)
+    modulesOn.set([...ALL_MODULES, 'monthly_plan'])
+    await TestBed.configureTestingModule({
+      imports: [TabChipsComponent, LucideAngularModule.pick({ ...TEST_LUCIDE_ICONS, CalendarDays })],
+      providers: [
+        moduleStub,
+        provideRouter([
+          { path: 'dashboard', component: BlankStubComponent },
+          { path: 'monthly-plan', component: BlankStubComponent }
+        ]),
+        { provide: TranslationService, useValue: { translate: (k: string) => k } },
+        { provide: FrontDeskBadgeService, useValue: { waitingCount_: signal(0) } },
+        { provide: KitchenStateService, useValue: { recipesById_: computed(() => new Map()) } },
+        { provide: UserService, useValue: { user_, isOwner_: computed(() => user_()?.businessRole === 'owner') } }
+      ]
+    }).compileComponents()
+  })
+
+  it('an owner of a business with the module sees the chip after suppliers', async () => {
+    as('owner')
+    expect(await chipPaths()).toEqual(['/venues', '/dashboard?tab=metadata', '/suppliers', '/monthly-plan', '/trash'])
+  })
+
+  it('a consultant sees the chip too', async () => {
+    as('consultant')
+    expect(await chipPaths()).toContain('/monthly-plan')
+  })
+
+  it('staff never see the chip', async () => {
+    as('staff')
+    expect(await chipPaths()).not.toContain('/monthly-plan')
+  })
+
+  it('with the module off nobody sees the chip', async () => {
+    as('owner')
+    modulesOn.set(ALL_MODULES)
+    expect(await chipPaths()).not.toContain('/monthly-plan')
+  })
+
+  it('on the monthly plan page the chip is replaced by the dashboard chip in the same place', async () => {
+    as('owner')
+    expect(await chipPaths('/monthly-plan')).toEqual([
+      '/venues',
+      '/dashboard?tab=metadata',
+      '/suppliers',
+      '/dashboard',
+      '/trash'
+    ])
   })
 })

@@ -1,0 +1,360 @@
+{
+  "run": "biz-final",
+  "branch": "orch/biz-final",
+  "base": "main",
+  "startedAt": "2026-11-27T14:26:23.948Z",
+  "mainShaAtStart": "7834e19f00abf1caac53758ce8ed21b58b045a3a",
+  "plans": {
+    "763": {
+      "nnn": "763",
+      "title": "The stock count's two-line rows only on narrow phones; the leaf's nutrition box always in the same place",
+      "branch": "feat/763-stock-count-narrow-breakpoint",
+      "state": "merged",
+      "round": 0,
+      "tier": "build",
+      "models": {
+        "builder": {
+          "model": "sonnet",
+          "tier": "build",
+          "at": "2026-11-27T15:05:31.166Z"
+        },
+        "reviewer": {
+          "model": "sonnet",
+          "at": "2026-11-27T15:27:20.470Z"
+        }
+      },
+      "humanItems": [
+        "The stock count with the window at about 400px wide: name on top, the controls under it; at about 600px",
+        "any page with a small floating box · open it on a row near the top and on a row near the bottom of the screen · it is as wide as its text, sits right above or below the row, and is never cut off — here: the product list's leaf icon, opened on the first and the last visible row and twice on the same row; it opens in the same place relative to the leaf every time, and the leaf sits at the same spot in every row."
+      ],
+      "history": [
+        {
+          "at": "2026-11-27T14:28:21.308Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-27T14:28:21.473Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-27T15:01:14.233Z",
+          "state": "parked",
+          "round": 0
+        },
+        {
+          "at": "2026-11-27T15:03:32.253Z",
+          "state": "asking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-27T15:05:31.000Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-27T15:05:31.167Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-27T15:24:29.786Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-27T15:27:11.714Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-27T15:27:20.472Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-27T15:28:16.223Z",
+          "state": "merging",
+          "round": 0
+        },
+        {
+          "at": "2026-11-27T15:29:13.936Z",
+          "state": "merged",
+          "round": 0
+        }
+      ],
+      "earlier": [
+        {
+          "nnn": "763",
+          "title": "The stock count's two-line rows only on narrow phones; the leaf's nutrition box always in the same place",
+          "branch": "feat/763-stock-count-narrow-breakpoint",
+          "state": "asking",
+          "round": 0,
+          "tier": "build",
+          "models": {
+            "builder": {
+              "model": "sonnet",
+              "tier": "build",
+              "at": "2026-11-27T14:28:21.471Z"
+            }
+          },
+          "tiers": [
+            "build"
+          ],
+          "freeDiskGb": 9.6,
+          "reason": "asking 763-1: ESCALATE scope: ESCALATE: scope — `pnpm run test:scripts` exits 1 (156/157: scripts/test/breakpoints-no-literals.test.mjs rejects `@media (max-width: $break-phone-narrow-max)`), and kit-checks.mjs fails with `KIT_DEBT: reuse-copy.tooltip 240 → 241` in user-management.component.html; neither file is in the plan's sc",
+          "calls": [
+            {
+              "stage": "builder",
+              "model": "sonnet",
+              "seconds": 1972.4,
+              "tokens": {
+                "input": 7724729,
+                "output": 65382
+              },
+              "exit": 0
+            }
+          ],
+          "park": {
+            "at": "2026-11-27T15:03:21.119Z",
+            "reason": "ESCALATE scope: ESCALATE: scope — `pnpm run test:scripts` exits 1 (156/157: scripts/test/breakpoints-no-literals.test.mjs rejects `@media (max-width: $break-phone-narrow-max)`), and kit-checks.mjs fails with `KIT_DEBT: reuse-copy.tooltip 240 → 241` in user-management.component.html; neither file is in the plan's sc"
+          },
+          "parkBranch": "park/biz-final-763"
+        }
+      ],
+      "escalations": [
+        {
+          "step": "resumed after: asking 763-1: ESCALATE scope: ESCALATE: scope — `pnpm run test:scripts` exits 1 (156/157: scripts/test/breakpoints-no-literals.test.mjs rejects `@medi",
+          "check": "(not given)"
+        }
+      ],
+      "replan": "no — (not given)",
+      "tiers": [
+        "build"
+      ],
+      "freeDiskGb": 8.3,
+      "sha": "787adc5ccf9485843fd10d407f782ff55c8ecb01",
+      "calls": [
+        {
+          "stage": "builder",
+          "model": "sonnet",
+          "seconds": 1136.1,
+          "tokens": {
+            "input": 2225374,
+            "output": 23250
+          },
+          "exit": 0
+        },
+        {
+          "stage": "reviewer",
+          "model": "sonnet",
+          "seconds": 54.4,
+          "tokens": {
+            "input": 351955,
+            "output": 6458
+          },
+          "exit": 0
+        }
+      ],
+      "checkedHead": "45b50e86a18b45564fb673bafc351322903b2c19"
+    }
+  },
+  "notes": [
+    {
+      "at": "2026-11-27T14:28:21.145Z",
+      "plan": "763",
+      "text": "the folder foodVibe1.0-orch-biz-final-763 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-27T15:01:14.032Z",
+      "plan": "763",
+      "text": "builder left undone (round 0): G3: not ticked — test:scripts and kit-checks fail on files outside the scope; [human] stock count at about 400px and at 600px or wider: not checked in a running app; [human] leaf box on the first and last visible row and twice on one row: not checked in a running app"
+    },
+    {
+      "at": "2026-11-27T15:03:32.097Z",
+      "plan": "763",
+      "text": "parked: nothing to save (nothing uncommitted)"
+    },
+    {
+      "at": "2026-11-27T15:03:32.406Z",
+      "plan": "763",
+      "text": "ask 763-1 (scope, the Human or the advisor answers): May plan 763 edit the breakpoint guard test (to allow the new 419px name) and the user-management component (to replace one browser `title` with the shared tooltip, which clears the debt count)?"
+    },
+    {
+      "at": "2026-11-27T15:03:32.882Z",
+      "plan": "763",
+      "text": "decided without the Human: advisor · scope: ask 763-1 (\"May plan 763 edit the breakpoint guard test (to allow the new 419px name) and the user-management component (to replace one browser `title` with the shared tool\") answered: approved: scripts/test/breakpoints-no-literals.test.mjs, src/app/pages/metadata-manager/components/user-management/user-management.component.html, src/"
+    },
+    {
+      "at": "2026-11-27T15:03:33.456Z",
+      "plan": "763",
+      "text": "ask 763-1 answered by the advisor: approved: scripts/test/breakpoints-no-literals.test.mjs, src/app/pages/metadata-manager/components/user-management/user-management.component.html, src/app/pages/metadata-manager/components/user-management/user-management.component.ts"
+    },
+    {
+      "at": "2026-11-27T15:03:46.005Z",
+      "plan": "763",
+      "text": "scope of plan 763 extended on orch/biz-final by the answer to 763-1: scripts/test/breakpoints-no-literals.test.mjs, src/app/pages/metadata-manager/components/user-management/user-management.component.html, src/app/pages/metadata-manager/components/user-management/user-management.component.ts"
+    },
+    {
+      "at": "2026-11-27T15:05:24.244Z",
+      "plan": "763",
+      "text": "resumed from park/biz-final-763: round 0, tier build, after: asking 763-1: ESCALATE scope: ESCALATE: scope — `pnpm run test:scripts` exits 1 (156/157: scripts/test/breakpoints-no-literals.test.mjs rejects `@media (max-wid"
+    },
+    {
+      "at": "2026-11-27T15:05:30.862Z",
+      "plan": "763",
+      "text": "the folder foodVibe1.0-orch-biz-final-763 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-27T15:28:26.414Z",
+      "plan": "763",
+      "text": "the folder foodVibe1.0-orch-merge-biz-final was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-27T15:30:42.266Z",
+      "text": "FINAL: same tree as plan 763's gate — node scripts/orch-state.mjs prepare --missing server/generated/schemas --script build:schemas --pm pnpm, pnpm run build, pnpm run lint, pnpm run test:ci, node scripts/override-check.mjs, pnpm run lint:icons, pnpm run lint:no-native-select, node scripts/plan-ledger-check.mjs, node scripts/breadcrumbs-check.mjs, node scripts/ci-scope-check.mjs --checkout-branch"
+    }
+  ],
+  "attempts": 1,
+  "phase": "finished",
+  "freeDiskGb": 8.3,
+  "updatedAt": "2026-11-27T15:30:44.758Z",
+  "selfDecided": [
+    {
+      "plan": "763",
+      "kind": "advisor · scope",
+      "what": "ask 763-1 (\"May plan 763 edit the breakpoint guard test (to allow the new 419px name) and the user-management component (to replace one browser `title` with the shared tool\") answered: approved: scripts/test/breakpoints-no-literals.test.mjs, src/app/pages/metadata-manager/components/user-management/user-management.component.html, src/app/pages/metadata-manager/components/user-management/user-management.component.ts",
+      "why": "scope: 3 path(s) inside the repo, none sensitive (3 of 5 for this plan)",
+      "undo": "before merge it: on the run branch, git checkout origin/main -- scripts/test/breakpoints-no-literals.test.mjs src/app/pages/metadata-manager/components/user-management/user-management.component.html src/app/pages/metadata-manager/components/user-management/user-management.component.ts (drops the plan's change to those files), commit, push",
+      "at": "2026-11-27T15:03:32.616Z"
+    }
+  ],
+  "decisions": [
+    {
+      "id": "D1",
+      "plan": "763",
+      "type": "behaviour",
+      "text": "behaviour: the leaf sits at the end of the product name cell, after the name, not beside the warning triangle — reverse: move the name-nutrition-slot span before .name-text and widen the header's start padding",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D2",
+      "plan": "763",
+      "type": "behaviour",
+      "text": "behaviour: the leaf box still opens above the leaf and goes below only when there is no room above (the triangle's box tries below first) — reverse: set prefer to 'below' in nutrition-badge.component.ts",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D3",
+      "plan": "763",
+      "type": "behaviour",
+      "text": "behaviour: between 420px and 767px only the row layout changed; the counted mark keeps its phone size — reverse: drive phone_ from the narrow-phone query in stock-count.component.ts",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D4",
+      "plan": "763",
+      "type": "seen",
+      "text": "seen: _shared/product-defaults.md:131 (copied to docs/brain/inventory.md:122) still says screens change layout at three widths only; the 419px step is now a fourth",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D5",
+      "plan": "763",
+      "type": "seen",
+      "text": "seen: .claude/skills/cssLayer/SKILL.md:17 still names the old breakpoints $break-mobile, $break-tablet and $break-desktop",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D6",
+      "plan": "763",
+      "type": "seen",
+      "text": "seen: src/app/pages/metadata-manager/components/user-management/user-management.component.html:28 uses a browser title for a hint, which raises the reuse-copy.tooltip debt above its baseline",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D7",
+      "plan": "763",
+      "type": "behaviour",
+      "text": "behaviour: the leaf sits at the end of the product list's name cell, after the name, not beside the warning triangle — reverse: move the name-nutrition-slot span before .name-text and widen the header's start padding",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D8",
+      "plan": "763",
+      "type": "behaviour",
+      "text": "behaviour: the platform-admin chip's hint is now the shared tooltip, so it also opens by tap on touch; no keyboard tab stop was added — reverse: put [attr.title] back on the chip and remove TooltipDirective from the component (this raises the tooltip debt again)",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D9",
+      "plan": "763",
+      "type": "seen",
+      "text": "seen: src/app/pages/metadata-manager/components/user-management/user-management.component.html:28 — the platform-admin chip cannot take keyboard focus, so its hint never shows from the keyboard (the old title did not either)",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    }
+  ],
+  "finishedAt": "2026-11-27T15:30:44.756Z",
+  "finalGate": {
+    "ok": true,
+    "command": null,
+    "at": "2026-11-27T15:30:44.758Z",
+    "attempt": 1,
+    "blamed": []
+  }
+}

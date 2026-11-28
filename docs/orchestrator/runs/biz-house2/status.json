@@ -1,0 +1,393 @@
+{
+  "run": "biz-house2",
+  "branch": "orch/biz-house2",
+  "base": "main",
+  "startedAt": "2026-11-27T08:46:38.913Z",
+  "mainShaAtStart": "1b03eb61b3d12f355f0dbec0e0312d14b5c0eae1",
+  "plans": {
+    "762": {
+      "nnn": "762",
+      "title": "A clearer \"more\" sign, the stock count's name above its controls on phones, tooltips that tap-and-go",
+      "branch": "feat/762-house-style-grading-round",
+      "state": "merged",
+      "round": 0,
+      "tier": "build",
+      "models": {
+        "builder": {
+          "model": "sonnet",
+          "tier": "build",
+          "at": "2026-11-27T09:39:59.280Z"
+        },
+        "reviewer": {
+          "model": "sonnet",
+          "at": "2026-11-27T10:31:01.604Z"
+        }
+      },
+      "humanItems": [
+        "At phone width, the settings tabs and the dashboard's metadata row show a clearly visible sign at the edge",
+        "The stock count at phone width: each row shows the item's name on top, and under it the unit, the counted",
+        "At phone width, tap a blocked button (dev catalog sample): the tooltip shows; tap anywhere else, or scroll:",
+        "any page with a small floating box · open it on a row near the top and on a row near the bottom of the screen · it is as wide as its text, sits right above or below the row, and is never cut off — here: the product list's warning triangle at phone width, tapped on the first and the last visible row."
+      ],
+      "history": [
+        {
+          "at": "2026-11-27T08:50:51.135Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-27T08:50:51.579Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-27T09:18:12.369Z",
+          "state": "parked",
+          "round": 0
+        },
+        {
+          "at": "2026-11-27T09:19:18.541Z",
+          "state": "asking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-27T09:26:33.807Z",
+          "state": "parked",
+          "round": 0
+        },
+        {
+          "at": "2026-11-27T09:39:58.886Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-27T09:39:59.283Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-27T10:24:19.166Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-27T10:30:40.204Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-27T10:31:01.607Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-27T10:33:30.795Z",
+          "state": "merging",
+          "round": 0
+        },
+        {
+          "at": "2026-11-27T10:35:46.361Z",
+          "state": "merged",
+          "round": 0
+        }
+      ],
+      "earlier": [
+        {
+          "nnn": "762",
+          "title": "A clearer \"more\" sign, the stock count's name above its controls on phones, tooltips that tap-and-go",
+          "branch": "feat/762-house-style-grading-round",
+          "state": "parked",
+          "round": 0,
+          "tier": "build",
+          "models": {
+            "builder": {
+              "model": "sonnet",
+              "tier": "build",
+              "at": "2026-11-27T08:50:51.576Z"
+            }
+          },
+          "tiers": [
+            "build"
+          ],
+          "freeDiskGb": 15,
+          "reason": "replan needed: ESCALATE: scope — `git commit` exits 1 because `node scripts/plan-ledger-check.mjs` in the pre-commit hook reports MISSING plans/760-assistant-admin-edits-engine-numbers.plan.md and plans/761-ai-daily-budget-bar-admin-only.plan.md (both on origin/main, outside this plan's scope); the hook was not by — ask 762-1 answered, but the scope could not be extended: git c",
+          "calls": [
+            {
+              "stage": "builder",
+              "model": "sonnet",
+              "seconds": 1640.3,
+              "tokens": {
+                "input": 9528826,
+                "output": 90008
+              },
+              "exit": 0
+            }
+          ],
+          "parkBranch": "park/biz-house2-762",
+          "park": {
+            "at": "2026-11-27T09:19:15.488Z",
+            "reason": "replan needed: ESCALATE: scope — `git commit` exits 1 because `node scripts/plan-ledger-check.mjs` in the pre-commit hook reports MISSING plans/760-assistant-admin-edits-engine-numbers.plan.md and plans/761-ai-daily-budget-bar-admin-only.plan.md (both on origin/main, outside this plan's scope); the hook was not by",
+            "branch": "park/biz-house2-762"
+          }
+        }
+      ],
+      "tiers": [
+        "build"
+      ],
+      "freeDiskGb": 12.1,
+      "sha": "1d116218f27af8838a87b219f13c0886b3ba6fd3",
+      "calls": [
+        {
+          "stage": "builder",
+          "model": "sonnet",
+          "seconds": 2655.3,
+          "tokens": {
+            "input": 9391303,
+            "output": 101669
+          },
+          "exit": 0
+        },
+        {
+          "stage": "reviewer",
+          "model": "sonnet",
+          "seconds": 146.1,
+          "tokens": {
+            "input": 836085,
+            "output": 16255
+          },
+          "exit": 0
+        }
+      ],
+      "checkedHead": "f831ce820fe76057484dcde1445df509b5ee5040"
+    }
+  },
+  "notes": [
+    {
+      "at": "2026-11-27T08:50:50.708Z",
+      "plan": "762",
+      "text": "the folder foodVibe1.0-orch-biz-house2-762 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-27T09:18:12.146Z",
+      "plan": "762",
+      "text": "builder left undone (round 0): commit and push: blocked by the pre-commit plan-ledger check, so the worktree is not clean; F4: every check was run and noted under Execution Notes, but plan-ledger-check fails, so it is left unticked; the four [human] items: for the Human"
+    },
+    {
+      "at": "2026-11-27T09:19:18.377Z",
+      "plan": "762",
+      "text": "parked: saved on park/biz-house2-762 (529536e) and pushed"
+    },
+    {
+      "at": "2026-11-27T09:19:18.694Z",
+      "plan": "762",
+      "text": "ask 762-1 (scope, the Human or the advisor answers): The run branch's todo.md names plans 760 and 761 but lacks their files, so no commit passes the pre-commit hook; may this branch copy the two files unchanged from origin/main?"
+    },
+    {
+      "at": "2026-11-27T09:26:19.792Z",
+      "plan": "762",
+      "text": "ask 762-1 answered by the human: approved: plans/760-assistant-admin-edits-engine-numbers.plan.md, plans/761-ai-daily-budget-bar-admin-only.plan.md"
+    },
+    {
+      "at": "2026-11-27T09:26:34.157Z",
+      "plan": "762",
+      "text": "ask 762-1 answered, but the scope could not be extended: git commit: husky - pre-commit script failed (code 1) — plan 762 parked; the question was: The run branch's todo.md names plans 760 and 761 but lacks their files, so no commit passes the pre-commit hook; may this branch copy the two files unchanged from origin/main?"
+    },
+    {
+      "at": "2026-11-27T09:39:58.546Z",
+      "plan": "762",
+      "text": "the folder foodVibe1.0-orch-biz-house2-762 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-27T10:33:52.157Z",
+      "plan": "762",
+      "text": "the folder foodVibe1.0-orch-merge-biz-house2 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-27T10:38:25.693Z",
+      "text": "FINAL: same tree as plan 762's gate — node scripts/orch-state.mjs prepare --missing server/generated/schemas --script build:schemas --pm pnpm, pnpm run build, pnpm run lint, pnpm run test:ci, node scripts/override-check.mjs, pnpm run lint:icons, pnpm run lint:no-native-select, node scripts/plan-ledger-check.mjs, node scripts/breadcrumbs-check.mjs, node scripts/ci-scope-check.mjs --checkout-branch"
+    }
+  ],
+  "attempts": 2,
+  "phase": "finished",
+  "freeDiskGb": 12.1,
+  "updatedAt": "2026-11-27T10:38:29.671Z",
+  "decisions": [
+    {
+      "id": "D1",
+      "plan": "762",
+      "type": "behaviour",
+      "text": "behaviour: in a phone-wide window used with a mouse, hover still opens the tooltip and a click then keeps it until the next press; only a device with no hover loses hover — reverse: return early from onPointerEnter in tap mode and update the hover-based restaurant menu specs",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D2",
+      "plan": "762",
+      "type": "behaviour",
+      "text": "behaviour: on phones the stock count's product column heading takes its own line, so the other headings stay over their controls — reverse: drop .stock-count__name-head from the phone rule and restore the name track in mobileGridTemplate_",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D3",
+      "plan": "762",
+      "type": "behaviour",
+      "text": "behaviour: on phones the line between an item's name and its controls is removed so the two read as one row — reverse: delete the phone rule on .stock-count__name",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D4",
+      "plan": "762",
+      "type": "behaviour",
+      "text": "behaviour: the 'more' badge uses the teal --color-primary-strong as the theme's accent, not the unused violet --color-accent — reverse: swap the two colour tokens on .sr-more__badge",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D5",
+      "plan": "762",
+      "type": "seen",
+      "text": "seen: src/app/pages/inventory/components/inventory-product-list/inventory-product-list.component.html:179 and src/app/pages/recipe-book/components/recipe-book-list/recipe-book-list.component.html:303 still bind [tooltipOnClick], which now has no effect",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D6",
+      "plan": "762",
+      "type": "seen",
+      "text": "seen: src/app/pages/dev-catalog/dev-catalog.page.html:329 still describes the tooltip as 'hover, focus, tap' with tooltipOnClick",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D7",
+      "plan": "762",
+      "type": "seen",
+      "text": "seen: src/app/shared/counter/counter.component.spec.ts:85, src/app/shared/voice-note/voice-note.component.spec.ts:117, src/app/pages/inventory/components/inventory-product-list/inventory-product-list.component.spec.ts:261 and src/app/shared/month-figures/month-figures.component.spec.ts:114 expect a click or tap to open a tooltip without setting the screen, so they pass only whi",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D8",
+      "plan": "762",
+      "type": "behaviour",
+      "text": "behaviour: the sign of more uses the themed --color-primary, not the unused purple --color-accent token — reverse: swap the token in .sr-more__badge",
+      "alsoFrom": [],
+      "attempt": 2,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D9",
+      "plan": "762",
+      "type": "behaviour",
+      "text": "behaviour: a mouse in a phone-width window still hovers as before (a finger never does); a press on the control itself closes only a tap-opened box, and a keyboard click there toggles it — reverse: make canHover_ return false in tap mode",
+      "alsoFrom": [],
+      "attempt": 2,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D10",
+      "plan": "762",
+      "type": "behaviour",
+      "text": "behaviour: focus that comes from a press opens no tooltip, text fields included, so a click or tap never opens one above a phone — reverse: drop the pressed_ guard in onFocusIn",
+      "alsoFrom": [],
+      "attempt": 2,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D11",
+      "plan": "762",
+      "type": "behaviour",
+      "text": "behaviour: on a phone the product column heading takes its own line above the amount, unit and counted headings — reverse: hide .stock-count__head-name in the phone block",
+      "alsoFrom": [],
+      "attempt": 2,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D12",
+      "plan": "762",
+      "type": "seen",
+      "text": "seen: tooltipOnClick now has no effect but is still bound at src/app/pages/inventory/components/inventory-product-list/inventory-product-list.component.html:179 and src/app/pages/recipe-book/components/recipe-book-list/recipe-book-list.component.html:303, and named in the text at src/app/pages/dev-catalog/dev-catalog.page.html:329",
+      "alsoFrom": [],
+      "attempt": 2,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D13",
+      "plan": "762",
+      "type": "seen",
+      "text": "seen: src/app/pages/inventory/components/stock-count/stock-count.component.scss:106 — the error row tint sits in @layer, so by the cascade it cannot beat the unlayered .c-list-body-cell background and the cells of a failed row are likely not tinted (not checked in a browser)",
+      "alsoFrom": [],
+      "attempt": 2,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    }
+  ],
+  "finishedAt": "2026-11-27T10:38:29.667Z",
+  "finalGate": {
+    "ok": true,
+    "command": null,
+    "at": "2026-11-27T10:38:29.670Z",
+    "attempt": 1,
+    "blamed": []
+  }
+}

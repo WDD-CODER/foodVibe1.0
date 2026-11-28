@@ -60,6 +60,13 @@ docs/agent/house-style.md
 docs/brain/component-families.md
 docs/brain/inventory.md
 docs/workflow-kit/manifest.json
+src/app/core/engine/plan-snapshot.spec.ts
+src/app/core/services/export.service.spec.ts
+src/app/core/services/user.service.spec.ts
+src/app/pages/recipe-builder/services/recipe-builder-export.service.spec.ts
+scripts/test/breakpoints-no-literals.test.mjs
+src/app/pages/metadata-manager/components/user-management/user-management.component.html
+src/app/pages/metadata-manager/components/user-management/user-management.component.ts
 ```
 
 ## Read Scope
@@ -76,6 +83,7 @@ append the path to the scope block above and retry.
 ## Architecture Impact
 - INV-none: preserves — presentation only; no route, permission, data or AI change.
 - INV-6: preserves — the scope glob `src/app/**/breadcrumbs.md` matches `*ai*` paths only by name; no AI call is touched.
+- INV-3: preserves — the user list's admin chip swaps the browser `title` for the shared tooltip (ask 763-1); no rename, cascade or client write.
 
 ## Reuse Check
 - none — the narrow step is one more token in the app's one breakpoint set; the leaf box keeps the shared
@@ -125,9 +133,9 @@ line or file this plan names was removed, renamed or rewritten).
 
 These are the plan's milestones: a Worker does them in order and ticks each one after it is checked.
 
-- [ ] G1: Add the narrow-phone breakpoint and move the stock count's two-line rule to it — src/app/pages/inventory/components/stock-count/stock-count.component.scss
-- [ ] G2: The leaf's box opens in the same place every time, like the triangle's — src/app/shared/nutrition-badge/nutrition-badge.component.ts
-- [ ] G3: Run every automatic check and paste the outputs under Execution Notes — plans/763-stock-count-narrow-breakpoint-and-leaf-box-placement.plan.md
+- [x] G1: Add the narrow-phone breakpoint and move the stock count's two-line rule to it — src/app/pages/inventory/components/stock-count/stock-count.component.scss
+- [x] G2: The leaf's box opens in the same place every time, like the triangle's — src/app/shared/nutrition-badge/nutrition-badge.component.ts
+- [x] G3: Run every automatic check and paste the outputs under Execution Notes — plans/763-stock-count-narrow-breakpoint-and-leaf-box-placement.plan.md
 
 ## What happens when
 - A window between 420px and 767px: the stock count rows are one line, as on a tablet.
@@ -143,3 +151,51 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
 - none
 
 ## Execution Notes
+
+### G1 — narrow-phone step
+- `$break-phone-narrow-max: 419px` in `_breakpoints.scss` and `src/styles.scss` (plus `--bp-phone-narrow-max`);
+  `PHONE_NARROW_MAX` / `PHONE_NARROW_QUERY` in `breakpoints.ts`.
+- The two-line media rule uses the new name. The stock count's phone column template follows the same step
+  (`narrowPhone_`): 420–767px has the name column again (`minmax(0, 1.5fr) auto minmax(6rem, 1fr) auto`, the template
+  from before plan 762); without it a one-line row has four cells in three columns.
+- Spec: the drawn sheet is copied into a frame 400 / 420 / 500 / 800px wide; two lines at 400, one line at the others.
+  It replaces the old phone test, which was always `pending` in a wide test window.
+
+### G2 — the leaf and its box
+- Cause check: the new placement tests (side, gap, centring, same place twice, screen edges) passed on the unchanged
+  badge (14 run, 13 pass, 1 fail), so placing before the content had its final size was **not** reproduced.
+  The one failure: the box was a fixed 164px and cut row labels off. In the list, the leaf sat after the name text, so
+  its spot (and the box's) moved with each name's length.
+- Fix: the leaf has its own 1.5rem slot at the name cell's inline-end on every row; the box is `max-content` wide
+  (capped by the screen); placed again one frame after opening, as the shared tooltip does; the arrow offset takes
+  the 1px border off. Preferred side stays above, flipping below when there is no room (`## What happens when`).
+
+### Decisions
+- behaviour: the leaf sits at the end of the name cell (after the name), not beside the warning triangle — reverse:
+  move the `name-nutrition-slot` span (it reuses `.name-status-slot`) before `.name-text` and widen the header's start
+  padding.
+
+### Ask 763-1 (answered: approved)
+- `scripts/test/breakpoints-no-literals.test.mjs` knows the fifth name, `break-phone-narrow-max` = 419, in the two
+  style files, in `breakpoints.ts` and in the allowed `@media` names.
+- The user list's platform-admin chip uses `[appTooltip]` in place of the browser `title`, with `role="img"` and an
+  `aria-label` so it keeps its name; one spec case; the tooltip family's user list names it. This brings
+  `reuse-copy.tooltip` back from 241 to the baseline 240.
+- `## Architecture Impact` gained the INV-3 line: the approved paths made the scope overlap its `Touches`.
+
+### G3 — checks
+- `pnpm run build` -> exit 0
+- `pnpm run lint` -> exit 0 (0 errors, 71 warnings)
+- `pnpm run test:ci` -> exit 0, `TOTAL: 3138 SUCCESS` (one run in this resume: 1 failed, the new chip case opened the
+  tooltip by focus, which a non-focusable chip never gets; it now opens it by hover)
+- `pnpm run test:scripts` -> exit 0, 156 pass, 0 fail, 1 skipped
+- `kit-manifest-check.mjs --root .` -> `KIT_MANIFEST: ok`
+- `scope-check.mjs --diff=origin/orch/biz-final` (the worktree's copy) -> `SCOPE: ok`
+- `kit-checks.mjs` -> `KIT_CHECKS: ok (6 checks)`
+- `override-check`, `lint:icons`, `lint:no-native-select`, `plan-ledger-check`, `breadcrumbs-check`,
+  `inventory.mjs --check` -> exit 0
+- `ci-scope-check.mjs --checkout-branch` -> exit 0 (skipped: it reads no branch name outside CI)
+- `scope-check.mjs --arch` -> `ARCH: ok INV-none, INV-6, INV-3`
+- `log-query.mjs --since=plan-start --level=error` -> `SKIP: no database configured`
+- seen: the platform-admin chip cannot take keyboard focus, so its hint never shows from the keyboard (the old
+  `title` did not either) — `src/app/pages/metadata-manager/components/user-management/user-management.component.html:28`

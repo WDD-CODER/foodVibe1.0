@@ -1,0 +1,440 @@
+{
+  "run": "repo-polish",
+  "branch": "orch/repo-polish",
+  "base": "main",
+  "startedAt": "2026-11-26T08:43:22.265Z",
+  "mainShaAtStart": "7acf46c8a9641a554ddc543a11aad5a2c5809341",
+  "plans": {
+    "738": {
+      "nnn": "738",
+      "title": "Make the repository look professional to a recruiter",
+      "branch": "feat/738-repo-readme-license-and",
+      "state": "merged",
+      "round": 0,
+      "tier": "build",
+      "models": {
+        "builder": {
+          "model": "sonnet",
+          "tier": "build",
+          "at": "2026-11-26T15:03:01.557Z"
+        },
+        "reviewer": {
+          "model": "sonnet",
+          "at": "2026-11-26T17:14:42.353Z"
+        }
+      },
+      "humanItems": [
+        "Card — read the README on GitHub as a recruiter: open the branch's README on github.com; in under two minutes you can say what FoodVibe does, open the live demo from the link, see the screenshots, and nothing reads as unfinished or explains how to copy the workflow.",
+        "Card — the license: on the branch's repository page, the side panel shows «View license» (GitHub's label for a license it does not recognise), and opening it shows \"All rights reserved\" with your name.",
+        "Card — only when A3 could not take real screenshots: open the app at the slot's page, take the listed screenshots and drop them into `docs/images/` under the names A3 listed (the builder names them under Execution Notes)."
+      ],
+      "history": [
+        {
+          "at": "2026-11-26T08:47:12.928Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-26T08:47:13.625Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-26T09:50:52.450Z",
+          "state": "parked",
+          "round": 0
+        },
+        {
+          "at": "2026-11-26T09:51:45.164Z",
+          "state": "asking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-26T09:51:47.604Z",
+          "state": "parked",
+          "round": 0
+        },
+        {
+          "at": "2026-11-26T15:03:01.261Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-26T15:03:01.562Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-26T16:41:41.582Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-26T17:14:29.640Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-26T17:14:42.354Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-26T17:16:06.463Z",
+          "state": "merging",
+          "round": 0
+        },
+        {
+          "at": "2026-11-26T17:42:31.965Z",
+          "state": "merged",
+          "round": 0
+        }
+      ],
+      "earlier": [
+        {
+          "nnn": "738",
+          "title": "Make the repository look professional to a recruiter",
+          "branch": "feat/738-repo-readme-license-and",
+          "state": "parked",
+          "round": 0,
+          "tier": "build",
+          "models": {
+            "builder": {
+              "model": "sonnet",
+              "tier": "build",
+              "at": "2026-11-26T08:47:13.623Z"
+            }
+          },
+          "tiers": [
+            "build"
+          ],
+          "freeDiskGb": 6,
+          "reason": "replan needed: `git add` in the worktree exits 128 (`fatal: not a git repository`) after the run was stopped for `environment: disk full, Human restarting the PC to free space`, and `pnpm run test:server` last exited 1 on a usage-write race in `server/test/ai-voice-transcribe.test.js`, which is outside the scope. — ask 738-1 answered, but the scope could not be extended: the me",
+          "calls": [
+            {
+              "stage": "builder",
+              "model": "sonnet",
+              "seconds": 3817.3,
+              "tokens": {
+                "input": 5533180,
+                "output": 47754
+              },
+              "exit": 0
+            }
+          ],
+          "park": {
+            "at": "2026-11-26T09:51:27.452Z",
+            "reason": "replan needed: `git add` in the worktree exits 128 (`fatal: not a git repository`) after the run was stopped for `environment: disk full, Human restarting the PC to free space`, and `pnpm run test:server` last exited 1 on a usage-write race in `server/test/ai-voice-transcribe.test.js`, which is outside the scope."
+          },
+          "parkBranch": "park/repo-polish-738"
+        }
+      ],
+      "tiers": [
+        "build"
+      ],
+      "freeDiskGb": 13.2,
+      "sha": "9ed8f356cee92dbeb56e000b1fde4225debcfb6b",
+      "calls": [
+        {
+          "stage": "builder",
+          "model": "sonnet",
+          "seconds": 5912.9,
+          "tokens": {
+            "input": 5075289,
+            "output": 35371
+          },
+          "exit": 0
+        },
+        {
+          "stage": "reviewer",
+          "model": "sonnet",
+          "seconds": 81.2,
+          "tokens": {
+            "input": 256343,
+            "output": 8820
+          },
+          "exit": 0
+        }
+      ],
+      "checkedHead": "85ec98d41454fa21d7f829f1ef44d2403a33c746"
+    }
+  },
+  "notes": [
+    {
+      "at": "2026-11-26T08:47:12.562Z",
+      "plan": "738",
+      "text": "the folder foodVibe1.0-orch-repo-polish-738 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-26T09:50:51.836Z",
+      "plan": "738",
+      "text": "builder left undone (round 0): A1: the waits are added in both listed tests, but three green server test runs in a row were not achieved; A7: not every automatic check passes, and the outputs are not committed under Execution Notes; Plan file: sub-task ticks and Execution Notes not committed (the worktree is no longer a git repos"
+    },
+    {
+      "at": "2026-11-26T09:51:26.296Z",
+      "plan": "738",
+      "text": "the folder foodVibe1.0-orch-repo-polish-738 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-26T09:51:44.811Z",
+      "plan": "738",
+      "text": "parked: no folder — nothing to save"
+    },
+    {
+      "at": "2026-11-26T09:51:45.503Z",
+      "plan": "738",
+      "text": "ask 738-1 (scope, the Human or the advisor answers): May the builder add one line (`await _waitForUsageWritesForTests();` in `beforeEach`, before line 47) to server/test/ai-voice-transcribe.test.js, which has the same usage-write race and failed server test run 3?"
+    },
+    {
+      "at": "2026-11-26T09:51:46.073Z",
+      "plan": "738",
+      "text": "decided without the Human: advisor · scope: ask 738-1 (\"May the builder add one line (`await _waitForUsageWritesForTests();` in `beforeEach`, before line 47) to server/test/ai-voice-transcribe.test.js, which has the \") answered: approved: server/test/ai-voice-transcribe.test.js"
+    },
+    {
+      "at": "2026-11-26T09:51:46.891Z",
+      "plan": "738",
+      "text": "ask 738-1 answered by the advisor: approved: server/test/ai-voice-transcribe.test.js"
+    },
+    {
+      "at": "2026-11-26T09:51:48.204Z",
+      "plan": "738",
+      "text": "ask 738-1 answered, but the scope could not be extended: the merge folder does not fast-forward to origin/orch/repo-polish:  (no commit of its own beyond origin/orch/repo-polish) — plan 738 parked; the question was: May the builder add one line (`await _waitForUsageWritesForTests();` in `beforeEach`, before line 47) to server/test/ai-voice-transcribe.test.js, which has the same usage-write race an"
+    },
+    {
+      "at": "2026-11-26T15:03:00.908Z",
+      "plan": "738",
+      "text": "the folder foodVibe1.0-orch-repo-polish-738 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-26T16:41:34.890Z",
+      "plan": "738",
+      "text": "builder left undone (round 0): README screenshots (3-5 images): none taken, because this folder is not a slot and has no running app or QA login. Human card 3: add dashboard.png, recipe-costing.png, event.png, inventory.png and ai-menu-draft.png under docs/images/, then move their lines out of the README comment; [human] cards (R"
+    },
+    {
+      "at": "2026-11-26T17:16:29.531Z",
+      "plan": "738",
+      "text": "the folder foodVibe1.0-orch-merge-repo-polish was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-26T17:44:43.207Z",
+      "text": "FINAL: same tree as plan 738's gate — node scripts/orch-state.mjs prepare --missing server/generated/schemas --script build:schemas --pm pnpm, pnpm run build, pnpm run lint, pnpm run test:ci, node scripts/kit-manifest-check.mjs, node scripts/override-check.mjs, pnpm run lint:icons, pnpm run lint:no-native-select, node scripts/plan-ledger-check.mjs, node scripts/breadcrumbs-check.mjs, node scripts/"
+    },
+    {
+      "at": "2026-11-26T17:44:43.748Z",
+      "text": "make this a default? added `pnpm run build:schemas` and the Node 22, pnpm and local MongoDB prerequisites to 'Run it locally', because the server needs the generated schemas and its dev:local script does not build them —  (trigger: destructive-action) — reply: default yes run-destructive-action"
+    }
+  ],
+  "attempts": 2,
+  "phase": "finished",
+  "freeDiskGb": 13.2,
+  "updatedAt": "2026-11-26T17:44:45.973Z",
+  "stops": [
+    {
+      "at": "2026-11-26T09:25:02.127Z",
+      "reason": "environment: disk full, Human restarting the PC to free space (2026-11-26)",
+      "attempt": 1
+    }
+  ],
+  "selfDecided": [
+    {
+      "plan": "738",
+      "kind": "advisor · scope",
+      "what": "ask 738-1 (\"May the builder add one line (`await _waitForUsageWritesForTests();` in `beforeEach`, before line 47) to server/test/ai-voice-transcribe.test.js, which has the \") answered: approved: server/test/ai-voice-transcribe.test.js",
+      "why": "scope: 1 path(s) inside the repo, none sensitive (1 of 5 for this plan)",
+      "undo": "before merge it: on the run branch, git checkout origin/main -- server/test/ai-voice-transcribe.test.js (drops the plan's change to that file), commit, push",
+      "at": "2026-11-26T09:51:45.802Z"
+    }
+  ],
+  "decisions": [
+    {
+      "id": "D1",
+      "plan": "738",
+      "type": "seen",
+      "text": "seen: server/test/ai-voice-transcribe.test.js:47 — beforeEach empties aiUsage without waiting for the previous test's usage write, so the test at line 168 can read two rows; it failed server test run 3",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D2",
+      "plan": "738",
+      "type": "seen",
+      "text": "seen: scripts/scope-check.mjs:71 — the main folder's copy takes its root from its own location, so run from the builder folder it reports the main folder's untracked 'Claude outputs/' files as out of scope (exit 1); the branch's own copy answers SCOPE: ok",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D3",
+      "plan": "738",
+      "type": "seen",
+      "text": "seen: GitHub repository settings, Security — private vulnerability reporting is off (gh api repos/WDD-CODER/foodVibe1.0/private-vulnerability-reporting -> enabled: false), so the route SECURITY.md names first is not offered yet",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D4",
+      "plan": "738",
+      "type": "behaviour",
+      "text": "behaviour: with no screenshots, the README shows one sentence linking the live demo and keeps the five image lines in an HTML comment, so no broken image appears — reverse: replace the sentence with the commented block once the files are in docs/images/",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D5",
+      "plan": "738",
+      "type": "behaviour",
+      "text": "behaviour: the README's local run steps include `pnpm run build:schemas` before the server start, because the server requires server/generated/schemas — reverse: delete that line in README.md",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D6",
+      "plan": "738",
+      "type": "behaviour",
+      "text": "behaviour: SECURITY.md prints no email address; it offers GitHub private reporting 'where it is offered', email to the author, or an issue that only asks for a private contact — reverse: edit 'Reporting a vulnerability' and add the address",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D7",
+      "plan": "738",
+      "type": "behaviour",
+      "text": "behaviour: SECURITY.md says secrets are scanned on every pull request and every push to the main branch, not 'every push', to match ci.yml — reverse: change that line in SECURITY.md",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D8",
+      "plan": "738",
+      "type": "behaviour",
+      "text": "behaviour: with no screenshots, the README's Screenshots section links to the live demo and keeps the five image lines in a hidden comment, so no broken image shows — reverse: move each image's lines out of the comment once the file is in docs/images/",
+      "alsoFrom": [],
+      "attempt": 2,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D9",
+      "plan": "738",
+      "type": "behaviour",
+      "text": "behaviour: added `pnpm run build:schemas` and the Node 22, pnpm and local MongoDB prerequisites to 'Run it locally', because the server needs the generated schemas and its dev:local script does not build them — reverse: delete those lines in README.md",
+      "alsoFrom": [],
+      "attempt": 2,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D10",
+      "plan": "738",
+      "type": "behaviour",
+      "text": "behaviour: the README says 'Every pull request that changes code runs ... checks in CI', because ci.yml skips lint, build and tests for docs-only changes — reverse: drop 'that changes code'",
+      "alsoFrom": [],
+      "attempt": 2,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D11",
+      "plan": "738",
+      "type": "behaviour",
+      "text": "behaviour: 'CRM and quotes' is described as client profiles plus an event stage that marks when a quote was sent, since I found no quote document builder in the app — reverse: edit that bullet in README.md",
+      "alsoFrom": [],
+      "attempt": 2,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D12",
+      "plan": "738",
+      "type": "behaviour",
+      "text": "behaviour: SECURITY.md offers GitHub's private report 'when that button is shown' (it is off for the repository today) and otherwise the email on the GitHub profile, with no address written in the file — reverse: turn the setting on or put an address in SECURITY.md",
+      "alsoFrom": [],
+      "attempt": 2,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D13",
+      "plan": "738",
+      "type": "behaviour",
+      "text": "behaviour: the README states 'New accounts get 100 AI calls' as the plan writes it, although plan 736 is not in this branch — reverse: remove the sentence if 736 does not ship",
+      "alsoFrom": [],
+      "attempt": 2,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D14",
+      "plan": "738",
+      "type": "seen",
+      "text": "seen: `pnpm run test:ci` failed once with 1 of 2789 tests and passed on the next run with no src/ change (steps: run pnpm run test:ci repeatedly on this branch); the failing test name was not captured",
+      "alsoFrom": [],
+      "attempt": 2,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    }
+  ],
+  "finishedAt": "2026-11-26T17:44:45.971Z",
+  "finalGate": {
+    "ok": true,
+    "command": null,
+    "at": "2026-11-26T17:44:45.972Z",
+    "attempt": 1,
+    "blamed": []
+  }
+}

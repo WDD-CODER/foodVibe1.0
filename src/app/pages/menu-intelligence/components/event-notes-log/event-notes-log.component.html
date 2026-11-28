@@ -17,7 +17,13 @@
       ></textarea>
       <div class="notes-add-row">
         <span class="notes-counter" dir="ltr">{{ draft_().length }} / {{ maxLength }}</span>
-        <button type="button" class="c-btn-primary" [disabled]="isBusy_() || !draft_().trim()" (click)="add()">
+        <button
+          type="button"
+          class="c-btn-primary"
+          [disabled]="isBusy_()"
+          [appDisabledWhy]="!draft_().trim() ? ('why_write_first' | translatePipe) : null"
+          (click)="add()"
+        >
           {{ 'notes_add' | translatePipe }}
         </button>
       </div>
@@ -72,7 +78,8 @@
               <button
                 type="button"
                 class="c-btn-primary"
-                [disabled]="isBusy_() || !editText_().trim()"
+                [disabled]="isBusy_()"
+                [appDisabledWhy]="!editText_().trim() ? ('why_write_first' | translatePipe) : null"
                 (click)="saveEdit(note)"
               >
                 {{ 'save' | translatePipe }}

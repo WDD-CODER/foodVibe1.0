@@ -13,13 +13,14 @@ Reusable standalone components, modals, and list/table primitives used across pa
 | `add-equipment-modal/` | Add equipment dialog | AddEquipmentModalComponent |
 | `ai-menu-modal/` | AI-drafted menu modal + service | AiMenuModalComponent, AiMenuModalService |
 | `ai-product-modal/` | AI-drafted product modal + service | AiProductModalComponent, AiProductModalService |
-| `ai-recipe-modal/` | AI-drafted recipe modal + service | AiRecipeModalComponent, AiRecipeModalService |
+| `ai-recipe-modal/` | AI-drafted recipe modal + service (plan 736: the recipe, menu and product AI windows show the user's AI calls left under the daily bar) | AiRecipeModalComponent, AiRecipeModalService |
 | `approve-stamp/` | Approval stamp UI | ApproveStampComponent |
-| `column-carousel/` | Mobile column carousel for list tables (header + cells, shared index) | ColumnCarouselGroupDirective, ColumnCarouselHeaderComponent, ColumnCarouselCellComponent, ColumnSlideDirective |
+| `column-carousel/` | Mobile column carousel for list tables (header + cells, shared index) | ColumnCarouselGroupDirective, ColumnCarouselHeaderComponent, ColumnCarouselCellComponent, ColumnSlideDirective, FallColumnDirective (columns that fall into the carousel by measured width, plan 745) |
 | `chip-search-dropdown/` | Searchable chip-select dropdown | ChipSearchDropdownComponent |
 | `confirm-modal/` | Confirm/cancel | ConfirmModalComponent |
 | `voice-note/` | Record (up to 3 min) or type a note; transcribes into a text box; `send` gives text, source and file id (plan 623) | VoiceNoteComponent, VoiceNoteSend |
 | `counter/` | Numeric counter control + the shared press-and-hold for any +/- button (plan 500) | CounterComponent, StepHoldDirective |
+| `month-figures/` | Plan-versus-actual table of a month's figures with «לא הוזן», «חלקי», band tags and the completeness badge (plan 728); optional `fixedHint` input, and every «חלקי» tag and the badge say on hover what is missing (plan 749); a figure resting on a forecast that stands in for an empty actual is faded, with a shared-tooltip hint (plan 759); `app-month-figures` | MonthFiguresComponent |
 | `custom-multi-select/` | Multi-select CVA | CustomMultiSelectComponent |
 | `custom-select/` | Select CVA | CustomSelectComponent |
 | `edit-gate/` | Shows its content only when the user may save the opened document, else a view-only note | EditGateComponent |
@@ -33,7 +34,7 @@ Reusable standalone components, modals, and list/table primitives used across pa
 | `global-specific-modal/` | Global vs specific choice | GlobalSpecificModalComponent |
 | `label-creation-modal/` | Label editor + `LabelCreationModalService` | LabelCreationModalComponent |
 | `list-selection/` | Row selection + `ListSelectionState` | ListRowCheckboxComponent, ListSelectionState |
-| `list-shell/` | Reusable list shell: `layout="table"` (default, pinned header grid) or `layout="cards"` (projects `[shell-cards]`, `cardMin`); list search/sort/clear handlers live in `core/utils/list-controls.util.ts` | ListShellComponent |
+| `list-shell/` | Reusable list shell: `layout="table"` (default, pinned header grid) or `layout="cards"` (projects `[shell-cards]`, `cardMin`); list search/sort/clear handlers live in `core/utils/list-controls.util.ts`; `[columns]` + `fitColumns` measure the width and decide which columns fall into the carousel | ListShellComponent |
 | `loader/` | Loading indicator | LoaderComponent |
 | `front-desk-status-banner/` | One-line amber notice when the front desk is suspended (plan 557) | FrontDeskStatusBannerComponent |
 | `modal-shell/` | The one popup shell: engines + dialog role, Escape (top-most only), focus trap | ModalShellComponent |
@@ -55,6 +56,7 @@ Reusable standalone components, modals, and list/table primitives used across pa
 | `scaling-chip/` | Recipe scaling chip | ScalingChipComponent |
 | `scrollable-dropdown/` | Scrollable dropdown | ScrollableDropdownComponent |
 | `scroll-rail/` | Horizontal scroll strip with edge fades and arrow buttons; `centerChild(el)` glides a tapped chip to the middle | ScrollRailComponent |
+| `tooltip/` | The one hint box: `[appTooltip]` (hover and focus; a tap on a phone or a no-hover device; placed by `placeInViewport`), box looks from the global c-tooltip class | TooltipDirective, TooltipBoxComponent |
 | `scroll-area/` | A block that scrolls with no scrollbar and shows an arrow while there is more above or below (`maxBlockSize`) | ScrollAreaComponent |
 | `inline-rename-field/` | Inline rename input with Save and Cancel buttons (Enter saves, Escape cancels, blur does nothing) | InlineRenameFieldComponent |
 | `selection-bar/` | Bulk selection bar | SelectionBarComponent |

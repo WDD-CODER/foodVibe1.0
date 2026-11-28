@@ -20,7 +20,8 @@ describe('routes: unsaved-work guards', () => {
     'inventory/equipment/edit/:id',
     'suppliers/add',
     'suppliers/edit/:id',
-    'settings'
+    'settings',
+    'restaurant-menu/sales'
   ]) {
     it(`${path} has the pending-changes guard`, () => {
       expect(all.get(path)?.canDeactivate).toContain(pendingChangesGuard)
@@ -29,5 +30,9 @@ describe('routes: unsaved-work guards', () => {
 
   it('settings re-runs the guard on a ?tab= change', () => {
     expect(all.get('settings')?.runGuardsAndResolvers).toBe('paramsOrQueryParamsChange')
+  })
+
+  it('restaurant-menu/sales re-runs the guard on a ?month= change (plan 726)', () => {
+    expect(all.get('restaurant-menu/sales')?.runGuardsAndResolvers).toBe('paramsOrQueryParamsChange')
   })
 })

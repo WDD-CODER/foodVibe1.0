@@ -12,6 +12,7 @@ import { CustomSelectComponent } from 'src/app/shared/custom-select/custom-selec
 import { CustomMultiSelectComponent } from 'src/app/shared/custom-multi-select/custom-multi-select.component'
 import { DateFieldComponent } from 'src/app/shared/date-field/date-field.component'
 import { HoursEditorComponent } from 'src/app/shared/hours-editor/hours-editor.component'
+import { DisabledWhyDirective } from 'src/app/shared/tooltip/disabled-why.directive'
 import { TextareaAutoGrowDirective } from 'src/app/core/directives/textarea-auto-grow.directive'
 import { BusinessService } from '@services/business.service'
 import { FrontDeskProfileDataService } from '@services/front-desk-profile-data.service'
@@ -83,7 +84,8 @@ const DAY_MS = 86_400_000
     CustomMultiSelectComponent,
     DateFieldComponent,
     HoursEditorComponent,
-    TextareaAutoGrowDirective
+    TextareaAutoGrowDirective,
+    DisabledWhyDirective
   ],
   templateUrl: './frontdesk-onboarding.page.html',
   styleUrl: './frontdesk-onboarding.page.scss',

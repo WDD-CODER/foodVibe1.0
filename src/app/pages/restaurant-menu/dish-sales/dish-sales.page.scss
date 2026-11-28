@@ -1,0 +1,107 @@
+@use '../../../core/styles/breakpoints' as *;
+
+@layer components {
+  :host {
+    display: block;
+  }
+
+  .ds-row__notice {
+    margin: var(--space-4);
+    padding: var(--space-4);
+    text-align: center;
+  }
+
+  .ds-row__actions {
+    display: flex;
+    gap: var(--space-2);
+    white-space: nowrap;
+  }
+
+  .ds-row__month {
+    min-inline-size: 7rem;
+    text-align: center;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+
+  /* The progress line and the closed banner span every column above the heads. */
+  .ds-row__intro {
+    grid-column: 1 / -1;
+
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.25rem;
+
+    text-transform: none;
+  }
+
+  .ds-row__progress,
+  .ds-row__banner {
+    margin: 0;
+    font-weight: 400;
+  }
+
+  .ds-row__state {
+    grid-column: 1 / -1;
+
+    padding: var(--space-6) var(--space-4);
+
+    text-align: center;
+    color: var(--color-text-muted);
+  }
+
+  /* One line per row at every width: long text is cut with an ellipsis. */
+  .ds-row__cell {
+    gap: 0.5rem;
+    min-inline-size: 0;
+    white-space: nowrap;
+  }
+
+  .ds-row__cell--name {
+    justify-content: flex-start;
+    min-inline-size: 0;
+    font-weight: 600;
+  }
+
+  .ds-row__ellipsis {
+    overflow: hidden;
+    min-inline-size: 0;
+    max-inline-size: 100%;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .ds-row__removed {
+    color: var(--color-text-muted);
+    font-weight: 400;
+  }
+
+  .ds-row__reasons--over {
+    color: var(--color-danger);
+  }
+
+  .ds-row__skipped {
+    padding-block: var(--space-2);
+    padding-inline: var(--space-4);
+  }
+
+  .ds-row__skipped-list {
+    margin: 0;
+    padding-inline-start: 1.5rem;
+  }
+
+  @media (max-width: $break-phone-max) {
+    .ds-row__wide {
+      display: none;
+    }
+
+    /* Wider text (another font) must not push «שמירה» off the screen: the two buttons wrap instead. */
+    .ds-row__actions {
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      min-inline-size: 0;
+      max-inline-size: 100%;
+      white-space: normal;
+    }
+  }
+}

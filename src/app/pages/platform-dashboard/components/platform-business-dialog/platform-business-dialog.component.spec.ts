@@ -319,11 +319,13 @@ describe('PlatformBusinessDialogComponent (plan 620)', () => {
       expect(q('biz-erase-box')).toBeNull()
       openBox()
       expect(q('biz-erase-box')).not.toBeNull()
-      expect((q('biz-erase-confirm') as HTMLButtonElement).disabled).toBeTrue()
+      expect(q('biz-erase-confirm')!.getAttribute('aria-disabled')).toBe('true')
       typeReason('   ')
-      expect((q('biz-erase-confirm') as HTMLButtonElement).disabled).toBeTrue()
+      expect(q('biz-erase-confirm')!.getAttribute('aria-disabled')).toBe('true')
+      ;(q('biz-erase-confirm') as HTMLButtonElement).click()
+      expect(confirmOpen).not.toHaveBeenCalled()
       typeReason('asked')
-      expect((q('biz-erase-confirm') as HTMLButtonElement).disabled).toBeFalse()
+      expect(q('biz-erase-confirm')!.getAttribute('aria-disabled')).toBeNull()
     })
 
     it('confirm opens the popup naming the business; cancel sends nothing', async () => {

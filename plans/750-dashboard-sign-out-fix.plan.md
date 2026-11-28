@@ -72,6 +72,7 @@ hotspots (`src/styles.scss`, `public/assets/data/dictionary.json`, `src/app/app.
 src/app/core/components/header/header.component.ts
 src/app/core/components/header/header.component.spec.ts
 src/app/core/components/breadcrumbs.md
+src/app/appRoot/app.component.spec.ts
 ```
 
 ## Read Scope
@@ -122,15 +123,15 @@ line or file this plan names was removed, renamed or rewritten).
 ## Functional Requirements
 
 ### Must Have (P0)
-- [ ] **Skip the navigation when already there:** in `logout()`, navigate to `/dashboard` first only when the current
+- [x] **Skip the navigation when already there:** in `logout()`, navigate to `/dashboard` first only when the current
   route is protected **and** `this.router.url !== '/dashboard'` (the serialised current URL; `?tab=` or a fragment
   makes it differ, so the dashboard's own unsaved-changes guard still runs from `?tab=metadata`). A `false` from a
   real navigation still aborts the sign-out as today. Then `this.userService.logout().subscribe()`;
   `SignedOutRedirectService` (plan 591) moves the visitor to `/welcome` as it does from other pages.
-- [ ] **The comment says why:** replace "Navigate to a public page first" (the dashboard is no longer public, plan
+- [x] **The comment says why:** replace "Navigate to a public page first" (the dashboard is no longer public, plan
   589) with one line: the navigation lets unsaved-changes guards ask, and a same-URL navigation resolves `false`
   without running any guard, so it is skipped.
-- [ ] **Spec replaying the bug:** a new `describe` in `header.component.spec.ts` with `provideRouter` routes
+- [x] **Spec replaying the bug:** a new `describe` in `header.component.spec.ts` with `provideRouter` routes
   `dashboard` (`canActivate: [authGuard]`, `canDeactivate: [() => allowLeave]`,
   `runGuardsAndResolvers: 'paramsOrQueryParamsChange'`, a stub component) and `inventory` (`canActivate: [authGuard]`),
   a signed-in `UserService` stub whose `logout` is a spy returning `of(null)`; the three cases of Goals. The
@@ -150,9 +151,9 @@ line or file this plan names was removed, renamed or rewritten).
 
 These are the plan's milestones: a Worker does them in order and ticks each one after it is checked.
 
-- [ ] A1: Write a failing test that signs out on the dashboard and proves nothing happens today — real authGuard routes, three cases — src/app/core/components/header/header.component.spec.ts
-- [ ] A2: Let sign-out go ahead when the user is already on the dashboard, keeping the unsaved-changes question elsewhere — skip the same-URL navigation, fix the comment — src/app/core/components/header/header.component.ts
-- [ ] A3: Run every automatic check and record the root cause — paste outputs under Execution Notes — src/app/core/components/header/header.component.ts
+- [x] A1: Write a failing test that signs out on the dashboard and proves nothing happens today — real authGuard routes, three cases — src/app/core/components/header/header.component.spec.ts
+- [x] A2: Let sign-out go ahead when the user is already on the dashboard, keeping the unsaved-changes question elsewhere — skip the same-URL navigation, fix the comment — src/app/core/components/header/header.component.ts
+- [x] A3: Run every automatic check and record the root cause — paste outputs under Execution Notes — src/app/core/components/header/header.component.ts
 
 ## What happens when
 - The user is on `/dashboard?tab=metadata` with unsaved coefficients: the navigation to `/dashboard` runs the guard;
@@ -184,3 +185,11 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
 ## Execution Notes
 - Planner 2026-11-26: written from Dandan's grading of run biz-numbers.
 - behaviour: on the bare dashboard sign-out goes ahead without any leave question, because that tab holds no unsaved form — reverse: always run the page's own hasRealChanges() check before signing out.
+- Root cause: the dashboard has had `authGuard` since plan 589, so `logout()` navigated to the URL already open; the router ignores a same-URL navigation and resolves `false`, which the header read as a guard refusal.
+- Header spec before the fix -> exit 1, `TOTAL: 1 FAILED, 25 SUCCESS`: only «signs out from the bare dashboard» failed (`Expected spy logout to have been called once. It was called 0 times.`). After the fix -> exit 0, `TOTAL: 26 SUCCESS` (code commit c97dcec9).
+- Test note: the three cases render the header beside a `router-outlet`; without an activated outlet the router never runs a reused route's `canDeactivate`, so the `?tab=metadata` case would not test the guard.
+- `pnpm run build` -> exit 0 (budget and ESM warnings only); `pnpm run lint` -> exit 0 (0 errors, 69 warnings).
+- `pnpm run test:ci` -> exit 0, `TOTAL: 2969 SUCCESS`.
+- `scope-check.mjs --diff=origin/orch/biz-fixes` -> `SCOPE: ok`; `--arch` -> `ARCH: ok INV-1, INV-none`; `--reuse` -> `REUSE: ok none`.
+- `breadcrumbs-check.mjs` -> `BREADCRUMBS: clean`; kit-manifest-check -> `KIT_MANIFEST: ok`; kit-checks -> `KIT_CHECKS: ok (6 checks)`; override-check, lint:icons, lint:no-native-select, plan-ledger-check -> exit 0; ci-scope-check -> exit 0 (it printed `skipped`).
+- `log-query.mjs --since=plan-start --level=error` -> `SKIP: no database configured`.

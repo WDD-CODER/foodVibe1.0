@@ -93,4 +93,16 @@ describe('taxonomyTermSchema', () => {
       expect(ok({ ...base, kind: 'logisticsSection', key: 'סעיף שלי' })).toBe(true);
     });
   });
+
+  describe('dish analysis (plan 724)', () => {
+    const { TERM_REFERENCES } = require('../generated/schemas/entities');
+    test('dishReturnReason is a plain kind referenced by month rows', () => {
+      expect(TAXONOMY_KINDS).toContain('dishReturnReason');
+      expect(ok({ ...base, kind: 'dishReturnReason', key: 'נשפך' })).toBe(true);
+      expect(TERM_REFERENCES.dishReturnReason).toEqual({ dishSalesMonths: ['rows.returnReasons.reason'] });
+    });
+    test('a course is also referenced by menu dishes', () => {
+      expect(TERM_REFERENCES.course.menuDishes).toEqual(['course']);
+    });
+  });
 });

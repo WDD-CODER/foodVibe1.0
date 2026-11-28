@@ -69,7 +69,7 @@ describe('BaselineTabComponent', () => {
   it('starts empty with save disabled and the not-filled line', () => {
     setup()
     expect(input('eventsClosedPerMonth').value).toBe('')
-    expect(saveBtn().disabled).toBeTrue()
+    expect(saveBtn().getAttribute('aria-disabled')).toBe('true')
     expect(el().querySelector('[data-testid="baseline-updated"]')?.textContent).toContain('baseline_not_filled')
   })
 
@@ -77,7 +77,7 @@ describe('BaselineTabComponent', () => {
     setup()
     type('eventsClosedPerMonth', '4')
     type('avgRevenuePerEvent', '12000')
-    expect(saveBtn().disabled).toBeFalse()
+    expect(saveBtn().getAttribute('aria-disabled')).toBeNull()
     await fixture.componentInstance.save()
     expect(updateBaseline).toHaveBeenCalledOnceWith({ eventsClosedPerMonth: 4, avgRevenuePerEvent: 12000 })
     expect(userMsg.onSetSuccessMsg).toHaveBeenCalledWith('baseline_saved')
@@ -100,7 +100,7 @@ describe('BaselineTabComponent', () => {
   it('a profit of 100 is invalid and cannot be saved', () => {
     setup()
     type('estProfitPct', '100')
-    expect(saveBtn().disabled).toBeTrue()
+    expect(saveBtn().getAttribute('aria-disabled')).toBe('true')
   })
 
   it('an out-of-range value shows a message', () => {
@@ -116,7 +116,7 @@ describe('BaselineTabComponent', () => {
     business_.set({ ...BUSINESS, baseline: { eventsClosedPerMonth: 4, filledAt: 1700000000000 } })
     fixture.detectChanges()
     type('eventsClosedPerMonth', '')
-    expect(saveBtn().disabled).toBeFalse()
+    expect(saveBtn().getAttribute('aria-disabled')).toBeNull()
     await fixture.componentInstance.save()
     expect(updateBaseline).toHaveBeenCalledOnceWith({})
   })
@@ -200,7 +200,7 @@ describe('BaselineTabComponent', () => {
       group('kitchen').click()
       fixture.detectChanges()
       type('wastePct', '7')
-      expect(saveBtn().disabled).toBeFalse()
+      expect(saveBtn().getAttribute('aria-disabled')).toBeNull()
       await fixture.componentInstance.save()
       expect(updateBaseline).toHaveBeenCalledOnceWith({ wastePct: 7 })
     })

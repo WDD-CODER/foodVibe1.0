@@ -209,85 +209,71 @@
     position: relative;
     display: inline-flex;
     align-items: center;
-    margin-inline-end: 0.25rem;
     vertical-align: middle;
     line-height: 1;
-    // shrink with the name cell so the mark never spills past the cell edge on a phone
-    max-inline-size: 100%;
-    min-inline-size: 0;
-
-    &--invalid {
-      color: var(--color-danger);
-    }
-    &--incomplete {
-      color: var(--border-warning);
-    }
+    // the mark keeps its own room (icon + padding) and never overlaps the name
+    flex: 0 0 auto;
   }
 
+  // One warning sign for every status kind: the triangle, nothing else (plan 747).
+  // Its colour is set below, outside @layer.
   .row-status {
     display: inline-flex;
     align-items: center;
-    padding: 0;
+    flex: 0 0 auto;
+    padding: 0.25rem;
     background: transparent;
     border: 0;
-    color: inherit;
     cursor: pointer;
-    max-inline-size: 100%;
+  }
+
+  // The fixed slot before every name (plan 747 round two): it holds the triangle or is empty, so the names
+  // of all rows start at the same place. Plan 763: the same slot after every name holds the nutrition leaf or
+  // is empty, so every leaf sits at the same place.
+  .name-status-slot {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 auto;
+
+    inline-size: 1.5rem;
+  }
+
+  .name-text {
+    flex: 1 1 auto;
+
     min-inline-size: 0;
+
+    text-align: start;
+    overflow-wrap: break-word;
   }
+}
 
-  .unpriced-badge {
-    flex-shrink: 0;
-    margin-inline-end: 0.35rem;
-    white-space: nowrap;
-  }
+// The triangle's colour: the orange-yellow the incomplete mark had before plan 747 (the Human, 2026-11-26), one
+// colour for every status kind. Outside @layer: the global `button { color: inherit }` in styles.scss is not in a
+// layer, so it beats a colour set inside one (that is how the triangle lost its colour).
+:host .row-status {
+  color: var(--border-warning);
+}
 
-  // Phone width: the name cell is ~120px, too narrow for the chip text — show the coin
-  // icon only (the button's aria-label still names the status) so the chip stays one line.
-  @media (max-width: $break-phone-max) {
-    .unpriced-badge {
-      padding-inline: 0.375rem;
-    }
+// The name cell is a row that starts at the cell's inline-start edge: the status slot, then the name.
+// Outside @layer (and more specific) so it wins over the list shell's block layout of .col-name.
+:host .product-grid-row .col-name.c-list-body-cell {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 0.25rem;
 
-    .unpriced-badge__label {
-      display: none;
-    }
-  }
+  text-align: start;
+}
 
-  .validation-tooltip {
-    display: none;
-    position: absolute;
-    inset-block-start: 100%;
-    inset-inline-start: 0;
-    z-index: 100;
+// The header lines up with the names: the body cell's padding, the slot and the gap.
+:host .col-name.c-grid-header-cell {
+  justify-content: flex-start;
 
-    flex-direction: row;
-    flex-wrap: wrap;
-    gap: 0.25rem;
-    inline-size: max-content;
-    max-inline-size: min(20rem, calc(100vw - 2rem));
-    padding: 0.375rem 0.5rem;
+  text-align: start;
 
-    background: var(--bg-popover, white);
-    background-clip: padding-box;
-    // transparent top edge keeps :hover alive while the pointer crosses from the mark to the box
-    border: 1px solid var(--border-default);
-    border-block-start: 6px solid transparent;
-    border-radius: var(--radius-sm);
-    box-shadow: var(--shadow-md);
-    color: var(--color-text-main);
-  }
-
-  .row-status[aria-expanded='true'] + .validation-tooltip {
-    display: flex;
-  }
-
-  @media (hover: hover) {
-    .validation-badge:hover .validation-tooltip,
-    .row-status:focus-visible + .validation-tooltip {
-      display: flex;
-    }
-  }
+  padding-inline-start: calc(0.75rem + 1.5rem + 0.25rem);
 }
 
 // Row tints — outside @layer so they win over the unlayered .c-list-body-cell background rule

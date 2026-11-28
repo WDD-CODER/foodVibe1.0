@@ -93,7 +93,8 @@
               type="button"
               class="c-btn-primary"
               data-testid="import-parse"
-              [disabled]="!text_().trim() || isParsing_() || isSaving_()"
+              [disabled]="isParsing_() || isSaving_()"
+              [appDisabledWhy]="!text_().trim() ? ('why_import_paste_first' | translatePipe) : null"
               (click)="parse()"
             >
               <lucide-icon name="sparkles" [size]="16" />
@@ -370,7 +371,8 @@
             type="button"
             class="c-btn-primary"
             data-testid="import-save"
-            [disabled]="!canSave_()"
+            [disabled]="saveBusy_()"
+            [appDisabledWhy]="saveWhy_() ? (saveWhy_()! | translatePipe) : null"
             (click)="saveAll()"
           >
             {{ 'import_save_all' | translatePipe }}

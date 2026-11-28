@@ -2,8 +2,7 @@
   appColumnCarouselGroup
   [isPanelOpen]="isPanelOpen_()"
   (panelToggle)="onPanelToggled()"
-  [gridTemplate]="'2fr 1fr 1fr 1fr minmax(48px, 0.8fr) 0.8fr 80px auto'"
-  [mobileGridTemplate]="'2fr 1.6fr minmax(4.75rem, auto) 40px 28px'"
+  [columns]="columns"
   [dir]="'rtl'"
   [resultCount]="filteredProducts_().length"
   [resultTotal]="kitchenStateService.products_().length"
@@ -46,8 +45,7 @@
       type="button"
       class="c-btn-primary"
       (click)="onAddProduct()"
-      [disabled]="!isLoggedIn()"
-      [attr.title]="!isLoggedIn() ? ('sign_in_to_use' | translatePipe) : null"
+      [appDisabledWhy]="!isLoggedIn() ? ('sign_in_to_use' | translatePipe) : null"
     >
       <lucide-icon name="plus" [size]="18"></lucide-icon>
       <span class="btn-label">{{ 'add' | translatePipe }}</span>
@@ -87,8 +85,7 @@
     <app-column-carousel-header>
       <div
         class="col-category c-grid-header-cell c-sortable-header"
-        appColumnSlide
-        label="category"
+        *appFallColumn="'category'; label: 'category'"
         (click)="setSort('category')"
         (keydown.enter)="setSort('category')"
         (keydown.space)="$event.preventDefault(); setSort('category')"
@@ -99,8 +96,7 @@
       </div>
       <div
         class="col-allergens c-grid-header-cell c-sortable-header"
-        appColumnSlide
-        label="allergens"
+        *appFallColumn="'allergens'; label: 'allergens'"
         (click)="toggleAllergenExpandAll()"
         (keydown.enter)="toggleAllergenExpandAll()"
         (keydown.space)="$event.preventDefault(); toggleAllergenExpandAll()"
@@ -111,8 +107,7 @@
       </div>
       <div
         class="col-supplier c-grid-header-cell c-sortable-header"
-        appColumnSlide
-        label="supplier"
+        *appFallColumn="'supplier'; label: 'supplier'"
         (click)="setSort('supplier')"
         (keydown.enter)="setSort('supplier')"
         (keydown.space)="$event.preventDefault(); setSort('supplier')"
@@ -121,11 +116,13 @@
       >
         {{ 'supplier' | translatePipe }}
       </div>
-      <div class="col-unit c-grid-header-cell" appColumnSlide label="unit" role="presentation">
+      <div class="col-unit c-grid-header-cell" *appFallColumn="'unit'; label: 'unit'" role="presentation">
         {{ 'unit' | translatePipe }}
       </div>
+      <div class="col-price c-grid-header-cell" *appFallColumn="'price'; label: 'price'" role="columnheader">
+        {{ 'price' | translatePipe }}
+      </div>
     </app-column-carousel-header>
-    <div class="col-price c-grid-header-cell" role="columnheader">{{ 'price' | translatePipe }}</div>
     <div class="c-col-actions c-grid-header-cell" role="columnheader">{{ 'actions' | translatePipe }}</div>
     <div class="col-select c-grid-header-cell" role="columnheader">
       <app-list-row-checkbox
@@ -143,7 +140,7 @@
             messageKey="empty_inventory"
             icon="package"
             ctaLabelKey="add_first_product"
-            [ctaDisabled]="!isLoggedIn()"
+            [ctaDisabledWhy]="!isLoggedIn() ? ('sign_in_to_use' | translatePipe) : null"
             (ctaClick)="onAddProduct()"
           />
         } @else {
@@ -170,66 +167,57 @@
         (keydown.space)="$event.preventDefault(); onEditProduct(row.product._id)"
       >
         <div class="col-name c-list-body-cell" role="cell">
-          @if (isLowStock(row.product)) {
-            <span class="low-stock-badge" [attr.title]="'low_stock' | translatePipe">{{
-              'low_stock' | translatePipe
-            }}</span>
-          }
-          @if (row.statusKind) {
-            <span
-              class="validation-badge validation-badge--{{ row.statusKind }}"
-              (appClickOutside)="closeStatus(row.product._id)"
-              (keydown.escape)="closeStatus(row.product._id)"
-            >
-              <button
-                type="button"
-                class="row-status"
-                aria-haspopup="true"
-                [attr.aria-expanded]="openStatusId_() === row.product._id"
-                [attr.aria-label]="statusLabel(row.statusFields)"
-                (click)="toggleStatus(row.product._id)"
-                (keydown.enter)="$event.stopPropagation()"
-                (keydown.space)="$event.stopPropagation()"
-              >
-                @switch (row.statusKind) {
-                  @case ('invalid') {
-                    <lucide-icon name="alert-circle" [size]="13"></lucide-icon>
-                  }
-                  @case ('unpriced') {
-                    <span class="c-chip amber unpriced-badge">
-                      <lucide-icon name="coins" [size]="11"></lucide-icon>
-                      <span class="unpriced-badge__label">{{ 'product_unpriced' | translatePipe }}</span>
+          <!-- A fixed slot on every row: the warning triangle or nothing, so every name starts at the same place. -->
+          <span class="name-status-slot">
+            @if (row.statusKind) {
+              <span class="validation-badge validation-badge--{{ row.statusKind }}">
+                <button
+                  type="button"
+                  class="row-status"
+                  [attr.aria-label]="statusLabel(row.statusFields)"
+                  [appTooltip]="statusTip"
+                  [tooltipOnClick]="true"
+                  tooltipPlacement="below"
+                  (keydown.enter)="$event.stopPropagation()"
+                  (keydown.space)="$event.stopPropagation()"
+                >
+                  <lucide-icon name="alert-triangle" [size]="16"></lucide-icon>
+                </button>
+                <ng-template #statusTip>
+                  @for (field of row.statusFields; track field) {
+                    <span
+                      class="c-chip c-chip--tag c-chip--sm c-chip--square"
+                      [class.c-chip--red]="row.statusKind === 'invalid'"
+                      [class.c-chip--amber]="row.statusKind !== 'invalid'"
+                    >
+                      <lucide-icon [name]="getFieldIcon(field)" [size]="11"></lucide-icon>
+                      {{ field | translatePipe }}
                     </span>
                   }
-                  @default {
-                    <lucide-icon name="alert-triangle" [size]="13"></lucide-icon>
-                  }
-                }
-              </button>
-              <span class="validation-tooltip" role="tooltip">
-                @for (field of row.statusFields; track field) {
-                  <span
-                    class="c-chip c-chip--tag c-chip--sm c-chip--square"
-                    [class.c-chip--red]="row.statusKind === 'invalid'"
-                    [class.c-chip--amber]="row.statusKind !== 'invalid'"
-                  >
-                    <lucide-icon [name]="getFieldIcon(field)" [size]="11"></lucide-icon>
-                    {{ field | translatePipe }}
-                  </span>
-                }
+                </ng-template>
               </span>
-            </span>
-          }
-          {{ row.product.nameHebrew }}
-          @if (row.product.nutritionPer100g) {
-            <app-nutrition-badge [nutrition]="row.product.nutritionPer100g"></app-nutrition-badge>
-          }
+            }
+          </span>
+          <span class="name-text">
+            @if (isLowStock(row.product)) {
+              <span class="low-stock-badge" [attr.title]="'low_stock' | translatePipe">{{
+                'low_stock' | translatePipe
+              }}</span>
+            }
+            {{ row.product.nameHebrew }}
+          </span>
+          <!-- A fixed slot on every row: the nutrition leaf or nothing, so every leaf sits at the same place. -->
+          <span class="name-status-slot" data-testid="name-nutrition-slot">
+            @if (row.product.nutritionPer100g) {
+              <app-nutrition-badge [nutrition]="row.product.nutritionPer100g"></app-nutrition-badge>
+            }
+          </span>
         </div>
         <app-column-carousel-cell>
-          <div class="col-category c-list-body-cell" appColumnSlide [label]="'category' | translatePipe">
-            {{ row.category || '—' }}
+          <div class="col-category c-list-body-cell" *appFallColumn="'category'; label: 'category' | translatePipe">
+            <span class="cell-line" [appTooltip]="row.category">{{ row.category || '—' }}</span>
           </div>
-          <div class="col-allergens c-list-body-cell" appColumnSlide [label]="'allergens' | translatePipe">
+          <div class="col-allergens c-list-body-cell" *appFallColumn="'allergens'; label: 'allergens' | translatePipe">
             @if (row.product.allergens.length) {
               <div
                 class="allergen-btn-wrapper"
@@ -254,17 +242,22 @@
               <span class="placeholder-dash">—</span>
             }
           </div>
-          <div class="col-supplier c-list-body-cell" appColumnSlide [label]="'supplier' | translatePipe">
-            {{ row.supplierNames || '—' }}
+          <div class="col-supplier c-list-body-cell" *appFallColumn="'supplier'; label: 'supplier' | translatePipe">
+            <span class="cell-line" [appTooltip]="row.supplierNames">{{ row.supplierNames || '—' }}</span>
           </div>
-          <div class="col-unit c-list-body-cell" appColumnSlide [label]="'unit' | translatePipe">
+          <div class="col-unit c-list-body-cell cell-nowrap" *appFallColumn="'unit'; label: 'unit' | translatePipe">
             {{ row.product.baseUnit | translatePipe }}
           </div>
+          <div
+            class="col-price col-price-readonly c-list-body-cell cell-nowrap"
+            *appFallColumn="'price'; label: 'price' | translatePipe"
+            role="cell"
+            [appTooltip]="row.priceTip"
+          >
+            <span class="price-value">{{ row.pricePerUnit | number: '1.2-2' }}</span>
+            <span class="price-suffix">₪</span>
+          </div>
         </app-column-carousel-cell>
-        <div class="col-price col-price-readonly c-list-body-cell" role="cell" [attr.title]="row.priceTip">
-          <span class="price-value">{{ row.pricePerUnit | number: '1.2-2' }}</span>
-          <span class="price-suffix">₪</span>
-        </div>
         <app-row-actions-menu class="c-col-actions c-list-body-cell" role="cell">
           @if (deletingId_() === row.product._id) {
             <app-loader size="small" [inline]="true" />
@@ -274,8 +267,7 @@
               class="c-icon-btn danger"
               (click)="onDeleteProduct(row.product._id); $event.stopPropagation()"
               [attr.aria-label]="'delete' | translatePipe"
-              [disabled]="!isLoggedIn()"
-              [attr.title]="!isLoggedIn() ? ('sign_in_to_use' | translatePipe) : null"
+              [appDisabledWhy]="!isLoggedIn() ? ('sign_in_to_use' | translatePipe) : null"
             >
               <lucide-icon name="trash-2" [size]="18"></lucide-icon>
             </button>

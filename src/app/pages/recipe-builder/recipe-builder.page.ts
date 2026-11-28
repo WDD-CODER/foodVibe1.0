@@ -62,6 +62,7 @@ import { useSavingState } from 'src/app/core/utils/saving-state.util'
 import { useUnsavedChanges } from 'src/app/core/utils/unsaved-changes'
 import { CounterComponent } from 'src/app/shared/counter/counter.component'
 import { EditGateComponent } from 'src/app/shared/edit-gate/edit-gate.component'
+import { DisabledWhyDirective } from 'src/app/shared/tooltip/disabled-why.directive'
 @Component({
   selector: 'app-recipe-builder-page',
   standalone: true,
@@ -81,7 +82,8 @@ import { EditGateComponent } from 'src/app/shared/edit-gate/edit-gate.component'
     ExportToolbarOverlayComponent,
     ApproveStampComponent,
     CounterComponent,
-    EditGateComponent
+    EditGateComponent,
+    DisabledWhyDirective
   ],
   templateUrl: './recipe-builder.page.html',
   styleUrl: './recipe-builder.page.scss'
