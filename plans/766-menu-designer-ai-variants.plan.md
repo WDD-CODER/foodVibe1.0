@@ -338,3 +338,14 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
   `GeminiService.offerModelSwitch` in the two ai-panel components.
 - seen: `server/routes/ai.js:37-38` with `:64` — the private-address patterns `^fc` / `^fd` are also tested on host
   names, so a public site such as `https://fdexample.com` is refused as a link (here and in the URL imports).
+
+#### Evidence (run on `ff621add`; the commit after it changes this file only)
+
+- `pnpm run build` -> exit 0; `pnpm run lint` -> exit 0 (0 errors, 69 warnings); `pnpm run lint:icons` -> exit 0.
+- `pnpm run test:ci` -> exit 0, `TOTAL: 2905 SUCCESS`.
+- `pnpm run test:server` -> exit 0, 157 files, 2127 tests passed (the two new server test files among them).
+- `scope-check.mjs --arch` -> `ARCH: ok INV-6, INV-4, INV-1`; `--reuse` -> `REUSE: ok`; kit
+  `scope-check.mjs --diff=origin/orch/md-2a` -> `SCOPE: ok`; kit `kit-checks.mjs` -> `KIT_CHECKS: ok (6 checks)`;
+  kit `kit-manifest-check.mjs` -> `KIT_MANIFEST: ok`.
+- `breadcrumbs-check.mjs` -> `BREADCRUMBS: clean`; `log-query.mjs --since=plan-start --level=error` ->
+  `SKIP: no database configured`.
