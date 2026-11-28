@@ -1,6 +1,6 @@
 # Plan 766 — AI in the designer: three variants from a picture, link or description, then refine in words
 
-Status: draft
+Status: done
 Depends-on: 764, 765
 Track: code
 Snapshot: d34a01068fe2f1b28efd33b753b8a3f69aa8762b
