@@ -782,3 +782,8 @@ Every batch's plans depend only on plans in earlier batches, so the batches are 
 - [ ] L2: Make the generic routes read clone lineage from the cloneable flag instead of a hand list — server/routes/generic.js
 - [ ] L3: Correct the New Collection Checklist so planners stop asking for the generic route — docs/agent/standards-backend.md
 - [ ] L4: Run every automatic check and paste the outputs under Execution Notes — plans/771-generic-writes-read-lineage-from-cloneable.plan.md
+
+### Plan 772 — Menu designer: a picked title or dish font stays on the sample menu
+- [ ] A1: Reproduce the reverting title and dish font in a spec and the browser test before fixing — failing spec + e2e/ui/772-1.spec.ts — src/app/shared/menu-designer/menu-designer.component.spec.ts, e2e/ui/772-1.spec.ts
+- [ ] A2: Fix the root cause so a picked title or dish font stays on the sample menu — per the cause found — src/app/shared/menu-designer/**, src/app/shared/menu-preview/**, shared/schemas/menu-design/**, src/app/core/utils/menu-fonts-link.util.ts
+- [ ] A3: Lock it with a template test and note the trap for the next builder — server/test/menu-design-template.test.js, docs/brain/gotchas.md
